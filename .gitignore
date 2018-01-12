@@ -1,0 +1,10 @@
+# Add any directories, files, or patterns you don't want to be tracked by version control
+
+# Python build remnants
+*.pyc
+
+# file system nonsense
+*.DS_Store
+
+# project specific
+.idea

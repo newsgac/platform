@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if experiments|length == 0 %}
+        <div class="page-header">
+            <h1>Experiments <small>created by you</small></h1>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svm') }}"><span class="glyphicon glyphicon-plus "></span> SVM </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dt') }}"><span class="glyphicon glyphicon-plus "></span> Decision Trees </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
+        </div>
+        <p><i>There are no experiments to view.</i></p>
+    {% else %}
+        {% set finished_experiments = [] %}
+        {% set running_experiments = [] %}
+        {% set ready_experiments = [] %}
+        {% for experiment in experiments %}
+            {% if experiment.run_started != None and experiment.run_finished != None %}
+                {% if finished_experiments.append(experiment)  %}{% endif %}
+            {% elif experiment.run_started != None %}
+                {% if running_experiments.append(experiment)  %}{% endif %}
+            {% else %}
+                {% if ready_experiments.append(experiment)  %}{% endif %}
+            {% endif %}
+        {% endfor %}
+        <div class="page-header">
+            <h1>Experiments <small>created by you</small></h1>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svm') }}"><span class="glyphicon glyphicon-plus "></span> SVM </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dt') }}"><span class="glyphicon glyphicon-plus "></span> Decision Trees </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
+            {% if finished_experiments|length > 0 %}
+                <a class="btn btn-info" href="{{ url_for('experiments.user_experiments_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
+            {% endif %}
+        </div>
+
+        {% if finished_experiments|length > 0 and running_experiments|length > 0 and ready_experiments|length > 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a  href="#finished" data-toggle="tab">Finished</a></li>
+                <li><a href="#running" data-toggle="tab">Running</a></li>
+                <li><a href="#ready" data-toggle="tab">Ready to run</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="list-group tab-pane fade in active" id="finished">
+                    {% for experiment in finished_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Training took {{ experiment.get_run_duration() }}<br/>
+                                Run completed on: {{ experiment.get_user_friendly_run_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade" id="running">
+                    {% for experiment in running_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Run started on: {{ experiment.get_user_friendly_run_started().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade" id="ready">
+                    {% for experiment in ready_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif finished_experiments|length == 0 and running_experiments|length > 0 and ready_experiments|length > 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li><a href="#finished_none" data-toggle="tab">Finished</a></li>
+                <li class="active"><a href="#running2" data-toggle="tab">Running</a></li>
+                <li><a href="#ready2" data-toggle="tab">Ready to run</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade" id="finished_none">
+                    <br/><br/>
+                    <p><i>There are no finished experiments to view.</i></p>
+                </div>
+                <div class="list-group tab-pane fade in active" id="running2">
+                    {% for experiment in running_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Run started on: {{ experiment.get_user_friendly_run_started().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade" id="ready2">
+                    {% for experiment in ready_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif finished_experiments|length == 0 and running_experiments|length == 0 and ready_experiments|length > 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li><a href="#finished_none2" data-toggle="tab">Finished</a></li>
+                <li><a href="#running_none" data-toggle="tab">Running</a></li>
+                <li class="active"><a href="#ready3" data-toggle="tab">Ready to run</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade" id="finished_none2">
+                    <br/><br/>
+                    <p><i>There are no finished experiments to view.</i></p>
+                </div>
+
+                <div class="tab-pane fade" id="running_none">
+                    <br/><br/>
+                    <p><i>There are no running experiments to view.</i></p>
+                </div>
+
+                <div class="list-group tab-pane fade  in active" id="ready3">
+                    {% for experiment in ready_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif finished_experiments|length > 0 and running_experiments|length == 0 and ready_experiments|length == 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a href="#finished2" data-toggle="tab">Finished</a></li>
+                <li><a href="#running_none2" data-toggle="tab">Running</a></li>
+                <li><a href="#ready_none" data-toggle="tab">Ready to run</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="list-group tab-pane fade in active" id="finished2">
+                    {% for experiment in finished_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Training took {{ experiment.get_run_duration() }}<br/>
+                                Run completed on: {{ experiment.get_user_friendly_run_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="tab-pane fade" id="running_none2">
+                    <br/><br/>
+                    <p><i>There are no running experiments to view.</i></p>
+                </div>
+                <div class="tab-pane fade" id="ready_none">
+                    <br/><br/>
+                    <p><i>There are no ready-to-run experiments to view.</i></p>
+                </div>
+            </div>
+        {% elif finished_experiments|length > 0 and running_experiments|length > 0 and ready_experiments|length == 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a href="#finished3" data-toggle="tab">Finished</a></li>
+                <li><a href="#running3" data-toggle="tab">Running</a></li>
+                <li><a href="#ready_none2" data-toggle="tab">Ready to run</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="list-group tab-pane fade in active" id="finished3">
+                    {% for experiment in finished_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Training took {{ experiment.get_run_duration() }}<br/>
+                                Run completed on: {{ experiment.get_user_friendly_run_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade" id="running3">
+                    {% for experiment in running_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Run started on: {{ experiment.get_user_friendly_run_started().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="tab-pane fade" id="ready_none2">
+                    <br/><br/>
+                    <p><i>There are no ready-to-run experiments to view.</i></p>
+                </div>
+            </div>
+        {% elif finished_experiments|length == 0 and running_experiments|length > 0 and ready_experiments|length == 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li><a href="#finished_none3" data-toggle="tab">Finished</a></li>
+                <li class="active"><a href="#running4" data-toggle="tab">Running</a></li>
+                <li><a href="#ready_none3" data-toggle="tab">Ready to run</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade" id="finished_none3">
+                    <br/><br/>
+                    <p><i>There are no finished experiments to view.</i></p>
+                </div>
+                <div class="list-group tab-pane fade in active" id="running4">
+                    {% for experiment in running_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Run started on: {{ experiment.get_user_friendly_run_started().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="tab-pane fade" id="ready_none3">
+                    <br/><br/>
+                    <p><i>There are no ready-to-run experiments to view.</i></p>
+                </div>
+            </div>
+        {% else %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a href="#finished4" data-toggle="tab">Finished</a></li>
+                <li><a href="#running_none3" data-toggle="tab">Running</a></li>
+                <li><a href="#ready4" data-toggle="tab">Ready to run</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="list-group tab-pane fade in active" id="finished4">
+                    {% for experiment in finished_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Training took {{ experiment.get_run_duration() }}<br/>
+                                Run completed on: {{ experiment.get_user_friendly_run_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="tab-pane fade" id="running_none3">
+                    <br/><br/>
+                    <p><i>There are no running experiments to view.</i></p>
+                </div>
+                <div class="list-group tab-pane fade" id="ready4">
+                    {% for experiment in ready_experiments %}
+                        <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ experiment.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ experiment.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% endif %}
+{% endblock %}
+
