@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Results for Experiment:
+            <small> {{ experiment.display_title }} </small>
+        </h1>
+    </div>
+
+    {% if results is defined %}
+
+    <div class="row text-center">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover text-center">
+            <thead>
+                <tr>
+                    <th class="text-center">Metric</th>
+                    <th class="text-center">Weighted</th>
+                    <th class="text-center">Micro (Global average)</th>
+                    <th class="text-center">Macro (Class-based average)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Precision</td>
+                    <td>{{ results.precision_weighted|safe }}</td>
+                    <td>{{ results.precision_micro|safe }}</td>
+                    <td>{{ results.precision_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td>Recall</td>
+                    <td>{{ results.recall_weighted|safe }}</td>
+                    <td>{{ results.recall_micro|safe }}</td>
+                    <td>{{ results.recall_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td>F1 Score</td>
+                    <td>{{ results.fmeasure_weighted|safe }}</td>
+                    <td>{{ results.fmeasure_micro|safe }}</td>
+                    <td>{{ results.fmeasure_macro|safe }}</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+    <br/>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>10-fold Cross Validation Accuracy</h4>
+            <span class="help-block"><i>Uses stratified sampling to split the data into folds.</i></span>
+        </div>
+        <div class="col-md-2">
+            <h4> {{ results.accuracy|safe }} </h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Cohen's Kappa</h4>
+            <span class="help-block"><i>Gives a better indicator of how the classifier performed across all instances. <br> Accuracy can be skewed if the class distribution is similarly skewed. </i></span>
+        </div>
+        <div class="col-md-2">
+            <h4> {{ results.cohens_kappa|safe }} </h4>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <br/><br/>
+
+    <div class="row">
+        <div class="col-md-2">
+            <h4>Confusion Matrix</h4>
+        </div>
+        <div class="col-md-6">
+            {% if plot_div is defined %}
+                {{ plot_div|indent(4)|safe }}
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

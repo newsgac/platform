@@ -11,6 +11,7 @@ import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 # from src.celery_tasks.tasks import run_exp, del_exp
 import time
+from bokeh.resources import INLINE
 
 __author__ = 'abilgin'
 
@@ -89,8 +90,8 @@ def get_experiment_page(experiment_id):
     # return the experiment page with the type code
     experiment = Experiment.get_by_id(experiment_id)
     if experiment.type == "SVC":
-        if experiment.trained_model_handler is not None:
-            ExperimentSVC.get_by_id(experiment_id).predict("")
+        # if experiment.trained_model_handler is not None:
+        #     ExperimentSVC.get_by_id(experiment_id).predict("")
         return render_template('experiments/experiment_svm.html', experiment=experiment)
     elif experiment.type == "DT":
         return render_template('experiments/experiment_dt.html', experiment=experiment)
@@ -116,7 +117,21 @@ def run_experiment(experiment_id):
 @experiment_blueprint.route('/visualise/<string:experiment_id>')
 @user_decorators.requires_login
 def visualise_results(experiment_id):
-    return render_template('underconstruction.html')
+    exp_type = Experiment.get_by_id(experiment_id).type
+    if exp_type == "SVC":
+        experiment = ExperimentSVC.get_by_id(experiment_id)
+    else:
+        experiment = ExperimentDT.get_by_id(experiment_id)
+
+    results = experiment.get_results()
+    script, div = results.visualise_confusion_matrix(True)
+    return render_template('experiments/results.html',
+                           experiment=experiment,
+                           results=results,
+                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           mimetype='text/html')
+
+    # return render_template('experiments/results.html', experiment=experiment)
 
 @experiment_blueprint.route('/overview',  methods=['GET'])
 @user_decorators.requires_login

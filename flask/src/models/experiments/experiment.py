@@ -60,6 +60,9 @@ class Experiment(object):
         return [cls(**elem) for elem in
                 DATABASE.find(ExperimentConstants.COLLECTION, {"": True, "run_finished": {"$ne": None}})]
 
+    def get_public_username(self):
+        return User.get_by_email(self.user_email).username
+
     def get_user_friendly_created(self):
         return UT.get_local_display_time(self.created)
 
@@ -153,13 +156,18 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         self.run_finished = datetime.datetime.utcnow()
         self.save_to_db()
 
-        # validate
-        svc.validate()
-
     def predict(self, example):
         svc = SVM_SVC(self)
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
         classifier = dill.loads(pickled_model)
-        svc.predict(classifier)
+        svc.predict(classifier, example)
+
+    def get_results(self):
+        # populate results
+        svc = SVM_SVC(self)
+        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+        classifier = dill.loads(pickled_model)
+        return svc.populate_results(classifier)
+
 
 

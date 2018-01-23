@@ -82,11 +82,8 @@ class ConfigurationSVC():
             except ValueError:
                 val = ConfigurationConstants.SVC_DEFAULT_RANDOM_STATE
 
-            # with sigmoid kernel svc requires an integer random_seed
-            if self.kernel == 'sigmoid':
-                val = 8
-
-            self.random_state = val
+            self.random_state = int(val)
+            print self.random_state
 
     @classmethod
     def get_by_user_email(cls, user_email):

@@ -19,11 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import src.data_engineering.io as io
-from sklearn import svm
-from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit
+import src.data_engineering.data_io as io
+from sklearn import svm, metrics
+from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit, train_test_split
+
 from sklearn.externals import joblib
 import dill
+
+from data_engineering.postprocessing import Result
 from src.common.database import Database
 
 DATABASE = Database()
@@ -36,21 +39,31 @@ class SVM_SVC():
                       class_weight=self.class_weight, probability=experiment.probability, random_state=experiment.random_state)
 
         # Load an existing training set
-        self.X_train, self.y_train = io.load_data('training.txt')
+        X, y = io.load_data('training.txt')
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, random_state=0)
 
-    def validate(self):
+
+    def cross_validate(self):
         # Ten-fold cross-validation with stratified sampling
         cv = StratifiedShuffleSplit(n_splits=10)
         scores = cross_val_score(self.clf, self.X_train, self.y_train, cv=cv)
         print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        return scores
 
     def train(self):
         trained_model = self.clf.fit(self.X_train, self.y_train)
         return trained_model
 
-    def predict(self, classifier):
-        logits = classifier.decision_function([self.X_train[0]])
+    def predict(self, classifier, example):
+        logits = classifier.decision_function([example])
         print logits
         if self.clf.probability:
-            proba = classifier.predict_proba([self.X_train[0]])
+            proba = classifier.predict_proba([example])
             print proba
+
+    def populate_results(self, classifier):
+        y_pred = classifier.predict(self.X_test)
+        results = Result(y_test=self.y_test, y_pred=y_pred)
+        scores = self.cross_validate()
+        results.accuracy = format(scores.mean(), '.2f')
+        return results
