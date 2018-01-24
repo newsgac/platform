@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
 
+from data_engineering.postprocessing import ExperimentComparator
 from models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
 from models.configurations.configuration_dt import ConfigurationDT
@@ -117,11 +118,7 @@ def run_experiment(experiment_id):
 @experiment_blueprint.route('/visualise/<string:experiment_id>')
 @user_decorators.requires_login
 def visualise_results(experiment_id):
-    exp_type = Experiment.get_by_id(experiment_id).type
-    if exp_type == "SVC":
-        experiment = ExperimentSVC.get_by_id(experiment_id)
-    else:
-        experiment = ExperimentDT.get_by_id(experiment_id)
+    experiment = Experiment.get_by_id(experiment_id)
 
     results = experiment.get_results()
     script, div = results.visualise_confusion_matrix(True)
@@ -131,20 +128,30 @@ def visualise_results(experiment_id):
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
 
-    # return render_template('experiments/results.html', experiment=experiment)
-
 @experiment_blueprint.route('/overview',  methods=['GET'])
 @user_decorators.requires_login
 @back.anchor
 def user_experiments_overview():
-    return render_template('underconstruction.html')
+    # call overview method with the experiments that belong to the user
+    experiments = Experiment.get_by_user_email(session['email'])
+    comparator = ExperimentComparator(experiments)
+    script, div = comparator.performComparison()
+
+    return render_template('experiments/overview.html', plot_script=script, plot_div=div,
+                           js_resources=INLINE.render_js(),
+                           css_resources=INLINE.render_css(), mimetype='text/html')
 
 @experiment_blueprint.route('/public_overview')
 @back.anchor
 def public_overview():
     # call overview method with the public experiments
     experiments = Experiment.get_public_experiments()
-    return render_template('underconstruction.html')
+    comparator = ExperimentComparator(experiments)
+    script, div = comparator.performComparison()
+
+    return render_template('experiments/overview.html', plot_script=script, plot_div=div,
+                           js_resources=INLINE.render_js(),
+                           css_resources=INLINE.render_css(), mimetype='text/html')
 
 
 @experiment_blueprint.route('/delete/<string:experiment_id>')

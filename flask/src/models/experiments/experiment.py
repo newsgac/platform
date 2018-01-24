@@ -1,20 +1,12 @@
-import json
 import datetime
-
-import requests
-
+import dill
 from machine_learning.svm import SVM_SVC
 from models.configurations.configuration_svc import ConfigurationSVC
 from src.common.database import Database
 import src.models.experiments.constants as ExperimentConstants
-# import src.models.alerts.constants as AlertConstants
-# import src.engine.EngineConstants as EngineConstants
 import src.common.utils as Utilities
-# from src.engine.distributionalsemantics.word2vecVSModel import word2vecVSModel
-# from src.engine.visualisation.ModelVisualiser import ModelVisualiser
 from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.users.user import User
-import dill
 
 DATABASE = Database()
 UT = Utilities.Utils()
@@ -31,6 +23,7 @@ class Experiment(object):
             self.run_started = None
             self.run_finished = None
             self.trained_model_handler = None
+            self.results_handler = None
         else:
             # default constructor from the database
             self.__dict__.update(kwargs)
@@ -81,6 +74,10 @@ class Experiment(object):
 
         return "{:2d} hours {:2d} minutes {:2d} seconds".format(int(h), int(m), int(s))
 
+    def get_results(self):
+        pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
+        return dill.loads(pickled_results)
+
 class ExperimentDT(Experiment, ConfigurationDT):
 
     def __init__(self, user_email, display_title, public_flag, **kwargs):
@@ -105,8 +102,6 @@ class ExperimentDT(Experiment, ConfigurationDT):
         self.save_to_db()
 
         # TODO: under construction
-
-        # pre-processing steps
 
         # call the training method
 
@@ -136,6 +131,7 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
         ConfigurationSVC.delete(self)
         DATABASE.getGridFS().delete(self.trained_model_handler)
+        DATABASE.getGridFS().delete(self.results_handler)
 
     def start_running(self):
 
@@ -143,17 +139,16 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         self.run_started = datetime.datetime.utcnow()
         self.save_to_db()
 
-        # pre-processing steps
-        if self.auto_pp:
-            # auto configuration
-            pass
-
         # train
         svc = SVM_SVC(self)
         trained_model = svc.train()
         self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
 
         self.run_finished = datetime.datetime.utcnow()
+
+        # populate results
+        results = svc.populate_results(trained_model)
+        self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
         self.save_to_db()
 
     def predict(self, example):
@@ -161,13 +156,6 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
         classifier = dill.loads(pickled_model)
         svc.predict(classifier, example)
-
-    def get_results(self):
-        # populate results
-        svc = SVM_SVC(self)
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-        return svc.populate_results(classifier)
 
 
 
