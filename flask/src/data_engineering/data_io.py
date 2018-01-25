@@ -37,5 +37,3 @@ def load_data(filename):
         print('Features:', dataset.shape)
         print('Labels:', labels.shape)
         return dataset, labels
-
-

@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
 
-from data_engineering.postprocessing import ExperimentComparator
 from models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
 from models.configurations.configuration_dt import ConfigurationDT
@@ -13,6 +12,9 @@ import src.models.configurations.errors as ConfigurationErrors
 # from src.celery_tasks.tasks import run_exp, del_exp
 import time
 from bokeh.resources import INLINE
+
+from visaulisation.comparison import ExperimentComparator
+from visaulisation.resultvisualiser import ResultVisualiser
 
 __author__ = 'abilgin'
 
@@ -121,7 +123,7 @@ def visualise_results(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
 
     results = experiment.get_results()
-    script, div = results.visualise_confusion_matrix(True)
+    script, div = ResultVisualiser.plotHeatMapfromResult(normalisation_flag=True, result=results)
     return render_template('experiments/results.html',
                            experiment=experiment,
                            results=results,

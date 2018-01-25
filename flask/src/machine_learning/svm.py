@@ -64,6 +64,9 @@ class SVM_SVC():
     def populate_results(self, classifier):
         y_pred = classifier.predict(self.X_test)
         results = Result(y_test=self.y_test, y_pred=y_pred)
+        print ("Number of samples")
+        print len(self.y_test)
+        print len(y_pred)
         scores = self.cross_validate()
         results.accuracy = format(scores.mean(), '.2f')
         return results

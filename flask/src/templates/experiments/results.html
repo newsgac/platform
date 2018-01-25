@@ -14,10 +14,10 @@
         <table class="table table-sm table-hover text-center">
             <thead>
                 <tr>
-                    <th class="text-center">Metric</th>
-                    <th class="text-center">Weighted</th>
-                    <th class="text-center">Micro (Global average)</th>
-                    <th class="text-center">Macro (Class-based average)</th>
+                    <th class="text-center col-md-3">Metric</th>
+                    <th class="text-center col-md-3">Weighted</th>
+                    <th class="text-center col-md-3">Micro (Global average)</th>
+                    <th class="text-center col-md-3">Macro (Class-based average)</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,8 +74,18 @@
     <br/><br/>
 
     <div class="row">
-        <div class="col-md-2">
+        <div class="col-md-4">
             <h4>Confusion Matrix</h4>
+
+            {% for index in range(0, results.genre_names|length) %}
+                <span class="help-block">
+                    <i> {{ results.confusion_matrix[0:][index] | sum }} instances for {{ results.genre_names[index] }} <br/></i>
+                </span>
+            {% endfor %}
+            <span class="help-block">
+                    <i>Total : {{ results.y_pred | length }} <br/></i>
+            </span>
+
         </div>
         <div class="col-md-6">
             {% if plot_div is defined %}
