@@ -123,7 +123,7 @@ def visualise_results(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
 
     results = experiment.get_results()
-    script, div = ResultVisualiser.plotHeatMapfromResult(normalisation_flag=True, result=results)
+    plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
     return render_template('experiments/results.html',
                            experiment=experiment,
                            results=results,
@@ -138,8 +138,12 @@ def user_experiments_overview():
     experiments = Experiment.get_by_user_email(session['email'])
     comparator = ExperimentComparator(experiments)
     script, div = comparator.performComparison()
+    script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
 
-    return render_template('experiments/overview.html', plot_script=script, plot_div=div,
+    script.append(script_cm)
+    div.append(div_cm)
+
+    return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
                            js_resources=INLINE.render_js(),
                            css_resources=INLINE.render_css(), mimetype='text/html')
 
@@ -151,7 +155,7 @@ def public_overview():
     comparator = ExperimentComparator(experiments)
     script, div = comparator.performComparison()
 
-    return render_template('experiments/overview.html', plot_script=script, plot_div=div,
+    return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
                            js_resources=INLINE.render_js(),
                            css_resources=INLINE.render_css(), mimetype='text/html')
 

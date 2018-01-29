@@ -4,9 +4,6 @@ from sklearn.metrics import confusion_matrix
 import data_engineering.utils as DataUtils
 from sklearn import metrics
 
-import itertools
-import matplotlib.pyplot as plt
-
 __author__ = 'abilgin'
 
 class Result(object):

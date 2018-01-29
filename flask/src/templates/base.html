@@ -14,8 +14,12 @@
     {{ css_resources|indent(4)|safe }}
     {% endif %}
 
-    {% if plot_script is defined %}
-    {{ plot_script|indent(4)|safe }}
+    {% if plot_scripts is defined %}
+        {% for plot_script in plot_scripts %}
+            {{ plot_script|indent(4)|safe }}
+        {% endfor %}
+    {% elif plot_script is defined %}
+        {{ plot_script|indent(4)|safe }}
     {% endif %}
 </head>
 <body>
