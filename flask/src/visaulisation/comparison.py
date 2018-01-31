@@ -59,21 +59,23 @@ class ExperimentComparator:
 
     def resultsComparisonUsingExperiments(self):
 
-        p_fmeasure = self.generate_plots_for_metric(self.fmeasure, "F1 Scores")
-        p_precision= self.generate_plots_for_metric(self.precision, "Precision")
-        p_recall = self.generate_plots_for_metric(self.recall, "Recall")
-        # p_other = self.generate_plot_for_other(self.other, "Other metrics")
+        colors = ["#E74C3C", "#9B59B6", "#1ABC9C", "#F39C12", "#2980B9"]
+        p_fmeasure = self.generate_plots_for_metric(self.fmeasure, "F1 Scores", colors[0])
+        p_precision= self.generate_plots_for_metric(self.precision, "Precision", colors[1])
+        p_recall = self.generate_plots_for_metric(self.recall, "Recall", colors[2])
+        p_other = self.generate_plots_for_other_metric(self.other, "Other", colors[3])
 
         plots = []
         plots.extend(p_fmeasure)
         plots.extend(p_precision)
         plots.extend(p_recall)
-        # plots.append(p_other)
+        plots.extend(p_other)
 
         return list(plots)
 
     def resultsComparisonUsingMetric(self):
 
+        # TODO: Label location tuning for figures
         p_fmeasure = self.generate_plot_for_experiment(self.fmeasure, "Overview F1 Scores")
         p_precision= self.generate_plot_for_experiment(self.precision, "Overview Precision")
         p_recall = self.generate_plot_for_experiment(self.recall, "Overview Recall")
@@ -87,7 +89,7 @@ class ExperimentComparator:
 
         return list(plots)
 
-    def generate_plots_for_metric(self, metric, title):
+    def generate_plots_for_metric(self, metric, title, color='navy'):
 
         figures = []
         types = ['weighted', 'micro', 'macro']
@@ -99,17 +101,14 @@ class ExperimentComparator:
         metric_source = ColumnDataSource(data=metric_data)
 
         for type in types:
-            p = figure(y_range=self.experiment_titles, plot_height=50*len(self.experiment_titles), title=title + '(' + type + ')',
+            p = figure(y_range=self.experiment_titles, plot_height=50*len(self.experiment_titles), title=title + ' (' + type + ')',
                        plot_width = 400, x_range=[0,1], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
 
-            p.hbar(y=self.experiment_titles, height=0.5, left=0, right=metric[type], color="navy")
+            p.hbar(y=self.experiment_titles, height=0.5, left=0, right=metric[type], color=color)
 
             labels = LabelSet(x=type, y='experiments', text=type, level='glyph', text_font_size="7pt",
                               x_offset=2, y_offset= -1, source=metric_source, render_mode='canvas')
 
-            # p.xgrid.grid_line_color = 'black'
-            # p.ygrid.grid_line_color = 'black'
-            # p.ygrid.grid_line_color = None
             p.y_range.range_padding = 0.4
             p.xgrid.grid_line_color = None
             p.legend.location = "top_left"
@@ -119,6 +118,41 @@ class ExperimentComparator:
             p.add_layout(labels)
 
             figures.append(p)
+
+        return figures
+
+    def generate_plots_for_other_metric(self, metric, title, color='navy'):
+
+        figures = []
+        types = ['cross_validation_accuracies', 'kappas']
+        subtitles = ['Accuracy', 'Cohen\'s kappa']
+
+        metric_data = {'experiments': self.experiment_titles,
+                       'cross_validation_accuracies': metric['cross_validation_accuracies'],
+                       'kappas': metric['kappas']}
+        metric_source = ColumnDataSource(data=metric_data)
+
+        i = 0
+        for type in types:
+            p = figure(y_range=self.experiment_titles, plot_height=50*len(self.experiment_titles), title=title + ' (' + subtitles[i] + ')',
+                       plot_width = 400, x_range=[0,1], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
+
+            p.hbar(y=self.experiment_titles, height=0.5, left=0, right=metric[type], color=color)
+
+            labels = LabelSet(x=type, y='experiments', text=type, level='glyph', text_font_size="7pt",
+                              x_offset=2, y_offset= -1, source=metric_source, render_mode='canvas')
+
+            p.y_range.range_padding = 0.4
+            p.xgrid.grid_line_color = None
+            p.legend.location = "top_left"
+            p.legend.orientation = "horizontal"
+            p.xaxis.major_label_orientation = "horizontal"
+
+            p.add_layout(labels)
+
+            figures.append(p)
+
+            i = i+1
 
         return figures
 
@@ -141,7 +175,7 @@ class ExperimentComparator:
                           y_offset=2, x_offset=-(100/(crowd*crowd)), source=metric_source, render_mode='canvas')
 
         labels_kap = LabelSet(x='experiments', y='kappas', text='kappas', level='glyph', text_font_size="7pt",
-                              y_offset=2, x_offset=(100/(crowd*crowd)-crowd/5)*5, source=metric_source, render_mode='canvas')
+                              y_offset=2, x_offset=(100/(crowd*crowd))*5-3*crowd, source=metric_source, render_mode='canvas')
 
         p.add_layout(labels_acc)
         p.add_layout(labels_kap)
@@ -179,7 +213,7 @@ class ExperimentComparator:
                               y_offset=2, x_offset=-(100/(crowd*crowd))*2, source=metric_source, render_mode='canvas')
 
         labels_mac = LabelSet(x='experiments', y='macro', text='macro', level='glyph', text_font_size="7pt",
-                              y_offset=2, x_offset=(100/(crowd*crowd))*7-2*crowd, source=metric_source, render_mode='canvas')
+                              y_offset=2, x_offset=(100/(crowd*crowd))*7-3*crowd, source=metric_source, render_mode='canvas')
 
         p.add_layout(labels_wei)
         p.add_layout(labels_mic)
@@ -200,7 +234,8 @@ class ExperimentComparator:
         for experiment in self.experiments:
 
             results = experiment.get_results()
-            plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title=experiment.display_title, downsize = True)
+            plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results,
+                                                                           title=experiment.display_title, downsize = True)
             plots.append(plot)
 
         overview_layout = gridplot(list(plots), ncols=3)
@@ -220,12 +255,13 @@ class ExperimentComparator:
         scripts.append(script)
         divs.append(div)
 
-        plots = []
-        plots.extend(self.resultsComparisonUsingMetric())
-        overview_layout = gridplot(plots, ncols=2)
-        script, div = components(overview_layout)
-        scripts.append(script)
-        divs.append(div)
+        # Plots shows all metrics grouped by experiment in the same graph
+        # plots = []
+        # plots.extend(self.resultsComparisonUsingMetric())
+        # overview_layout = gridplot(plots, ncols=2)
+        # script, div = components(overview_layout)
+        # scripts.append(script)
+        # divs.append(div)
 
         return scripts, divs
 

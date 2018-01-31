@@ -5,15 +5,13 @@
         <h1>Experiments Overview</h1>
     </div>
 
-
     {% if plot_divs is defined %}
         {% for plot_div in plot_divs %}
             <div class="row">
-                {{ plot_div|indent(4)|safe }}
+                {{ plot_div|safe }}
             </div>
             <div class="row"></div>
             <div class="row"></div>
         {% endfor %}
     {% endif %}
-
 {% endblock %}

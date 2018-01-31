@@ -121,9 +121,9 @@ def run_experiment(experiment_id):
 @user_decorators.requires_login
 def visualise_results(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
-
     results = experiment.get_results()
     plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
+
     return render_template('experiments/results.html',
                            experiment=experiment,
                            results=results,
@@ -139,7 +139,6 @@ def user_experiments_overview():
     comparator = ExperimentComparator(experiments)
     script, div = comparator.performComparison()
     script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-
     script.append(script_cm)
     div.append(div_cm)
 
@@ -154,6 +153,11 @@ def public_overview():
     experiments = Experiment.get_public_experiments()
     comparator = ExperimentComparator(experiments)
     script, div = comparator.performComparison()
+
+    script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
+
+    script.append(script_cm)
+    div.append(div_cm)
 
     return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
                            js_resources=INLINE.render_js(),

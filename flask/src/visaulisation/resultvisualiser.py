@@ -3,12 +3,12 @@ from bokeh.models import (
     ColumnDataSource,
     HoverTool,
     LinearColorMapper,
-    BasicTicker,
     PrintfTickFormatter,
     ColorBar,
-    FixedTicker, FuncTickFormatter)
+    FixedTicker)
 from bokeh.embed import components
 from bokeh.plotting import figure
+import colorcet
 import numpy as np
 
 
@@ -24,15 +24,12 @@ class ResultVisualiser(object):
     def retrieveHeatMapfromResult(normalisation_flag, result, title="", downsize=False):
         confusion_matrix = result.get_confusion_matrix()
         cm_normalised = Result.normalise_confusion_matrix(confusion_matrix)
-
         genre_names = result.genre_names
 
-        colors = [ "#1B4F72", "#21618C", "#2874A6", "#2E86C1", "#3498DB", "#5DADE2", "#85C1E9", "#AED6F1",
-                  "#D6EAF8", "#EBF5FB", "#FBFCFC"]
         if normalisation_flag:
-            mapper = LinearColorMapper(palette=list(reversed(colors)), low=0, high=1)
+            mapper = LinearColorMapper(palette=colorcet.blues, low=0, high=1)
         else:
-            mapper = LinearColorMapper(palette=list(reversed(colors)), low=confusion_matrix.min(),
+            mapper = LinearColorMapper(palette=colorcet.blues, low=confusion_matrix.min(),
                                        high=confusion_matrix.max())
 
         actual = []
@@ -90,8 +87,7 @@ class ResultVisualiser(object):
                line_color='white')
 
         color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size=font_size,
-                             ticker=BasicTicker(desired_num_ticks=len(colors)),
-                             # ticker=FixedTicker(ticks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]),
+                             ticker=FixedTicker(ticks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]),
                              formatter=PrintfTickFormatter(format="%.1f"),
                              label_standoff=7, border_line_color='white', location=(0, 0))
         p.add_layout(color_bar, 'right')
