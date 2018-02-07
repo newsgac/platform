@@ -24,10 +24,23 @@ genres = {
     2: ['Interview'],
     3: ['Reportage/feature'],
     4: ['Verslag'],
-    5: ['Opiniestuk / Hoofdredactioneel commentaar'],
+    5: ['Opiniestuk/Hoofdredactioneel commentaar'],
     6: ['Recensie'],
     7: ['Achtergrond/Nieuwsanalyse'],
     8: ['Column']
+}
+
+genre_codebook = {
+    'INT' : 'Interview',
+    'NIE' : 'Nieuwsbericht',
+    'REP' : 'Reportage',
+    'FEA' : 'Reportage',
+    'VER' : 'Verslag',
+    'OPI' : 'Opiniestuk',
+    'HOO' : 'Opiniestuk',
+    'REC' : 'Recensie',
+    'ACH' : 'Achtergrond',
+    'COL' : 'Column'
 }
 
 features = [

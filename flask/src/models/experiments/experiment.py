@@ -7,6 +7,7 @@ import src.models.experiments.constants as ExperimentConstants
 import src.common.utils as Utilities
 from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.users.user import User
+import sklearn
 
 DATABASE = Database()
 UT = Utilities.Utils()
@@ -77,6 +78,15 @@ class Experiment(object):
     def get_results(self):
         pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
         return dill.loads(pickled_results)
+
+    def predict(self, example):
+
+        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+        classifier = dill.loads(pickled_model)
+        print type(classifier)
+        if type(classifier) is sklearn.svm.classes.SVC:
+            svc = SVM_SVC(self)
+            return svc.predict(classifier, example)
 
 class ExperimentDT(Experiment, ConfigurationDT):
 
@@ -150,12 +160,6 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         results = svc.populate_results(trained_model)
         self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
         self.save_to_db()
-
-    def predict(self, example):
-        svc = SVM_SVC(self)
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-        svc.predict(classifier, example)
 
 
 

@@ -21,7 +21,7 @@ class ResultVisualiser(object):
         pass
 
     @staticmethod
-    def retrieveHeatMapfromResult(normalisation_flag, result, title="", downsize=False):
+    def retrieveHeatMapfromResult(normalisation_flag, result, title="", ds_param = 1):
         confusion_matrix = result.get_confusion_matrix()
         cm_normalised = Result.normalise_confusion_matrix(confusion_matrix)
         genre_names = result.genre_names
@@ -58,22 +58,15 @@ class ResultVisualiser(object):
 
         TOOLS = "hover,save,pan,box_zoom,reset,wheel_zoom"
 
-        if downsize:
-            ds_param = 0.5
-            tool_loc = 'right'
-        else:
-            ds_param = 1
-            tool_loc = 'above'
-
         p = figure(title=title,
                    y_range=list(reversed(genre_names)), x_range=list(genre_names),
                    x_axis_location="below", plot_width=int(850*ds_param), plot_height=int(800*ds_param),
-                   tools=TOOLS, toolbar_location=tool_loc)
+                   tools=TOOLS, toolbar_location='above')
 
         p.grid.grid_line_color = None
         p.axis.axis_line_color = None
         p.axis.major_tick_line_color = None
-        if downsize:
+        if ds_param < 1:
             font_size = "7pt"
         else:
             font_size = "10pt"

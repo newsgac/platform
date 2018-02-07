@@ -153,9 +153,7 @@ def public_overview():
     experiments = Experiment.get_public_experiments()
     comparator = ExperimentComparator(experiments)
     script, div = comparator.performComparison()
-
     script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-
     script.append(script_cm)
     div.append(div_cm)
 

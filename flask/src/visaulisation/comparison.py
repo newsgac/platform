@@ -5,6 +5,7 @@ from bokeh.core.properties import value
 from bokeh.embed import components
 from bokeh.models import (
     ColumnDataSource, LabelSet)
+import math
 
 from visaulisation.resultvisualiser import ResultVisualiser
 
@@ -19,7 +20,7 @@ class ExperimentComparator:
         for experiment in self.experiments:
             self.experiment_titles.append(experiment.display_title)
 
-        # construct data x axis experiment names, y axis result
+        # construct data_sources x axis experiment names, y axis result
         self.fmeasure = {}
         self.precision = {}
         self.recall = {}
@@ -100,8 +101,13 @@ class ExperimentComparator:
                        'macro': metric['macro']}
         metric_source = ColumnDataSource(data=metric_data)
 
+        if len(self.experiment_titles) < 7:
+            height = 300
+        else:
+            height = 50*len(self.experiment_titles)
+
         for type in types:
-            p = figure(y_range=self.experiment_titles, plot_height=50*len(self.experiment_titles), title=title + ' (' + type + ')',
+            p = figure(y_range=self.experiment_titles, plot_height=height, title=title + ' (' + type + ')',
                        plot_width = 400, x_range=[0,1], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
 
             p.hbar(y=self.experiment_titles, height=0.5, left=0, right=metric[type], color=color)
@@ -132,9 +138,14 @@ class ExperimentComparator:
                        'kappas': metric['kappas']}
         metric_source = ColumnDataSource(data=metric_data)
 
+        if len(self.experiment_titles) < 7:
+            height = 300
+        else:
+            height = 50*len(self.experiment_titles)
+
         i = 0
         for type in types:
-            p = figure(y_range=self.experiment_titles, plot_height=50*len(self.experiment_titles), title=title + ' (' + subtitles[i] + ')',
+            p = figure(y_range=self.experiment_titles, plot_height=height, title=title + ' (' + subtitles[i] + ')',
                        plot_width = 400, x_range=[0,1], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
 
             p.hbar(y=self.experiment_titles, height=0.5, left=0, right=metric[type], color=color)
@@ -152,7 +163,7 @@ class ExperimentComparator:
 
             figures.append(p)
 
-            i = i+1
+            i += 1
 
         return figures
 
@@ -231,11 +242,17 @@ class ExperimentComparator:
 
         plots = []
 
+        if len(self.experiments) > 2:
+            ds_param = 0.55
+        else:
+            ds_param = 1/math.sqrt(len(self.experiments))
+
         for experiment in self.experiments:
 
             results = experiment.get_results()
             plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results,
-                                                                           title=experiment.display_title, downsize = True)
+                                                                           title=experiment.display_title,
+                                                                           ds_param = ds_param)
             plots.append(plot)
 
         overview_layout = gridplot(list(plots), ncols=3)
