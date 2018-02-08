@@ -23,9 +23,6 @@ import src.data_engineering.data_io as io
 from sklearn import svm, metrics
 from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit, train_test_split
 
-from sklearn.externals import joblib
-import dill
-
 from data_engineering.postprocessing import Result
 from src.common.database import Database
 
@@ -39,7 +36,12 @@ class SVM_SVC():
                       class_weight=self.class_weight, probability=True, random_state=experiment.random_state)
 
         # Load an existing training set
-        X, y = io.load_preprocessed_data('training.txt')
+        if experiment.data_source_id is None:
+            X, y = io.load_preprocessed_data_from_file('training.txt')
+        else:
+            #read from db
+            X, y = io.load_preprocessed_data_from_db(experiment.data_source_id)
+
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, random_state=0)
 
 

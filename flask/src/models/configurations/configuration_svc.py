@@ -2,6 +2,7 @@ import uuid
 import src.models.configurations.constants as ConfigurationConstants
 import src.models.configurations.errors as ConfigurationErrors
 from src.common.database import Database
+from src.models.data_sources.data_source import DataSource
 
 DATABASE = Database()
 
@@ -38,10 +39,18 @@ class ConfigurationSVC():
         return self.stemming == other.stemming and self.sw_removal == other.sw_removal and self.avg_sent_length == other.avg_sent_length and \
                 self.avg_sent_length == other.avg_sent_length and self.perc_exclamation_mark == other.perc_exclamation_mark and \
                 self.perc_adjectives == other.perc_adjectives and self.kernel == other.kernel and \
-                self.penalty_parameter_c == other.penalty_parameter_c and self.random_state == other.random_state
+                self.penalty_parameter_c == other.penalty_parameter_c and self.random_state == other.random_state and \
+                self.data_source_id == other.data_source_id
 
     def render_form(self, form):
 
+        if form["data_source"]:
+            ds = DataSource.get_by_user_email_and_display_title(self.user_email, form["data_source"])
+            self.data_source_id = ds._id
+            self.data_source_title = ds.display_title
+        else:
+            self.data_source_id = None
+            self.data_source_title = ConfigurationConstants.DEFAULT_DATASOURCE
         # pre-processing and feature selection
         self.auto_pp = "auto_pp" in form
 

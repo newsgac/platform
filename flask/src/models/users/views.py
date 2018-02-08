@@ -31,6 +31,7 @@ def login_user():
             except UserErrors.UserError as e:
                 error = e.message
                 flash(error, 'error')
+                return render_template("users/login.html", error=error, request=request.form)
 
     return render_template("users/login.html", error=error)
 
@@ -49,7 +50,6 @@ def register_user():
         if (username == "") or (name == "") or (surname == "") or (email == "") or (password == ""):
             error = "All fields are required."
             flash(error, 'error')
-            return back.redirect()
         else :
             try:
                 if User.register_user(username, name, surname, email, password):
@@ -59,13 +59,14 @@ def register_user():
             except UserErrors.UserError as e:
                 error = e.message
                 flash(error, 'error')
+        
+        return render_template("users/register.html", error=error, request=request.form)
     else:
         flash(Markup('You need to have an account to create your experiments.'+
                          ' Already have an account? <a href="/users/login" class="alert-link">Log in here.</a><br/>'+
                         'If you would like to find out more, why not <a href="/experiments/public" class="alert-link">browse public experiments?</a>'), 'info')
 
-    # TODO: passing request to keep the previously entered form elements do not work
-    return render_template("users/register.html", error=error, request=request)
+    return render_template("users/register.html", error=error)
 
 
 @user_blueprint.route('/logout')

@@ -68,304 +68,304 @@
                     </ul>
                 </div>
 
-                <!--<form role="form" id="experiment_dt" method="post">-->
-                    <div class="tab-content">
+                <div class="tab-content">
 
-                        <div class="tab-pane active" role="tabpanel" id="step1">
-                            <div class="step33">
-                                <h5><strong>Pre-process training data and select features</strong></h5>
-                                <hr>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Auto</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.auto_pp %}
-                                                    <input type="checkbox" name="auto_pp" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="auto_pp" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>Automated choice. Ignores all options below.<br/></i></span>
-                                    </div>
-                                </div>
+                    <div class="tab-pane active" role="tabpanel" id="step1">
+                        <div class="step33">
+                            <h5><strong>Pre-process training data and select features</strong></h5>
+                            <hr>
 
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Stemming</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.stemming %}
-                                                    <input type="checkbox" name="stemming" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="stemming" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>Different forms of the same word are consolidated into a single word.<br/></i></span>
-                                    </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-4">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Data source</strong>
+                                        <span class="help-block"><i>The experiment will use the chosen dataset for training and testing.</i></span>
+                                    </p>
                                 </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Stop-word removal</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.sw_removal %}
-                                                    <input type="checkbox" name="sw_removal" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="sw_removal" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The most common words that are not specific to the different classes are removed.</i></span>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Average sentence length</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.avg_sent_length %}
-                                                    <input type="checkbox" name="avg_sent_length" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="avg_sent_length" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The average number of words per sentence in the document.</i></span>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Percentage of exclamation marks</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox" id="online_flag_div">
-                                            <label>
-                                                {% if experiment.perc_exclamation_mark %}
-                                                    <input type="checkbox" name="perc_exclamation_mark" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="perc_exclamation_mark" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The percentage of exclamation marks used in the document.</i></span>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Percentage of adjectives</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.perc_adjectives %}
-                                                    <input type="checkbox" name="perc_adjectives" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="perc_adjectives" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The percentage of adjectives used in the document.</i></span>
-                                    </div>
+                                <div class="col-md-4" id="datasource_div">
+                                    <input type="text" class="form-control" value="{{ experiment.data_source_title|capitalize() }}" disabled>
                                 </div>
                             </div>
-                            <ul class="list-inline pull-right">
-                                <li>
-                                    <button type="button" class="btn btn-primary next-step">Next</button>
-                                </li>
-                            </ul>
-                        </div>
 
-                        <div class="tab-pane" role="tabpanel" id="step2">
-                            <div class="step33">
-                                <h5><strong>Configure support vector algorithmic hyperparameters</strong></h5>
-                                <hr>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Auto</strong>
-                                            <span class="help-block"><i>Automated choice. Ignores all options below.<br/></i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.auto_alg %}
-                                                    <input type="checkbox" name="auto_alg" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="auto_alg" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-3">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Auto</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.auto_pp %}
+                                                <input type="checkbox" name="auto_pp" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="auto_pp" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
                                     </div>
                                 </div>
-
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Penalty parameter C</strong>
-                                            <span class="help-block"><i>Penalty parameter C of the error term.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="text" class="form-control" value="{{ experiment.penalty_parameter_c }}" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Kernel</strong>
-                                            <span class="help-block"><i>The kernel type to be used in the algorithm.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6" id="kernel_div">
-                                        <input type="text" class="form-control" value="{{ experiment.kernel|capitalize() }}" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Probability</strong>
-                                            <span class="help-block"><i>Whether to enable probability estimates.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" value="{{ experiment.probability|capitalize() }}" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Random state</strong>
-                                            <span class="help-block"><i>Enter an integer for a random seed.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="text" class="form-control" value="{{ experiment.random_state }}" disabled>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <ul class="list-inline pull-right">
-                                <li>
-                                    <button type="button" class="btn btn-default prev-step">Previous</button>
-                                </li>
-                                <li>
-                                    <button type="button" class="btn btn-primary next-step">Next</button>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="tab-pane" role="tabpanel" id="complete">
-                            <div class="step33">
-                                <h5><strong>Enter display properties for the experiment and save</strong></h5>
-                                <hr>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Experiment display name</strong>
-                                            <span class="help-block"><i>Make it as descriptive as possible.<br/></i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input type="text" class="form-control" value="{{ experiment.display_title }}" disabled>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Public Visibility</strong>
-                                            <span class="help-block"><i>Public experiments can be seen by all users.</i></span>
-                                        </p>
-                                        </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                {% if experiment.public_flag %}
-                                                    <input type="checkbox" name="public_flag" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="public_flag" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
+                                <div class="col-md-8">
+                                    <span class="help-block"><i>Automated choice. Ignores all options below.<br/></i></span>
                                 </div>
                             </div>
-                            <ul class="list-inline pull-right">
-                                <li>
-                                    <button type="button" class="btn btn-default prev-step">Previous</button>
-                                </li>
-                            </ul>
+
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-3">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Stemming</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.stemming %}
+                                                <input type="checkbox" name="stemming" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="stemming" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="help-block"><i>Different forms of the same word are consolidated into a single word.<br/></i></span>
+                                </div>
+                            </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-3">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Stop-word removal</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.sw_removal %}
+                                                <input type="checkbox" name="sw_removal" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="sw_removal" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="help-block"><i>The most common words that are not specific to the different classes are removed.</i></span>
+                                </div>
+                            </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-3">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Average sentence length</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.avg_sent_length %}
+                                                <input type="checkbox" name="avg_sent_length" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="avg_sent_length" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="help-block"><i>The average number of words per sentence in the document.</i></span>
+                                </div>
+                            </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-3">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Percentage of exclamation marks</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox" id="online_flag_div">
+                                        <label>
+                                            {% if experiment.perc_exclamation_mark %}
+                                                <input type="checkbox" name="perc_exclamation_mark" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="perc_exclamation_mark" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="help-block"><i>The percentage of exclamation marks used in the document.</i></span>
+                                </div>
+                            </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-3">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Percentage of adjectives</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.perc_adjectives %}
+                                                <input type="checkbox" name="perc_adjectives" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="perc_adjectives" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="help-block"><i>The percentage of adjectives used in the document.</i></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="clearfix"></div>
+                        <ul class="list-inline pull-right">
+                            <li>
+                                <button type="button" class="btn btn-primary next-step">Next</button>
+                            </li>
+                        </ul>
                     </div>
-                <!--</form>-->
+
+                    <div class="tab-pane" role="tabpanel" id="step2">
+                        <div class="step33">
+                            <h5><strong>Configure support vector algorithmic hyperparameters</strong></h5>
+                            <hr>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-6">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Auto</strong>
+                                        <span class="help-block"><i>Automated choice. Ignores all options below.<br/></i></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.auto_alg %}
+                                                <input type="checkbox" name="auto_alg" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="auto_alg" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-6">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Penalty parameter C</strong>
+                                        <span class="help-block"><i>Penalty parameter C of the error term.</i></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" value="{{ experiment.penalty_parameter_c }}" disabled>
+                                </div>
+                            </div>
+
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-6">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Kernel</strong>
+                                        <span class="help-block"><i>The kernel type to be used in the algorithm.</i></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-2" id="kernel_div">
+                                    <input type="text" class="form-control" value="{{ experiment.kernel|capitalize() }}" disabled>
+                                </div>
+                            </div>
+
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-6">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Random state</strong>
+                                        <span class="help-block"><i>Enter an integer for a random seed.</i></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" value="{{ experiment.random_state }}" disabled>
+                                </div>
+                            </div>
+
+                        </div>
+                        <ul class="list-inline pull-right">
+                            <li>
+                                <button type="button" class="btn btn-default prev-step">Previous</button>
+                            </li>
+                            <li>
+                                <button type="button" class="btn btn-primary next-step">Next</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-pane" role="tabpanel" id="complete">
+                        <div class="step33">
+                            <h5><strong>Enter display properties for the experiment and save</strong></h5>
+                            <hr>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-6">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Experiment display name</strong>
+                                        <span class="help-block"><i>Make it as descriptive as possible.<br/></i></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" value="{{ experiment.display_title }}" disabled>
+                                </div>
+                            </div>
+                            <div class="row mar_ned"></div>
+                            <div class="row mar_ned">
+                                <div class="col-md-6">
+                                    <p align="right" class="center-align-pad">
+                                        <strong>Public Visibility</strong>
+                                        <span class="help-block"><i>Public experiments can be seen by all users.</i></span>
+                                    </p>
+                                    </div>
+                                <div class="col-md-1">
+                                    <div class="checkbox">
+                                        <label>
+                                            {% if experiment.public_flag %}
+                                                <input type="checkbox" name="public_flag" checked disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% else %}
+                                                <input type="checkbox" name="public_flag" disabled>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <ul class="list-inline pull-right">
+                            <li>
+                                <button type="button" class="btn btn-default prev-step">Previous</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+
             </div>
         </section>
     </div>

@@ -36,7 +36,7 @@ def create_data_source():
             filename = secure_filename(f.filename)
             try:
                 if DataSource.is_source_unique(user_email= session['email'], display_title=request.form['display_title'],
-                                        description=request.form['description'], filename=filename):
+                                        filename=filename):
                         # file_handler = DATABASE.getGridFS().put(pickle.dumps(f))
                         file_handler = DATABASE.getGridFS().put(f)
                         new_ds = DataSource(user_email= session['email'], display_title=request.form['display_title'],
@@ -47,6 +47,7 @@ def create_data_source():
 
             except DataSourceErrors.ResourceError as e:
                 flash(e.message, 'error')
+                return render_template('data_sources/new_data_source.html', form=request.form)
         else:
             flash('The file type is not supported! Try again using the allowed file formats.', 'error')
 

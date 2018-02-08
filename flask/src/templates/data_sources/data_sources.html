@@ -68,7 +68,7 @@
                     <br/><br/>
                     <p><i>There are no processed data sources to view.</i></p>
                 </div>
-                <div class="list-group tab-pane fade" id="raw2">
+                <div class="list-group tab-pane fade in active" id="raw2">
                     {% for data_source in raw_data_sources %}
                         <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
                             <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
@@ -110,7 +110,7 @@
             </ul>
 
             <div class="tab-content">
-                <div class="list-group tab-pane fade in active" id="processed4">
+                <div class="list-group tab-pane fade" id="processed4">
                     {% for data_source in processed_data_sources %}
                         <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
                             <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
@@ -122,7 +122,7 @@
                         </a>
                     {% endfor %}
                 </div>
-                <div class="list-group tab-pane fade" id="raw4">
+                <div class="list-group tab-pane fade in active" id="raw4">
                     {% for data_source in raw_data_sources %}
                         <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
                             <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>

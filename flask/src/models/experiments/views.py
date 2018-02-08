@@ -9,6 +9,7 @@ from models.configurations.configuration_dt import ConfigurationDT
 from src.models.experiments.experiment import Experiment, ExperimentDT, ExperimentSVC
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
+from models.data_sources.data_source import DataSource
 # from src.celery_tasks.tasks import run_exp, del_exp
 import time
 from bokeh.resources import INLINE
@@ -35,6 +36,10 @@ def user_experiments():
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_dt():
+
+    # get the list of data sources of the user
+    existing_data_source_titles = DataSource.get_titles_by_user_email(user_email=session['email'], processed=True)
+
     if request.method == 'POST':
         configuration = ConfigurationDT(user_email= session['email'], form = request.form)
         try:
@@ -49,13 +54,18 @@ def create_experiment_dt():
         except ConfigurationErrors.ConfigAlreadyExistsError as e:
                 error = e.message
                 flash(error, 'error')
+                return render_template('experiments/new_experiment_dt.html', request=request.form)
 
-    return render_template('experiments/new_experiment_dt.html')
+    return render_template('experiments/new_experiment_dt.html', ds_titles_from_db=existing_data_source_titles)
 
 @experiment_blueprint.route('/new_svm', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_svm():
+
+    # get the list of processed data sources of the user
+    existing_data_source_titles = DataSource.get_titles_by_user_email(user_email=session['email'], processed=True)
+
     if request.method == 'POST':
         configuration = ConfigurationSVC(user_email= session['email'], form = request.form)
         try:
@@ -70,21 +80,22 @@ def create_experiment_svm():
         except ConfigurationErrors.ConfigAlreadyExistsError as e:
                 error = e.message
                 flash(error, 'error')
+                return render_template('experiments/new_experiment_svm.html', request=request.form)
 
-    return render_template('experiments/new_experiment_svm.html')
+    return render_template('experiments/new_experiment_svm.html', ds_titles_from_db=existing_data_source_titles)
 
 @experiment_blueprint.route('/new_ft', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_ft():
-    #TODO FastText
+    #TODO FastText can be used with raw data (DataSource.get_titles_by_user_email(user_email=session['email'], processed=False))
     return render_template('underconstruction.html')
 
 @experiment_blueprint.route('/new_dl', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_dl():
-    #TODO Deep Learning
+    #TODO Deep Learning can be used with raw data (DataSource.get_titles_by_user_email(user_email=session['email'], processed=False))
     return render_template('underconstruction.html')
 
 @experiment_blueprint.route('/<string:experiment_id>')

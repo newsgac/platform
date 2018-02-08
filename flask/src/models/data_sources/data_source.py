@@ -7,7 +7,9 @@ import src.models.data_sources.errors as DataSourceErrors
 from data_engineering.feature_extraction import Article
 from src.common.database import Database
 import src.common.utils as Utilities
-import src.data_engineering.data_io as io
+import re
+
+import src.data_engineering.utils as DataUtils
 
 UT = Utilities.Utils()
 DATABASE = Database()
@@ -36,11 +38,6 @@ class DataSource(object):
         self.description = description
         self.secure_filename = secure_filename
 
-    def __eq__(self, user_email, display_title, description, filename):
-
-        return self.user_email == user_email and self.display_title == display_title \
-                and self.description == description and self.secure_filename == filename
-
     @classmethod
     def get_by_id(cls, id):
         return cls(**DATABASE.find_one(DataSourceConstants.COLLECTION, {"_id": id}))
@@ -49,13 +46,32 @@ class DataSource(object):
     def get_by_user_email(cls, user_email):
         return [cls(**elem) for elem in DATABASE.find(DataSourceConstants.COLLECTION, {"user_email": user_email})]
 
+    @classmethod
+    def get_by_user_email_and_display_title(cls, user_email, display_title):
+        return cls(**DATABASE.find_one(DataSourceConstants.COLLECTION, {"user_email": user_email,
+                                                                        "display_title": display_title}))
+
     @staticmethod
-    def is_source_unique(user_email, display_title, description, filename):
+    def get_titles_by_user_email(user_email, processed=False):
+        ds_list = DataSource.get_by_user_email(user_email=user_email)
+        titles = []
+        for ds in ds_list:
+            if processed and ds.processing_started is not None and ds.processing_completed is not None:
+                titles.append(ds.display_title)
+            elif not processed:
+                titles.append(ds.display_title)
+
+        return titles
+
+    @staticmethod
+    def is_source_unique(user_email, display_title, filename):
         user_data_list = DataSource.get_by_user_email(user_email)
 
         for ds in user_data_list:
-            if ds.__eq__(user_email, display_title, description, filename):
-                raise DataSourceErrors.ResourceAlreadyExistsError("The data source already exists.")
+            if ds.user_email == user_email and ds.display_title == display_title:
+                raise DataSourceErrors.ResourceDisplayTitleAlreadyExistsError("The display title is already taken.")
+            elif ds.user_email == user_email and ds.secure_filename == filename:
+                raise DataSourceErrors.ResourceFilenameAlreadyExistsError("Another file with the same filename already exists.")
 
         return True
 
@@ -67,10 +83,10 @@ class DataSource(object):
         self.save_to_db()
 
         # process rather raw version and upload
-        structured_data = io.read_and_upload_raw_text_input_file(self)
+        structured_data = self.read_and_upload_raw_text_input_file()
 
         # add features separately
-        articles_from_db = self.get_articles_by_data_source()
+        articles_from_db = DataSource.get_articles_by_data_source(self._id)
         print "retrieved articles from db"
         print len(articles_from_db)
 
@@ -113,11 +129,48 @@ class DataSource(object):
     def save_raw_to_db(self, dict):
         DATABASE.insert(DataSourceConstants.COLLECTION_PROCESSED, dict)
 
-    def get_articles_by_data_source(self):
-        return [elem for elem in DATABASE.find(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": self._id})]
+    @staticmethod
+    def get_articles_by_data_source(data_source_id):
+        return [elem for elem in DATABASE.find(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": data_source_id})]
 
     def add_features_to_db(self, article_id, dict):
         DATABASE.update(DataSourceConstants.COLLECTION_PROCESSED, {'_id': article_id, 'data_source_id': self._id}, {'$set': dict})
+
+    def read_and_upload_raw_text_input_file(self):
+
+        file = DATABASE.getGridFS().get(self.file_handler_db).read()
+        data = []
+
+        for line in file.splitlines():
+            line = line.rstrip()
+
+            # groups = re.search(r'^__label__(.{3}.+)DATE\=([\0-9]+) ((?s).*)$', line).groups()
+            # groups = re.search(r'^__label__(.{3}.+)DATE\=([\0-9]+[^&]) ((?s).*)$', line).groups()
+            groups = re.search(r'^__label__(.{3}.+)DATE\=(.{8}) ((?s).*)$', line).groups()
+
+            if not groups:
+                groups = re.search(r'^__label__(.{3})((?s).*)', line).groups()
+                label = groups[0].rstrip()
+                date = None
+                raw_text = groups[1].rstrip()
+            else:
+                label = groups[0].rstrip()
+                date_str = groups[1].rstrip()
+                # TODO: Need to test the following
+                day = date_str.split("/")[0]
+                month = date_str.split("/")[1]
+                year = date_str.split("/")[2]
+                # fix for conversion 20xx where xx < 69 although the data is from 1900s
+                date_str_corr = day + "/" + month + "/19" + year
+                print date_str_corr
+                date = datetime.datetime.strptime(date_str_corr, "%d/%m/%Y").strftime("%d-%m-%Y")
+                raw_text = groups[2].rstrip()
+
+            row = dict(data_source_id=self._id, genre=DataUtils.genre_codebook[label], date=date, article_raw_text=raw_text)
+            self.save_raw_to_db(row)
+            data.append(row)
+
+        return data
 
 
 
