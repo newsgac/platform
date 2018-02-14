@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 
 import time
-from dill import dill
-import pickle
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
-
-from common.database import Database
-from models.data_sources.data_source import DataSource
+from src.celery_tasks.tasks import process_data, del_data
+from src.common.database import Database
+from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.errors as DataSourceErrors
 from src.common.back import back
 import src.models.users.decorators as user_decorators
@@ -31,7 +29,6 @@ def user_data_sources():
 def create_data_source():
     if request.method == 'POST':
         f = request.files['file']
-        print type(f)
         if f and DataSource.is_allowed(f.filename):
             filename = secure_filename(f.filename)
             try:
@@ -65,10 +62,10 @@ def get_data_source_page(data_source_id):
 @user_decorators.requires_login
 def process_data_source(data_source_id):
     # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-    # task = run_exp.delay(experiment_id)
+    task = process_data.delay(data_source_id)
     # without celery
+    # DataSource.get_by_id(data_source_id).process_data_source()
 
-    DataSource.get_by_id(data_source_id).process_data_source()
     time.sleep(0.5)
     return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
 
@@ -97,8 +94,9 @@ def sources_overview():
 @user_decorators.requires_login
 def delete_data_source(data_source_id):
     # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-    # task = del_exp.delay(experiment_id)
+    task = del_data.delay(data_source_id)
     # without celery
-    DataSource.get_by_id(data_source_id).delete()
+    # DataSource.get_by_id(data_source_id).delete()
+
     time.sleep(0.5)
     return back.redirect()

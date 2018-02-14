@@ -1,13 +1,17 @@
 import gridfs
 import pymongo
+from src.app import app
 
 __author__ = 'abilgin'
 
 class Database(object):
 
     def __init__(self):
-        self.URI = "mongodb://127.0.0.1:27017"
-        # self.URI = "mongodb://database:27017"
+        if app.DOCKER_RUN:
+            self.URI = "mongodb://database:27017"  # use this when dockerized
+        else:
+            self.URI = "mongodb://127.0.0.1:27017"
+
         self.client = pymongo.MongoClient(self.URI)
         self.db = self.client["newsgacdev"]
         self.fs = gridfs.GridFS(self.db)
@@ -20,6 +24,9 @@ class Database(object):
 
     def find_one(self, collection, query):
         return self.db[collection].find_one(query)
+
+    def get_count(self, collection, query):
+        return self.db[collection].find(query).count()
 
     def update(self, collection, query, data):
         self.db[collection].update(query, data, upsert=True)

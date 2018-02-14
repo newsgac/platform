@@ -3,7 +3,7 @@
 
     <div class="page-header">
         <h1>Data source:
-            <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">
+            <a href="{{ url_for('data_sources.get_data_source_page', data_source_id=data_source._id) }}">
                 <small> {{ data_source.display_title }} </small>
             </a>
         </h1>
@@ -16,7 +16,7 @@
                href="{{ url_for('data_sources.delete_data_source', data_source_id=data_source._id) }}">
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>
 
-        {% elif data_source.processing_started != None and data_source.processing_finished == None %}
+        {% elif data_source.processing_started != None and data_source.processing_completed == None %}
             <a class="btn btn-primary disabled">
                 <span class="glyphicon glyphicon-play"></span> Processing</a>
             <a class="btn btn-danger"
@@ -36,7 +36,7 @@
 
     <div class="row">
         <div class="col-md-2">
-            <p align="right" class="center-align-pad"><strong>Description</strong></p>
+            <p align="left" class="center-align-pad"><strong>Description</strong></p>
         </div>
         <div class="col-md-10">
             <p align="left" class="center-align-pad">{{ data_source.description  }}</p>

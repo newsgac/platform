@@ -23,7 +23,7 @@ import src.data_engineering.data_io as io
 from sklearn import svm, metrics
 from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit, train_test_split
 
-from data_engineering.postprocessing import Result
+from src.data_engineering.postprocessing import Result
 from src.common.database import Database
 
 DATABASE = Database()
@@ -56,7 +56,8 @@ class SVM_SVC():
         trained_model = self.clf.fit(self.X_train, self.y_train)
         return trained_model
 
-    def predict(self, classifier, example):
+    @staticmethod
+    def predict(classifier, example):
         return classifier.predict_proba(example)
 
     def populate_results(self, classifier):

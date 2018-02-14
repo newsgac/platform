@@ -3,9 +3,9 @@ from collections import OrderedDict
 
 import dill
 
-from data_engineering.feature_extraction import Article
-from machine_learning.svm import SVM_SVC
-from models.configurations.configuration_svc import ConfigurationSVC
+from src.data_engineering.feature_extraction import Article
+from src.machine_learning.svm import SVM_SVC
+from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.common.database import Database
 import src.models.experiments.constants as ExperimentConstants
 import src.common.utils as Utilities
@@ -55,9 +55,9 @@ class Experiment(object):
         return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION, {"public_flag": True, "run_finished": {"$ne" : None}})]
 
     @classmethod
-    def get_finished_experiments(cls):
+    def get_finished_experiments(cls, user_email):
         return [cls(**elem) for elem in
-                DATABASE.find(ExperimentConstants.COLLECTION, {"": True, "run_finished": {"$ne": None}})]
+                DATABASE.find(ExperimentConstants.COLLECTION, {"user_email": user_email, "run_finished": {"$ne": None}})]
 
     def get_public_username(self):
         return User.get_by_email(self.user_email).username
@@ -85,7 +85,6 @@ class Experiment(object):
         return "{:2d} hours {:2d} minutes {:2d} seconds".format(int(h), int(m), int(s))
 
     def get_results(self):
-        print self.results_handler
         pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
         return dill.loads(pickled_results)
 
@@ -95,10 +94,9 @@ class Experiment(object):
         sorted_resp = {}
 
         if type(classifier) is sklearn.svm.classes.SVC:
-            svc = SVM_SVC(self)
             # convert raw text to structured example
             example = Article.convert_raw_to_features(raw_text)
-            proba = svc.predict(classifier, example)
+            proba = SVM_SVC.predict(classifier, example)
             probabilities = proba[0].tolist()
 
             resp = {}
@@ -108,6 +106,8 @@ class Experiment(object):
             sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=False))
 
         return sorted_resp
+
+
 
 class ExperimentDT(Experiment, ConfigurationDT):
 
@@ -123,10 +123,13 @@ class ExperimentDT(Experiment, ConfigurationDT):
 
     def delete(self):
         id = self._id
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
+        DATABASE.getGridFS().delete(self.trained_model_handler)
+        DATABASE.getGridFS().delete(self.results_handler)
         ConfigurationDT.delete(self)
+        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
 
-    def start_running(self):
+
+    def run_dt(self):
 
         # update the timestamp
         self.run_started = datetime.datetime.utcnow()
@@ -134,11 +137,14 @@ class ExperimentDT(Experiment, ConfigurationDT):
 
         # TODO: under construction
 
-        # call the training method
+        # train
+
+        # populate results
 
 
-        # self.run_finished = datetime.datetime.utcnow()
-        # self.save_to_db()
+        # update the timestamp
+        self.run_finished = datetime.datetime.utcnow()
+        self.save_to_db()
 
 
 class ExperimentSVC(Experiment, ConfigurationSVC):
@@ -159,12 +165,13 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
 
     def delete(self):
         id = self._id
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
-        ConfigurationSVC.delete(self)
         DATABASE.getGridFS().delete(self.trained_model_handler)
         DATABASE.getGridFS().delete(self.results_handler)
+        ConfigurationSVC.delete(self)
+        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
 
-    def start_running(self):
+
+    def run_svc(self):
 
         # update the timestamp
         self.run_started = datetime.datetime.utcnow()
@@ -175,11 +182,12 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         trained_model = svc.train()
         self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
 
-        self.run_finished = datetime.datetime.utcnow()
-
         # populate results
         results = svc.populate_results(trained_model)
         self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
+
+        # update the timestamp
+        self.run_finished = datetime.datetime.utcnow()
         self.save_to_db()
 
 

@@ -3,19 +3,20 @@ from __future__ import absolute_import
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
 
-from models.configurations.configuration_svc import ConfigurationSVC
+from src.app import app
+from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
-from models.configurations.configuration_dt import ConfigurationDT
+from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.experiments.experiment import Experiment, ExperimentDT, ExperimentSVC
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
-from models.data_sources.data_source import DataSource
-# from src.celery_tasks.tasks import run_exp, del_exp
+from src.models.data_sources.data_source import DataSource
+from src.celery_tasks.tasks import run_exp, del_exp
 import time
 from bokeh.resources import INLINE
 
-from visaulisation.comparison import ExperimentComparator
-from visaulisation.resultvisualiser import ResultVisualiser
+from src.visualisation.comparison import ExperimentComparator
+from src.visualisation.resultvisualiser import ResultVisualiser
 
 __author__ = 'abilgin'
 
@@ -43,7 +44,7 @@ def create_experiment_dt():
     existing_data_source_titles = DataSource.get_titles_by_user_email(user_email=session['email'], processed=True)
 
     if request.method == 'POST':
-        configuration = ConfigurationDT(user_email= session['email'], form = request.form)
+        configuration = ConfigurationDT(user_email=session['email'], form=request.form)
         try:
             if ConfigurationDT.is_config_unique(configuration):
                 configuration.save_to_db()
@@ -109,8 +110,6 @@ def get_experiment_page(experiment_id):
     # return the experiment page with the type code
     experiment = Experiment.get_by_id(experiment_id)
     if experiment.type == "SVC":
-        # if experiment.trained_model_handler is not None:
-        #     ExperimentSVC.get_by_id(experiment_id).predict("")
         return render_template('experiments/experiment_svm.html', experiment=experiment)
     elif experiment.type == "DT":
         return render_template('experiments/experiment_dt.html', experiment=experiment)
@@ -123,14 +122,17 @@ def get_experiment_page(experiment_id):
 @experiment_blueprint.route('/train/<string:experiment_id>')
 @user_decorators.requires_login
 def run_experiment(experiment_id):
-    # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-    # task = run_exp.delay(experiment_id)
-    # without celery
-    exp_type = Experiment.get_by_id(experiment_id).type
-    if exp_type == "SVC":
-        ExperimentSVC.get_by_id(experiment_id).start_running()
-    elif exp_type == "DT":
-        ExperimentDT.get_by_id(experiment_id).start_running()
+    if app.DOCKER_RUN:
+        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
+        task = run_exp.delay(experiment_id)
+    else:
+        # without celery
+        exp = Experiment.get_by_id(experiment_id)
+        if exp.type == "SVC":
+            ExperimentSVC.get_by_id(experiment_id).run_svc()
+        elif exp.type == "DT":
+            ExperimentDT.get_by_id(experiment_id).run_dt()
+
     time.sleep(0.5)
     return redirect(url_for('.get_experiment_page', experiment_id=experiment_id))
 
@@ -157,7 +159,8 @@ def predict(experiment_id):
     if request.method == 'POST':
         sorted_prediction_results = experiment.predict(request.form['raw_text'])
         try:
-            plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results, experiment.display_title)
+            plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results,
+                                                                                                        experiment.display_title)
             return render_template('experiments/prediction.html',
                            experiment=experiment, request = request.form,
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
@@ -174,11 +177,7 @@ def predict(experiment_id):
 @back.anchor
 def user_experiments_overview_for_prediction():
     # call overview method with the finished experiments that belong to the user
-    experiments = Experiment.get_by_user_email(session['email'])
-    finished_experiments = []
-    for experiment in experiments:
-        if experiment.get_user_friendly_run_finished() is not None:
-            finished_experiments.append(experiment)
+    finished_experiments = Experiment.get_finished_experiments(session['email'])
     comparator = ExperimentComparator(finished_experiments)
 
     if request.method == 'POST':
@@ -200,11 +199,7 @@ def user_experiments_overview_for_prediction():
 @back.anchor
 def user_experiments_overview():
     # call overview method with the finished experiments that belong to the user
-    experiments = Experiment.get_by_user_email(session['email'])
-    finished_experiments = []
-    for experiment in experiments:
-        if experiment.get_user_friendly_run_finished() is not None:
-            finished_experiments.append(experiment)
+    finished_experiments = Experiment.get_finished_experiments(session['email'])
     comparator = ExperimentComparator(finished_experiments)
     script, div = comparator.performComparison()
     script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
@@ -220,13 +215,9 @@ def user_experiments_overview():
 @user_decorators.requires_login
 @back.anchor
 def public_experiments_overview_for_prediction():
-    # call overview method with the experiments that belong to the user
+    # call overview method with the finished public experiments
     experiments = Experiment.get_public_experiments()
-    finished_experiments = []
-    for experiment in experiments:
-        if experiment.get_user_friendly_run_finished() is not None:
-            finished_experiments.append(experiment)
-    comparator = ExperimentComparator(finished_experiments)
+    comparator = ExperimentComparator(experiments)
 
     if request.method == 'POST':
         try:
@@ -261,14 +252,17 @@ def public_overview():
 @experiment_blueprint.route('/delete/<string:experiment_id>')
 @user_decorators.requires_login
 def delete_experiment(experiment_id):
-    # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-    # task = del_exp.delay(experiment_id)
-    # without celery
-    exp_type = Experiment.get_by_id(experiment_id).type
-    if exp_type == "SVC":
-        ExperimentSVC.get_by_id(experiment_id).delete()
-    elif exp_type == "DT":
-        ExperimentDT.get_by_id(experiment_id).delete()
+    if app.DOCKER_RUN:
+        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
+        task = del_exp.delay(experiment_id)
+    else:
+        # without celery
+        exp = Experiment.get_by_id(experiment_id)
+        if exp.type == "SVC":
+            ExperimentSVC.get_by_id(experiment_id).delete()
+        elif exp.type == "DT":
+            ExperimentDT.get_by_id(experiment_id).delete()
+
     time.sleep(0.5)
     return back.redirect()
 

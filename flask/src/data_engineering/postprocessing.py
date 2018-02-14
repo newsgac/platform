@@ -4,10 +4,10 @@ from collections import OrderedDict
 
 import numpy as np
 from sklearn.metrics import confusion_matrix
-import data_engineering.utils as DataUtils
+import src.data_engineering.utils as DataUtils
 from sklearn import metrics
 
-from data_engineering.feature_extraction import Article
+from src.data_engineering.feature_extraction import Article
 
 __author__ = 'abilgin'
 

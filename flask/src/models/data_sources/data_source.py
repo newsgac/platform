@@ -1,10 +1,9 @@
 import uuid
-
 import datetime
 
 import src.models.data_sources.constants as DataSourceConstants
 import src.models.data_sources.errors as DataSourceErrors
-from data_engineering.feature_extraction import Article
+from src.data_engineering.feature_extraction import Article
 from src.common.database import Database
 import src.common.utils as Utilities
 import re
@@ -172,6 +171,8 @@ class DataSource(object):
 
         return data
 
+    def get_number_of_instances(self):
+        return DATABASE.get_count(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": self._id})
 
 
 

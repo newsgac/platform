@@ -1,16 +1,13 @@
 '''The data input/output operations'''
 import csv
-import os
+import os, sys
 import numpy as np
-
-from data_engineering import utils
+from src.data_engineering import utils
 from src.common.database import Database
 from src.models.data_sources.data_source import DataSource
 
 DATABASE = Database()
-
-
-DATA_DIR = os.path.join(os.path.dirname(__file__), '../../../data/')
+DATA_DIR = os.path.join(os.path.dirname(__file__), '../../datasets/')
 
 '''Adapted from https://github.com/jlonij/genre-classifier/blob/master/data.py'''
 def load_preprocessed_data_from_file(filename):
