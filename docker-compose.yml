@@ -1,0 +1,59 @@
+version: "3"
+
+networks:
+    newsgac-net:
+        driver: bridge
+
+services:
+    rabbit:
+        hostname: rabbit
+        image: rabbitmq:latest
+        environment:
+            - RABBITMQ_DEFAULT_USER=newsgac
+            - RABBITMQ_DEFAULT_PASS=1234
+        ports:
+            - "5673:5672"
+        restart: on-failure
+        networks:
+            - newsgac-net
+    
+    worker:
+        build:
+            context: ./flask
+            dockerfile: Dockerfile_celery
+        links:
+            - rabbit
+            - database
+        depends_on:
+            - rabbit
+        networks:
+            - newsgac-net
+        restart: on-failure
+    
+    database:
+        hostname: mongo
+        image: mongo:latest
+        volumes:
+            - /var/lib/mongodb:/data/db
+        ports:
+            - "27018:27017"
+        networks:
+            - newsgac-net
+    
+    web:
+        build:
+            context: ./flask
+            dockerfile: Dockerfile_flask
+        ports:
+            - "5050:5000"
+        links:
+            - worker
+            - rabbit
+            - database
+        depends_on:
+            - database
+            - worker
+        networks:
+            - newsgac-net
+        restart: on-failure
+            

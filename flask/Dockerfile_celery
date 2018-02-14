@@ -1,0 +1,23 @@
+FROM python:2.7
+
+MAINTAINER abilgin
+
+RUN ["mkdir", "flask"]
+RUN ["mkdir", "flask/datasets"]
+
+# Usage: ADD [source directory or URL] [destination directory]
+# If, however, the source is a URL (e.g. http://github.com/user/file/), 
+# then the contents of the URL are downloaded and placed at the destination.
+# ADD requirements.txt src/requirements.txt
+# ADD src/run.py flask/src/run.py
+COPY ./src/ /flask/src/
+COPY ./datasets/ /flask/datasets/
+COPY requirements.txt /flask/requirements.txt
+
+RUN ["pip", "install", "-r", "flask/requirements.txt"]
+RUN ["pip", "install", "fasttext==0.8.3"]
+
+WORKDIR flask/src/celery_tasks/
+
+# Usage: ENTRYPOINT application "argument", "argument", ..
+ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info"]
