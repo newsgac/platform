@@ -49,6 +49,25 @@
                             <div class="step33">
                                 <h5><strong>Pre-process training data and select features</strong></h5>
                                 <hr>
+                                <div class="row mar_ned">
+                                    <div class="col-md-4">
+                                        <p align="right" class="center-align-pad">
+                                            <strong>Data source</strong>
+                                            <span class="help-block"><i>The experiment will use the chosen dataset for training and testing.</i></span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-8" id="datasource_div">
+                                        <select name="data_source" id="data_source" class="selectpicker show-tick" title="Select a data source...">
+                                            {% if ds_titles_from_db|length == 0%}
+                                                <option id="default_data_source" value="">Default</option>
+                                            {% endif %}
+                                            {% for ds_title in ds_titles_from_db %}
+                                                <option id="{{ ds_title }}" value="{{ ds_title }}">{{ ds_title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
                                     <div class="col-md-3">
@@ -59,7 +78,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="auto_pp" id="auto_pp" value="true">
+                                                <input type="checkbox" name="auto_pp" id="auto_pp" value="{{request['auto_pp']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -78,7 +97,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox" id="stemming_div">
                                             <label>
-                                                <input type="checkbox" name="stemming" id="stemming" value="true">
+                                                <input type="checkbox" name="stemming" id="stemming" value="{{request['stemming']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -97,7 +116,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox" id="sw_removal_div">
                                             <label>
-                                                <input type="checkbox" name="sw_removal" id="sw_removal" value="true">
+                                                <input type="checkbox" name="sw_removal" id="sw_removal" value="{{request['sw_removal']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -116,7 +135,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox" id="avg_sent_length_div">
                                             <label>
-                                                <input type="checkbox" name="avg_sent_length" id="avg_sent_length" value="true">
+                                                <input type="checkbox" name="avg_sent_length" id="avg_sent_length" value="{{request['avg_sent_length']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -135,7 +154,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox" id="perc_exclamation_mark_div">
                                             <label>
-                                                <input type="checkbox" name="perc_exclamation_mark" id="perc_exclamation_mark" value="true">
+                                                <input type="checkbox" name="perc_exclamation_mark" id="perc_exclamation_mark" value="{{request['perc_exclamation_mark']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -154,7 +173,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox" id="perc_adjectives_div">
                                             <label>
-                                                <input type="checkbox" name="perc_adjectives" id="perc_adjectives" value="true">
+                                                <input type="checkbox" name="perc_adjectives" id="perc_adjectives" value="{{request['perc_adjectives']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -186,7 +205,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="auto_alg" id="auto_alg" value="true">
+                                                <input type="checkbox" name="auto_alg" id="auto_alg" value="{{request['auto_alg']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -203,7 +222,7 @@
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group" id="penalty_parameter_c_div">
-                                            <input class="form-control" type="text" name="penalty_parameter_c" id="penalty_parameter_c" value="1.0" placeholder="1.0">
+                                            <input class="form-control" type="text" name="penalty_parameter_c" id="penalty_parameter_c" value="{{request['penalty_parameter_c']}}" placeholder="1.0">
                                         </div>
                                     </div>
                                 </div>
@@ -230,33 +249,13 @@
                                 <div class="row mar_ned">
                                     <div class="col-md-6">
                                         <p align="right" class="center-align-pad">
-                                            <strong>Probability</strong>
-                                            <span class="help-block"><i>Whether to enable probability estimates.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="btn-group" data-toggle="buttons" id="probability_div">
-                                            <label class="btn btn-default">
-                                                <input type="radio" name="probability" id="option_true" value="true"> True
-                                            </label>
-                                            <label class="btn btn-default">
-                                                <input type="radio" name="probability" id="option_false" value="false"> False
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
                                             <strong>Random state</strong>
                                             <span class="help-block"><i>Enter an integer for a random seed.</i></span>
                                         </p>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group" id="random_state_div">
-                                            <input class="form-control" type="text" name="random_state" id="random_state" value="8" placeholder="8">
+                                            <input class="form-control" type="text" name="random_state" id="random_state" value="{{request['random_state']}}" placeholder="8">
                                         </div>
                                     </div>
                                 </div>
@@ -287,7 +286,7 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <input required class="form-control" type="text" name="experiment_display_title" id="experiment_display_title"
-                                                   value="Untitled SVC experiment" placeholder="Experiment Display Title">
+                                                   value="{{request['experiment_display_title']}}" placeholder="Experiment Display Title">
                                         </div>
                                     </div>
                                 </div>
@@ -302,7 +301,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="public_flag" id="public_flag" value="true">
+                                                <input type="checkbox" name="public_flag" id="public_flag" value="{{request['public_flag']}}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>

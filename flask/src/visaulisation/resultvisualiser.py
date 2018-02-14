@@ -1,6 +1,7 @@
 from data_engineering.postprocessing import Result
 from bokeh.models import (
     ColumnDataSource,
+    LabelSet,
     HoverTool,
     LinearColorMapper,
     PrintfTickFormatter,
@@ -21,7 +22,7 @@ class ResultVisualiser(object):
         pass
 
     @staticmethod
-    def retrieveHeatMapfromResult(normalisation_flag, result, title="", downsize=False):
+    def retrieveHeatMapfromResult(normalisation_flag, result, title="", ds_param = 1):
         confusion_matrix = result.get_confusion_matrix()
         cm_normalised = Result.normalise_confusion_matrix(confusion_matrix)
         genre_names = result.genre_names
@@ -58,22 +59,15 @@ class ResultVisualiser(object):
 
         TOOLS = "hover,save,pan,box_zoom,reset,wheel_zoom"
 
-        if downsize:
-            ds_param = 0.5
-            tool_loc = 'right'
-        else:
-            ds_param = 1
-            tool_loc = 'above'
-
         p = figure(title=title,
                    y_range=list(reversed(genre_names)), x_range=list(genre_names),
                    x_axis_location="below", plot_width=int(850*ds_param), plot_height=int(800*ds_param),
-                   tools=TOOLS, toolbar_location=tool_loc)
+                   tools=TOOLS, toolbar_location='above')
 
         p.grid.grid_line_color = None
         p.axis.axis_line_color = None
         p.axis.major_tick_line_color = None
-        if downsize:
+        if ds_param < 1:
             font_size = "7pt"
         else:
             font_size = "10pt"
@@ -102,3 +96,39 @@ class ResultVisualiser(object):
         script, div = components(p)
 
         return p, script, div
+
+    @staticmethod
+    def visualise_sorted_probabilities_for_raw_text_prediction(sorted_probabilities, title_suffix, ds_param = 1):
+
+        if ds_param < 1:
+            font_size = "7pt"
+        else:
+            font_size = "10pt"
+
+        prediction_data = {'genres': sorted_probabilities.keys(),
+                       'probs': sorted_probabilities.values()}
+        pred_source = ColumnDataSource(data=prediction_data)
+
+        p = figure(y_range=sorted_probabilities.keys(), plot_height=int(600*ds_param), title='Genre Probabilities for '+ title_suffix,
+                   plot_width=int(800*ds_param), x_range=[0, 1], toolbar_location='right',
+                   tools="save,pan,box_zoom,reset,wheel_zoom")
+
+        p.hbar(y=sorted_probabilities.keys(), height=0.5, left=0, right=sorted_probabilities.values(), color='navy')
+
+        labels = LabelSet(x='probs', y='genres', text='probs', level='glyph', text_font_size=font_size,
+                          x_offset=2, y_offset=-1, source=pred_source, render_mode='canvas')
+
+        p.y_range.range_padding = 0.4
+        p.axis.major_label_text_font_size = font_size
+        p.xgrid.grid_line_color = None
+        p.legend.location = "top_left"
+        p.legend.orientation = "horizontal"
+        p.xaxis.major_label_orientation = "horizontal"
+
+        p.add_layout(labels)
+
+        script, div = components(p)
+
+        return p, script, div
+
+

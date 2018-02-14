@@ -44,8 +44,10 @@
             </ul>
             {% if session['email'] %}
             <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('data_sources.user_data_sources') }}"><span
+                        class="glyphicon glyphicon-hdd"></span> Your data</a></li>
                 <li><a href="{{ url_for('experiments.user_experiments') }}"><span
-                        class="glyphicon glyphicon-blackboard"></span>Your experiments</a></li>
+                        class="glyphicon glyphicon-blackboard"></span> Your experiments</a></li>
                 <li><a href="{{ url_for('users.logout_user') }}"><span class="glyphicon glyphicon-log-out"></span> Log
                     out</a></li>
             </ul>

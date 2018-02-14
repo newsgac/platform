@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if data_sources|length == 0 %}
+        <div class="page-header">
+            <h1>Data sources <small>added by you</small></h1>
+            <a class="btn btn-success" href="{{ url_for('data_sources.create_data_source') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+        </div>
+        <p><i>There are no data sources to view.</i></p>
+    {% else %}
+        {% set processed_data_sources = [] %}
+        {% set raw_data_sources = [] %}
+        {% set processing_data_sources = [] %}
+        {% for data_source in data_sources %}
+            {% if data_source.processing_completed != None and data_source.processing_started != None %}
+                {{ processed_data_sources.append(data_source) }}
+            {% elif data_source.processing_started != None %}
+                {{ processing_data_sources.append(data_source) }}
+            {% else %}
+                {{ raw_data_sources.append(data_source)  }}
+            {% endif %}
+        {% endfor %}
+
+        <div class="page-header">
+            <h1>Data sources <small>added by you</small></h1>
+            <a class="btn btn-success" href="{{ url_for('data_sources.create_data_source') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+            {% if processed_data_sources|length > 0 %}
+                <a class="btn btn-info" href="{{ url_for('data_sources.sources_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
+            {% endif %}
+        </div>
+
+        {% if processed_data_sources|length > 0 and raw_data_sources|length > 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a  href="#processed" data-toggle="tab">Processed</a></li>
+                <li><a href="#raw" data-toggle="tab">Raw</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="list-group tab-pane fade in active" id="processed">
+                    {% for data_source in processed_data_sources %}
+                        <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Processing took {{ data_source.get_processing_duration() }}<br/>
+                                Processing completed on: {{ data_source.get_user_friendly_processing_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade" id="raw">
+                    {% for data_source in raw_data_sources %}
+                        <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif processed_data_sources|length == 0 and raw_data_sources|length > 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li><a href="#processed_none" data-toggle="tab">Processed</a></li>
+                <li class="active"><a href="#raw2" data-toggle="tab">Raw</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade" id="processed_none">
+                    <br/><br/>
+                    <p><i>There are no processed data sources to view.</i></p>
+                </div>
+                <div class="list-group tab-pane fade in active" id="raw2">
+                    {% for data_source in raw_data_sources %}
+                        <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif processed_data_sources|length > 0 and raw_data_sources|length == 0 %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a href="#processed5" data-toggle="tab">Processed</a></li>
+                <li><a href="#raw5" data-toggle="tab">Raw</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="list-group tab-pane fade" id="processed5">
+                    {% for data_source in processed_data_sources %}
+                        <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Processing took {{ data_source.get_processing_duration() }}<br/>
+                                Run completed on: {{ data_source.get_user_friendly_processing_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade" id="raw5">
+                    <br/><br/>
+                    <p><i>There are no raw data sources to view.</i></p>
+                </div>
+            </div>
+        {% else %}
+            <ul class="nav nav-pills nav-justified">
+                <li class="active"><a href="#processed4" data-toggle="tab">Processed</a></li>
+                <li><a href="#raw4" data-toggle="tab">Raw</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="list-group tab-pane fade" id="processed4">
+                    {% for data_source in processed_data_sources %}
+                        <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Processing took {{ data_source.get_processing_duration() }}<br/>
+                                Run completed on: {{ data_source.get_user_friendly_processing_finished().strftime("%d-%m-%Y at %H:%M") }}<br/>
+                                Time of creation: {{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="list-group tab-pane fade in active" id="raw4">
+                    {% for data_source in raw_data_sources %}
+                        <a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}" class="list-group-item">
+                            <h4 class="list-group-item-heading">{{ data_source.display_title }}</h4>
+                            <p class="list-group-item-text">
+                                Time of creation: {{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% endif %}
+{% endblock %}
+

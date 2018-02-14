@@ -23,9 +23,6 @@ import src.data_engineering.data_io as io
 from sklearn import svm, metrics
 from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit, train_test_split
 
-from sklearn.externals import joblib
-import dill
-
 from data_engineering.postprocessing import Result
 from src.common.database import Database
 
@@ -35,11 +32,16 @@ class SVM_SVC():
 
     def __init__(self, experiment):
         self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
-        self.clf = svm.SVC(kernel=experiment.kernel, C=experiment.penalty_parameter_c, decision_function_shape='ovr',
-                      class_weight=self.class_weight, probability=experiment.probability, random_state=experiment.random_state)
+        self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
+                      class_weight=self.class_weight, probability=True, random_state=experiment.random_state)
 
         # Load an existing training set
-        X, y = io.load_data('training.txt')
+        if experiment.data_source_id is None:
+            X, y = io.load_preprocessed_data_from_file('training.txt')
+        else:
+            #read from db
+            X, y = io.load_preprocessed_data_from_db(experiment.data_source_id)
+
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, random_state=0)
 
 
@@ -55,18 +57,13 @@ class SVM_SVC():
         return trained_model
 
     def predict(self, classifier, example):
-        logits = classifier.decision_function([example])
-        print logits
-        if self.clf.probability:
-            proba = classifier.predict_proba([example])
-            print proba
+        return classifier.predict_proba(example)
 
     def populate_results(self, classifier):
         y_pred = classifier.predict(self.X_test)
         results = Result(y_test=self.y_test, y_pred=y_pred)
         print ("Number of samples")
         print len(self.y_test)
-        print len(y_pred)
         scores = self.cross_validate()
         results.accuracy = format(scores.mean(), '.2f')
         return results

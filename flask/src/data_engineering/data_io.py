@@ -2,16 +2,22 @@
 import csv
 import os
 import numpy as np
+
 from data_engineering import utils
+from src.common.database import Database
+from src.models.data_sources.data_source import DataSource
+
+DATABASE = Database()
+
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '../../../data/')
 
 '''Adapted from https://github.com/jlonij/genre-classifier/blob/master/data.py'''
-def load_data(filename):
+def load_preprocessed_data_from_file(filename):
     '''
-    Transform tabular data set into NumPy arrays.
+    Transform tabular data_sources set into NumPy arrays.
     '''
-    # Load training data from csv file
+    # Load training data_sources from csv file
     with open(DATA_DIR+filename) as csvfile:
         reader = csv.DictReader(csvfile, delimiter='\t')
 
@@ -37,3 +43,31 @@ def load_data(filename):
         print('Features:', dataset.shape)
         print('Labels:', labels.shape)
         return dataset, labels
+
+#TODO: test this method
+def load_preprocessed_data_from_db(data_source_id):
+
+    non_feature_columns = ['_id', 'date', 'genre', 'article_raw_text', 'data_source_id']
+    articles = DataSource.get_articles_by_data_source(data_source_id)
+
+    # Get number of examples
+    num_examples = len(articles)
+    print('Number of examples', num_examples)
+
+    # Get number of features
+    num_features = len(articles[0].keys()) - len(non_feature_columns)
+    print('Number of features', num_features)
+
+    dataset = np.ndarray(shape=(num_examples, num_features),
+                         dtype=np.float64)
+    labels = np.ndarray(shape=(num_examples,), dtype=np.int32)
+
+    # Add features and label for each article
+
+    for i, row in enumerate(articles):
+        dataset[i, :] = [row[f] for f in articles[i].keys() if f not in non_feature_columns]
+        labels[i] = row['genre']
+
+    print('Features:', dataset.shape)
+    print('Labels:', labels.shape)
+    return dataset, labels

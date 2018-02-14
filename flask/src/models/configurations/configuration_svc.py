@@ -2,6 +2,7 @@ import uuid
 import src.models.configurations.constants as ConfigurationConstants
 import src.models.configurations.errors as ConfigurationErrors
 from src.common.database import Database
+from src.models.data_sources.data_source import DataSource
 
 DATABASE = Database()
 
@@ -37,11 +38,19 @@ class ConfigurationSVC():
 
         return self.stemming == other.stemming and self.sw_removal == other.sw_removal and self.avg_sent_length == other.avg_sent_length and \
                 self.avg_sent_length == other.avg_sent_length and self.perc_exclamation_mark == other.perc_exclamation_mark and \
-                self.perc_adjectives == other.perc_adjectives and self.kernel == other.kernel and self.probability == other.probability and \
-                self.penalty_parameter_c == other.penalty_parameter_c and self.random_state == other.random_state
+                self.perc_adjectives == other.perc_adjectives and self.kernel == other.kernel and \
+                self.penalty_parameter_c == other.penalty_parameter_c and self.random_state == other.random_state and \
+                self.data_source_id == other.data_source_id
 
     def render_form(self, form):
 
+        if form["data_source"]:
+            ds = DataSource.get_by_user_email_and_display_title(self.user_email, form["data_source"])
+            self.data_source_id = ds._id
+            self.data_source_title = ds.display_title
+        else:
+            self.data_source_id = None
+            self.data_source_title = ConfigurationConstants.DEFAULT_DATASOURCE
         # pre-processing and feature selection
         self.auto_pp = "auto_pp" in form
 
@@ -63,12 +72,10 @@ class ConfigurationSVC():
 
         if self.auto_alg:
             self.penalty_parameter_c = ConfigurationConstants.SVC_DEFAULT_PENALTY_PARAMETER_C
-            self.kernel = ConfigurationConstants.SVC_DEFAULT_KERNEL
-            self.probability = ConfigurationConstants.SVC_DEFAULT_PROBABILITY
+            self.kernel = str(ConfigurationConstants.SVC_DEFAULT_KERNEL)
             self.random_state = ConfigurationConstants.SVC_DEFAULT_RANDOM_STATE
         else:
-            self.kernel = form['kernel'] if form['kernel'] != "" else ConfigurationConstants.SVC_DEFAULT_KERNEL
-            self.probability = form['probability'] if 'probability' in form else ConfigurationConstants.SVC_DEFAULT_PROBABILITY
+            self.kernel = str(form['kernel']) if form['kernel'] != "" else str(ConfigurationConstants.SVC_DEFAULT_KERNEL)
 
             try:
                 val = float(form['penalty_parameter_c'])
@@ -83,7 +90,6 @@ class ConfigurationSVC():
                 val = ConfigurationConstants.SVC_DEFAULT_RANDOM_STATE
 
             self.random_state = int(val)
-            print self.random_state
 
     @classmethod
     def get_by_user_email(cls, user_email):

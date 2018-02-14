@@ -9,6 +9,7 @@ from models.configurations.configuration_dt import ConfigurationDT
 from src.models.experiments.experiment import Experiment, ExperimentDT, ExperimentSVC
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
+from models.data_sources.data_source import DataSource
 # from src.celery_tasks.tasks import run_exp, del_exp
 import time
 from bokeh.resources import INLINE
@@ -20,10 +21,12 @@ __author__ = 'abilgin'
 
 experiment_blueprint = Blueprint('experiments', __name__)
 
+
 @experiment_blueprint.route('/public')
 @back.anchor
 def index():
     return render_template('experiments/public.html', experiments = Experiment.get_public_experiments())
+
 
 @experiment_blueprint.route('/')
 @user_decorators.requires_login
@@ -31,10 +34,14 @@ def index():
 def user_experiments():
     return render_template("experiments/experiments.html", experiments = Experiment.get_by_user_email(session['email']))
 
+
 @experiment_blueprint.route('/new_dt', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_dt():
+    # get the list of data sources of the user
+    existing_data_source_titles = DataSource.get_titles_by_user_email(user_email=session['email'], processed=True)
+
     if request.method == 'POST':
         configuration = ConfigurationDT(user_email= session['email'], form = request.form)
         try:
@@ -49,13 +56,18 @@ def create_experiment_dt():
         except ConfigurationErrors.ConfigAlreadyExistsError as e:
                 error = e.message
                 flash(error, 'error')
+                return render_template('experiments/new_experiment_dt.html', request=request.form)
 
-    return render_template('experiments/new_experiment_dt.html')
+    return render_template('experiments/new_experiment_dt.html', ds_titles_from_db=existing_data_source_titles)
+
 
 @experiment_blueprint.route('/new_svm', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_svm():
+    # get the list of processed data sources of the user
+    existing_data_source_titles = DataSource.get_titles_by_user_email(user_email=session['email'], processed=True)
+
     if request.method == 'POST':
         configuration = ConfigurationSVC(user_email= session['email'], form = request.form)
         try:
@@ -70,22 +82,26 @@ def create_experiment_svm():
         except ConfigurationErrors.ConfigAlreadyExistsError as e:
                 error = e.message
                 flash(error, 'error')
+                return render_template('experiments/new_experiment_svm.html', request=request.form)
 
-    return render_template('experiments/new_experiment_svm.html')
+    return render_template('experiments/new_experiment_svm.html', ds_titles_from_db=existing_data_source_titles)
+
 
 @experiment_blueprint.route('/new_ft', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_ft():
-    #TODO FastText
+    #TODO FastText can be used with raw data (DataSource.get_titles_by_user_email(user_email=session['email'], processed=False))
     return render_template('underconstruction.html')
+
 
 @experiment_blueprint.route('/new_dl', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_dl():
-    #TODO Deep Learning
+    #TODO Deep Learning can be used with raw data (DataSource.get_titles_by_user_email(user_email=session['email'], processed=False))
     return render_template('underconstruction.html')
+
 
 @experiment_blueprint.route('/<string:experiment_id>')
 @user_decorators.requires_login
@@ -103,6 +119,7 @@ def get_experiment_page(experiment_id):
     else:
         return render_template('experiments/experiment_ft.html', experiment=experiment)
 
+
 @experiment_blueprint.route('/train/<string:experiment_id>')
 @user_decorators.requires_login
 def run_experiment(experiment_id):
@@ -117,12 +134,13 @@ def run_experiment(experiment_id):
     time.sleep(0.5)
     return redirect(url_for('.get_experiment_page', experiment_id=experiment_id))
 
+
 @experiment_blueprint.route('/visualise/<string:experiment_id>')
 @user_decorators.requires_login
 def visualise_results(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
     results = experiment.get_results()
-    plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
+    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
 
     return render_template('experiments/results.html',
                            experiment=experiment,
@@ -130,13 +148,64 @@ def visualise_results(experiment_id):
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
 
+
+@experiment_blueprint.route('/predict/<string:experiment_id>', methods=['GET', 'POST'])
+@user_decorators.requires_login
+def predict(experiment_id):
+    experiment = Experiment.get_by_id(experiment_id)
+
+    if request.method == 'POST':
+        sorted_prediction_results = experiment.predict(request.form['raw_text'])
+        try:
+            plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results, experiment.display_title)
+            return render_template('experiments/prediction.html',
+                           experiment=experiment, request = request.form,
+                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           mimetype='text/html')
+        except Exception as e:
+            flash("Something went wrong: " + e.message, 'error')
+            return render_template('experiments/prediction.html', experiment=experiment, request = request.form)
+
+    return render_template('experiments/prediction.html', experiment=experiment)
+
+
+@experiment_blueprint.route('/prediction_overview',  methods=['GET', 'POST'])
+@user_decorators.requires_login
+@back.anchor
+def user_experiments_overview_for_prediction():
+    # call overview method with the finished experiments that belong to the user
+    experiments = Experiment.get_by_user_email(session['email'])
+    finished_experiments = []
+    for experiment in experiments:
+        if experiment.get_user_friendly_run_finished() is not None:
+            finished_experiments.append(experiment)
+    comparator = ExperimentComparator(finished_experiments)
+
+    if request.method == 'POST':
+        try:
+            script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+            return render_template('experiments/prediction_overview.html',
+                           request = request.form,
+                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           mimetype='text/html')
+        except Exception as e:
+            print e.message
+            return render_template('experiments/prediction_overview.html', request=request.form)
+
+    return render_template('experiments/prediction_overview.html')
+
+
 @experiment_blueprint.route('/overview',  methods=['GET'])
 @user_decorators.requires_login
 @back.anchor
 def user_experiments_overview():
-    # call overview method with the experiments that belong to the user
+    # call overview method with the finished experiments that belong to the user
     experiments = Experiment.get_by_user_email(session['email'])
-    comparator = ExperimentComparator(experiments)
+    finished_experiments = []
+    for experiment in experiments:
+        if experiment.get_user_friendly_run_finished() is not None:
+            finished_experiments.append(experiment)
+    comparator = ExperimentComparator(finished_experiments)
     script, div = comparator.performComparison()
     script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
     script.append(script_cm)
@@ -146,6 +215,33 @@ def user_experiments_overview():
                            js_resources=INLINE.render_js(),
                            css_resources=INLINE.render_css(), mimetype='text/html')
 
+
+@experiment_blueprint.route('/public_prediction_overview', methods=['GET', 'POST'])
+@user_decorators.requires_login
+@back.anchor
+def public_experiments_overview_for_prediction():
+    # call overview method with the experiments that belong to the user
+    experiments = Experiment.get_public_experiments()
+    finished_experiments = []
+    for experiment in experiments:
+        if experiment.get_user_friendly_run_finished() is not None:
+            finished_experiments.append(experiment)
+    comparator = ExperimentComparator(finished_experiments)
+
+    if request.method == 'POST':
+        try:
+            script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+            return render_template('experiments/prediction_overview.html',
+                           request = request.form,
+                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           mimetype='text/html')
+        except Exception as e:
+            print e.message
+            return render_template('experiments/prediction_overview.html', request=request.form)
+
+    return render_template('experiments/prediction_overview.html')
+
+
 @experiment_blueprint.route('/public_overview')
 @back.anchor
 def public_overview():
@@ -153,9 +249,7 @@ def public_overview():
     experiments = Experiment.get_public_experiments()
     comparator = ExperimentComparator(experiments)
     script, div = comparator.performComparison()
-
     script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-
     script.append(script_cm)
     div.append(div_cm)
 
