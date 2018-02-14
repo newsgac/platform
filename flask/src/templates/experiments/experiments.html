@@ -31,6 +31,8 @@
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
             {% if finished_experiments|length > 0 %}
                 <a class="btn btn-info" href="{{ url_for('experiments.user_experiments_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
+                <a class="btn btn-primary" href="{{ url_for('experiments.user_experiments_overview_for_prediction') }}">
+                <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
             {% endif %}
         </div>
 

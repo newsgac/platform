@@ -260,6 +260,26 @@ class ExperimentComparator:
 
         return script, div
 
+    def visualise_prediction_comparison(self, raw_text):
+
+        plots = []
+
+        if len(self.experiments) > 2:
+            ds_param = 0.55
+        else:
+            ds_param = 1/math.sqrt(len(self.experiments))
+
+        for experiment in self.experiments:
+            prediction_results = experiment.predict(raw_text)
+            plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(prediction_results, experiment.display_title, ds_param)
+            plots.append(plot)
+
+        overview_layout = gridplot(list(plots), ncols=3)
+        script, div = components(overview_layout)
+
+        return script, div
+
+
     def performComparison(self):
 
         scripts = []

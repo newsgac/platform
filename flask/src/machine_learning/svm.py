@@ -57,21 +57,13 @@ class SVM_SVC():
         return trained_model
 
     def predict(self, classifier, example):
-        logits = classifier.decision_function(example)
-        print "Logits"
-        print logits
-        print self.clf.probability
-        if self.clf.probability:
-            proba = classifier.predict_proba(example)
-            print proba
-            return proba
+        return classifier.predict_proba(example)
 
     def populate_results(self, classifier):
         y_pred = classifier.predict(self.X_test)
         results = Result(y_test=self.y_test, y_pred=y_pred)
         print ("Number of samples")
         print len(self.y_test)
-        print len(y_pred)
         scores = self.cross_validate()
         results.accuracy = format(scores.mean(), '.2f')
         return results

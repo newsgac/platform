@@ -71,7 +71,7 @@ class DataSource(object):
             if ds.user_email == user_email and ds.display_title == display_title:
                 raise DataSourceErrors.ResourceDisplayTitleAlreadyExistsError("The display title is already taken.")
             elif ds.user_email == user_email and ds.secure_filename == filename:
-                raise DataSourceErrors.ResourceFilenameAlreadyExistsError("Another file with the same filename already exists.")
+                raise DataSourceErrors.ResourceFilenameAlreadyExistsError("Another file with the same name already exists.")
 
         return True
 

@@ -26,8 +26,6 @@ import re
 import sys
 import time
 import urllib
-import uuid
-from collections import OrderedDict
 
 import src.data_engineering.utils as Utilities
 
@@ -276,6 +274,13 @@ class Article(object):
         '''
         with open('frog_log.txt', 'a') as f:
             f.write(self.url + ' | ' + message + '\n')
+
+    @staticmethod
+    def convert_raw_to_features(raw_text):
+        art = Article(text=raw_text)
+        example = [art.features[f] for f in Utilities.features]
+        print example
+        return [example]
 
 #
 # if __name__=='__main__':

@@ -1,10 +1,15 @@
 import datetime
+from collections import OrderedDict
+
 import dill
+
+from data_engineering.feature_extraction import Article
 from machine_learning.svm import SVM_SVC
 from models.configurations.configuration_svc import ConfigurationSVC
 from src.common.database import Database
 import src.models.experiments.constants as ExperimentConstants
 import src.common.utils as Utilities
+import src.data_engineering.utils as DataUtilities
 from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.users.user import User
 import sklearn
@@ -61,10 +66,14 @@ class Experiment(object):
         return UT.get_local_display_time(self.created)
 
     def get_user_friendly_run_started(self):
-        return UT.get_local_display_time(self.run_started)
+        if self.run_started is not None:
+            return UT.get_local_display_time(self.run_started)
+        return None
 
     def get_user_friendly_run_finished(self):
-        return UT.get_local_display_time(self.run_finished)
+        if self.run_finished is not None:
+            return UT.get_local_display_time(self.run_finished)
+        return None
 
     def get_run_duration(self):
         delta = self.run_finished - self.run_started
@@ -76,17 +85,29 @@ class Experiment(object):
         return "{:2d} hours {:2d} minutes {:2d} seconds".format(int(h), int(m), int(s))
 
     def get_results(self):
+        print self.results_handler
         pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
         return dill.loads(pickled_results)
 
-    def predict(self, example):
-
+    def predict(self, raw_text):
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
         classifier = dill.loads(pickled_model)
-        print type(classifier)
+        sorted_resp = {}
+
         if type(classifier) is sklearn.svm.classes.SVC:
             svc = SVM_SVC(self)
-            return svc.predict(classifier, example)
+            # convert raw text to structured example
+            example = Article.convert_raw_to_features(raw_text)
+            proba = svc.predict(classifier, example)
+            probabilities = proba[0].tolist()
+
+            resp = {}
+            for i, p in enumerate(probabilities):
+                resp[DataUtilities.genres[i + 1][0].split('/')[0]] = format(p, '.2f')
+
+            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=False))
+
+        return sorted_resp
 
 class ExperimentDT(Experiment, ConfigurationDT):
 
