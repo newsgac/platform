@@ -173,4 +173,10 @@ $(document).ready(function() {
     });
 });
 
-$('table').DataTable();
+
+$(document).ready(function() {
+    $('#data_sources_table').DataTable( {
+        stateSave: true
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+    } );
+} );

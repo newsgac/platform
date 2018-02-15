@@ -31,6 +31,19 @@ genres = {
 }
 
 genre_codebook = {
+    'INT' : 2,
+    'NIE' : 1,
+    'REP' : 3,
+    'FEA' : 3,
+    'VER' : 4,
+    'OPI' : 5,
+    'HOO' : 5,
+    'REC' : 6,
+    'ACH' : 7,
+    'COL' : 8
+}
+
+genre_codebook_friendly = {
     'INT' : 'Interview',
     'NIE' : 'Nieuwsbericht',
     'REP' : 'Reportage',

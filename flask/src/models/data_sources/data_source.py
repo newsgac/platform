@@ -46,6 +46,15 @@ class DataSource(object):
         return [cls(**elem) for elem in DATABASE.find(DataSourceConstants.COLLECTION, {"user_email": user_email})]
 
     @classmethod
+    def get_processed_datasets(cls):
+        return [cls(**elem) for elem in DATABASE.find(DataSourceConstants.COLLECTION, {"processing_completed": {"$ne": None}})]
+
+    @classmethod
+    def get_processed_by_user_email(cls, user_email):
+        return [cls(**elem) for elem in
+                DATABASE.find(DataSourceConstants.COLLECTION, {"user_email": user_email, "processing_completed": {"$ne": None}})]
+
+    @classmethod
     def get_by_user_email_and_display_title(cls, user_email, display_title):
         return cls(**DATABASE.find_one(DataSourceConstants.COLLECTION, {"user_email": user_email,
                                                                         "display_title": display_title}))
@@ -165,7 +174,7 @@ class DataSource(object):
                 date = datetime.datetime.strptime(date_str_corr, "%d/%m/%Y").strftime("%d-%m-%Y")
                 raw_text = groups[2].rstrip()
 
-            row = dict(data_source_id=self._id, genre=DataUtils.genre_codebook[label], date=date, article_raw_text=raw_text)
+            row = dict(data_source_id=self._id, genre_friendly=DataUtils.genre_codebook_friendly[label], genre=DataUtils.genre_codebook[label], date=date, article_raw_text=raw_text)
             self.save_raw_to_db(row)
             data.append(row)
 

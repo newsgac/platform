@@ -42,8 +42,10 @@ class SVM_SVC():
             #read from db
             X, y = io.load_preprocessed_data_from_db(experiment.data_source_id)
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, random_state=0)
+        self.X_train, self.X_test, self.y_train_with_ids, self.y_test_with_ids = train_test_split(X, y, random_state=42)
 
+        self.y_train = self.y_train_with_ids[:,0]
+        self.y_test = self.y_test_with_ids[:,0]
 
     def cross_validate(self):
         # Ten-fold cross-validation with stratified sampling
@@ -68,3 +70,10 @@ class SVM_SVC():
         scores = self.cross_validate()
         results.accuracy = format(scores.mean(), '.2f')
         return results
+
+    def retrieve_test_instances(self):
+        # first column is the genre, and the second column is the article id
+        genres = self.y_test_with_ids[:,0]
+        article_ids = self.y_test_with_ids[:,1]
+        return article_ids
+

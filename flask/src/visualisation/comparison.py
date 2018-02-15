@@ -303,3 +303,8 @@ class ExperimentComparator:
         return scripts, divs
 
 
+    def get_common_test_articles(self):
+
+        # all the experiments use the same test instances due to same random seed in train_test_split
+        # TODO: implement
+        pass

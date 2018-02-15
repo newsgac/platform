@@ -5,7 +5,87 @@
         <h1>Experiments Overview</h1>
     </div>
 
+    <form role="form" action="{{ url_for('experiments.user_experiments_overview') }}" method="post" id="form_overview">
+        <div>
+            <div class="row">
+
+                <div class="col-md-3 control-group">
+                    <label>Choose the dataset to filter experiments under comparison</label>
+                </div>
+                <div class="col-md-8" id="datasource_div">
+                    <select name="data_source" id="data_source" class="selectpicker show-tick" title="Select a data source...">
+                        {% if data_sources_db|length == 0 %}
+                            <option value="">Default</option>
+                        {% endif %}
+                        {% for data_source in data_sources_db %}
+                            <option value="{{ data_source._id }}">{{ data_source.display_title }}</option>
+                        {% endfor %}
+                        {% if data_sources_db|length > 1 %}
+                            <option value="ALL">All</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="col-md-1 control-group">
+                    <button type="submit" form="form_overview" class="btn btn-success">Let's go!</button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <br/><br/>
+
     {% if plot_divs is defined %}
+
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="experiments_comparison_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                <!--<caption class="text-center">DataTables</caption>-->
+                <thead>
+                    <tr>
+                        <th>Experiment Title</th>
+                        <th>Training Dataset</th>
+                        <th>Predicted Genre</th>
+                        <th>True Genre</th>
+                        <th>Agreement</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for data_source in data_sources %}
+                    <tr>
+                        <td><a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
+                        {% if data_source.processing_completed != None and data_source.processing_started != None %}
+                            <td>Yes</td>
+                        {% elif data_source.processing_completed == None and data_source.processing_started != None %}
+                            <td>In progress</td>
+                        {% else %}
+                            <td>No</td>
+                        {% endif %}
+                        <td>{{ data_source.description }}</td>
+                        <td>{{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}</td>
+                        {% if data_source.processing_completed != None and data_source.processing_started != None %}
+                            <td>{{ data_source.get_processing_duration() }}</td>
+                        {% elif data_source.processing_completed == None and data_source.processing_started != None %}
+                            <td>In progress</td>
+                        {% else %}
+                            <td>N/A</td>
+                        {% endif %}
+
+                        <td>{{ data_source.get_number_of_instances() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <br/><br/>
+
+
+
         {% for plot_div in plot_divs %}
             <div class="row">
                 {{ plot_div|safe }}
@@ -13,4 +93,6 @@
             </div>
         {% endfor %}
     {% endif %}
+
+
 {% endblock %}

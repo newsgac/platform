@@ -194,21 +194,43 @@ def user_experiments_overview_for_prediction():
     return render_template('experiments/prediction_overview.html')
 
 
-@experiment_blueprint.route('/overview',  methods=['GET'])
+@experiment_blueprint.route('/overview',  methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
 def user_experiments_overview():
-    # call overview method with the finished experiments that belong to the user
-    finished_experiments = Experiment.get_finished_experiments(session['email'])
-    comparator = ExperimentComparator(finished_experiments)
-    script, div = comparator.performComparison()
-    script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-    script.append(script_cm)
-    div.append(div_cm)
+    processed_data_source_list = DataSource.get_processed_by_user_email(user_email=session['email'])
 
-    return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
-                           js_resources=INLINE.render_js(),
+    if request.method == 'POST':
+        try:
+            if not session['email']:
+                return redirect(url_for("experiments.public_overview"))
+
+            if request.form['data_source'] == "ALL":
+                # call overview method with the finished experiments that belong to the user
+                finished_experiments = Experiment.get_finished_experiments(user_email=session['email'])
+            elif request.form['data_source'] == "":
+                finished_experiments = Experiment.get_finished_experiments_using_data_id(user_email=session['email'],
+                                                                                         ds_id=None)
+            else:
+                finished_experiments = Experiment.get_finished_experiments_using_data_id(user_email=session['email'],
+                                                                                         ds_id=request.form['data_source'])
+
+            comparator = ExperimentComparator(finished_experiments)
+            articles = comparator.get_common_test_articles()
+            script, div = comparator.performComparison()
+            script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
+            script.append(script_cm)
+            div.append(div_cm)
+
+            return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
+                           js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
+                           articles=articles,
                            css_resources=INLINE.render_css(), mimetype='text/html')
+        except Exception as e:
+            flash(e.message, 'error')
+            return render_template('experiments/overview.html', data_sources_db=processed_data_source_list, request=request.form)
+
+    return render_template('experiments/overview.html', data_sources_db=processed_data_source_list)
 
 
 @experiment_blueprint.route('/public_prediction_overview', methods=['GET', 'POST'])
@@ -233,20 +255,39 @@ def public_experiments_overview_for_prediction():
     return render_template('experiments/prediction_overview.html')
 
 
-@experiment_blueprint.route('/public_overview')
+@experiment_blueprint.route('/public_overview', methods=['GET', 'POST'])
 @back.anchor
 def public_overview():
-    # call overview method with the public experiments
-    experiments = Experiment.get_public_experiments()
-    comparator = ExperimentComparator(experiments)
-    script, div = comparator.performComparison()
-    script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-    script.append(script_cm)
-    div.append(div_cm)
+    processed_data_source_list = DataSource.get_processed_datasets()
 
-    return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
-                           js_resources=INLINE.render_js(),
-                           css_resources=INLINE.render_css(), mimetype='text/html')
+    if request.method == 'POST':
+        try:
+
+            if request.form['data_source'] == "ALL":
+                # call overview method with the finished experiments that belong to the user
+                experiments = Experiment.get_public_experiments()
+            elif request.form['data_source'] == "":
+                experiments = Experiment.get_public_experiments_using_data_id(ds_id=None)
+            else:
+                experiments = Experiment.get_public_experiments_using_data_id(ds_id=request.form['data_source'])
+            # call overview method with the public experiments
+
+            comparator = ExperimentComparator(experiments)
+            script, div = comparator.performComparison()
+            script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
+            script.append(script_cm)
+            div.append(div_cm)
+
+            return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
+                                   js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
+                                   css_resources=INLINE.render_css(), mimetype='text/html')
+
+        except Exception as e:
+            flash(e.message, 'error')
+            return render_template('experiments/overview.html', data_sources_db=processed_data_source_list,
+                                   request=request.form)
+
+    return render_template('experiments/overview.html', data_sources_db=processed_data_source_list)
 
 
 @experiment_blueprint.route('/delete/<string:experiment_id>')

@@ -19,7 +19,7 @@
         <!--<div class="container">-->
             <div class="row">
                 <div class="col-xs-12">
-                    <table class="table table-bordered table-hover dt-responsive">
+                    <table id="data_sources_table" class="table table-bordered table-hover dt-responsive" width="100%">
                     <!--<caption class="text-center">DataTables</caption>-->
                     <thead>
                         <tr>
@@ -35,7 +35,7 @@
                     <tbody>
                         {% for data_source in data_sources %}
                         <tr>
-                            <td>{{ data_source.display_title }}</td>
+                            <td><a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
                             {% if data_source.processing_completed != None and data_source.processing_started != None %}
                                 <td>Yes</td>
                             {% elif data_source.processing_completed == None and data_source.processing_started != None %}

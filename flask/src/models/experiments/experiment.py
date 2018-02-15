@@ -59,6 +59,17 @@ class Experiment(object):
         return [cls(**elem) for elem in
                 DATABASE.find(ExperimentConstants.COLLECTION, {"user_email": user_email, "run_finished": {"$ne": None}})]
 
+    @classmethod
+    def get_finished_experiments_using_data_id(cls, user_email, ds_id):
+        return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION,
+                              {"user_email": user_email, "data_source_id": ds_id, "run_finished": {"$ne": None}})]
+
+    @classmethod
+    def get_public_experiments_using_data_id(cls, ds_id):
+        return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION,
+                                                      {"public_flag": True, "data_source_id": ds_id,
+                                                       "run_finished": {"$ne": None}})]
+
     def get_public_username(self):
         return User.get_by_email(self.user_email).username
 
@@ -191,4 +202,6 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         self.save_to_db()
 
 
-
+    def get_test_instances(self):
+        svc = SVM_SVC(self)
+        return svc.retrieve_test_instances()
