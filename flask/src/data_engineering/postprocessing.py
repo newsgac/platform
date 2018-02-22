@@ -19,10 +19,14 @@ class Result(object):
         self.y_pred = y_pred
 
         self.genre_names = []
+        genre_order = []
         for number, name in DataUtils.genres.items():
             self.genre_names.append(''.join(name).split('/')[0])
+            genre_order.append(number)
 
-        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred)
+        #TODO: DEBUG here to see whether genre names and confusion matrix match
+        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=genre_order)
+        print self.confusion_matrix
 
         self.precision_weighted = format(metrics.precision_score(self.y_test, self.y_pred, average='weighted'), '.2f')
         self.precision_micro = format(metrics.precision_score(self.y_test, self.y_pred, average='micro'), '.2f')
@@ -47,7 +51,10 @@ class Result(object):
 
     @staticmethod
     def normalise_confusion_matrix(cm):
-        return cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        sum = cm.sum(axis=1)[:, np.newaxis]
+        temp = cm.astype('float')
+        # return cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
 
     @staticmethod
     def predict_raw_example(experiment, text=None, url=None):

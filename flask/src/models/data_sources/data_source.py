@@ -7,7 +7,7 @@ from src.data_engineering.feature_extraction import Article
 from src.common.database import Database
 import src.common.utils as Utilities
 import re
-
+from bson import ObjectId
 import src.data_engineering.utils as DataUtils
 
 UT = Utilities.Utils()
@@ -101,7 +101,7 @@ class DataSource(object):
         for article in articles_from_db:
             art_id = article['_id']
             art = Article(text=article['article_raw_text'])
-            self.add_features_to_db(article_id=art_id, dict=art.get_features())
+            self.add_features_to_db(article_id=art_id, dict=art.get_features_frog())
 
         self.processing_completed = datetime.datetime.utcnow()
         self.save_to_db()
@@ -130,6 +130,10 @@ class DataSource(object):
         return "{:2d} hours {:2d} minutes {:2d} seconds".format(int(h), int(m), int(s))
 
     @staticmethod
+    def get_processed_article_by_id(id):
+        return DATABASE.find_one(DataSourceConstants.COLLECTION_PROCESSED, {"_id": ObjectId(id)})
+
+    @staticmethod
     def is_allowed(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -149,6 +153,7 @@ class DataSource(object):
         file = DATABASE.getGridFS().get(self.file_handler_db).read()
         data = []
 
+        limit = 100
         for line in file.splitlines():
             line = line.rstrip()
 
@@ -177,6 +182,11 @@ class DataSource(object):
             row = dict(data_source_id=self._id, genre_friendly=DataUtils.genre_codebook_friendly[label], genre=DataUtils.genre_codebook[label], date=date, article_raw_text=raw_text)
             self.save_raw_to_db(row)
             data.append(row)
+
+            if limit < 1:
+                break
+            else:
+                limit -= 1
 
         return data
 

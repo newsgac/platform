@@ -25,6 +25,7 @@ from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit, tra
 
 from src.data_engineering.postprocessing import Result
 from src.common.database import Database
+import numpy as np
 
 DATABASE = Database()
 
@@ -42,10 +43,12 @@ class SVM_SVC():
             #read from db
             X, y = io.load_preprocessed_data_from_db(experiment.data_source_id)
 
-        self.X_train, self.X_test, self.y_train_with_ids, self.y_test_with_ids = train_test_split(X, y, random_state=42)
+        self.X_train, self.X_test, self.y_train_with_ids, self.y_test_with_ids = train_test_split(X, y, random_state=42, shuffle=False)
 
-        self.y_train = self.y_train_with_ids[:,0]
-        self.y_test = self.y_test_with_ids[:,0]
+        self.X_train = np.asarray(self.X_train)
+        self.X_test = np.asarray(self.X_test)
+        self.y_train = np.asarray([row[0] for row in self.y_train_with_ids])
+        self.y_test = np.asarray([row[0] for row in self.y_test_with_ids])
 
     def cross_validate(self):
         # Ten-fold cross-validation with stratified sampling
@@ -73,7 +76,7 @@ class SVM_SVC():
 
     def retrieve_test_instances(self):
         # first column is the genre, and the second column is the article id
-        genres = self.y_test_with_ids[:,0]
-        article_ids = self.y_test_with_ids[:,1]
+        genres = np.asarray([row[0] for row in self.y_test_with_ids])
+        article_ids = np.asarray([row[1] for row in self.y_test_with_ids])
         return article_ids
 

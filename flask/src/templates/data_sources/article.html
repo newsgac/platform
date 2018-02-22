@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Article:
+            <small> All features </small>
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <p align="left" class="center-align-pad"><strong>Identifier</strong></p>
+        </div>
+        <div class="col-md-3">
+            <p align="left" class="center-align-pad"><strong>Description</strong></p>
+        </div>
+        <div class="col-md-7">
+            <p align="left" class="center-align-pad"><strong>Value</strong></p>
+        </div>
+    </div>
+
+    {% for key, value in article|dictsort(false, by='key') %}
+        <div class="row">
+            <div class="col-md-2">
+                <p align="left" class="center-align-pad">{{ key }}</p>
+            </div>
+            <div class="col-md-3">
+                <p align="left" class="center-align-pad">{{ descriptions[key] }}</p>
+            </div>
+            <div class="col-md-7">
+                <p align="left" class="center-align-pad">{{ value }}</p>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

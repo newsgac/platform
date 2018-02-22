@@ -58,9 +58,9 @@
                                     </div>
                                     <div class="col-md-8" id="datasource_div">
                                         <select name="data_source" id="data_source" class="selectpicker show-tick" title="Select a data source...">
-                                            {% if ds_titles_from_db|length == 0%}
-                                                <option id="default_data_source" value="">Default</option>
-                                            {% endif %}
+
+                                            <option id="default_data_source" value="">Default</option>
+
                                             {% for ds_title in ds_titles_from_db %}
                                                 <option id="{{ ds_title }}" value="{{ ds_title }}">{{ ds_title }}</option>
                                             {% endfor %}
@@ -185,7 +185,7 @@
                             </div>
                             <ul class="list-inline pull-right">
                                 <li>
-                                    <button type="button" class="btn btn-primary next-step">Save and continue</button>
+                                    <button type="button" class="btn btn-primary next-step-tab">Save and continue</button>
                                 </li>
                             </ul>
                         </div>
@@ -263,10 +263,10 @@
                             </div>
                             <ul class="list-inline pull-right">
                                 <li>
-                                    <button type="button" class="btn btn-default prev-step">Previous</button>
+                                    <button type="button" class="btn btn-default prev-step-tab">Previous</button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn btn-primary next-step">Save and continue</button>
+                                    <button type="button" class="btn btn-primary next-step-tab">Save and continue</button>
                                 </li>
                             </ul>
                         </div>
@@ -310,7 +310,7 @@
                             </div>
                             <ul class="list-inline pull-right">
                                 <li>
-                                    <button type="button" class="btn btn-default prev-step">Previous</button>
+                                    <button type="button" class="btn btn-default prev-step-tab">Previous</button>
                                 </li>
                                 <li>
                                     <button type="submit" class="btn btn-success">Create experiment</button>

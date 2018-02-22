@@ -38,8 +38,8 @@ class ResultVisualiser(object):
         weight = []
         value = []
         class_sizes = []
-        for x in range(0, len(genre_names)):
-            for y in range(0, len(genre_names)):
+        for x in range(0, len(confusion_matrix)):
+            for y in range(0, len(confusion_matrix)):
                 actual.append(genre_names[y])
                 predicted.append(genre_names[x])
                 value.append(confusion_matrix[y][x])

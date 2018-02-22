@@ -6,8 +6,15 @@ from bokeh.embed import components
 from bokeh.models import (
     ColumnDataSource, LabelSet)
 import math
+import itertools
 
-from visualisation.resultvisualiser import ResultVisualiser
+from collections import defaultdict
+from src.common.utils import Utils
+from src.models.experiments.experiment import ExperimentSVC
+from src.visualisation.resultvisualiser import ResultVisualiser
+from src.models.data_sources.data_source import DataSource
+
+UT = Utils()
 
 __author__ = 'abilgin'
 
@@ -302,9 +309,104 @@ class ExperimentComparator:
 
         return scripts, divs
 
+    def retrieveTestArticles(self):
+        test_articles = []
+        unique_data_sources = []
+        unique_exp = []
+        for exp in self.experiments:
+            if exp.data_source_id not in unique_data_sources:
+                unique_data_sources.append(exp.data_source_id)
+                unique_exp.append(exp)
 
-    def get_common_test_articles(self):
+        print unique_data_sources
+        print unique_exp
 
-        # all the experiments use the same test instances due to same random seed in train_test_split
-        # TODO: implement
-        pass
+        for exp in unique_exp:
+            if exp.type == "SVC":
+                test_articles.extend(ExperimentSVC.get_by_id(exp._id).get_test_instances())
+            elif exp.type == "DT":
+                pass
+
+
+        return test_articles
+
+
+    def generateAgreementOverview(self, test_articles):
+        # generate a dictionary to be displayed in the format of article_text, mutually agreeing experiments,
+        # quantity for the chosen genre
+        # test_articles is a list of documents from DB.collection("processed_data")
+        tabular_data_all = []   # list of dictionaries
+        count = 1
+
+        dicts_to_merge = {}
+        for article in test_articles:
+            tabular_data_row = {}
+            tabular_data_row["article_number"] = count
+            tabular_data_row["article_text"] = article["article_raw_text"]
+            tabular_data_row["article_id"] = article["_id"]
+
+            # get prediction from each experiment
+            predictions_dict = {}
+
+            for exp in self.experiments:
+                predictions_dict[exp] = (exp.predict_from_db(article)).keys()[0]
+
+            # print "Predictions dictionary"
+            # print predictions_dict
+
+            # count the predictions in the dictionary and find the largest agreement
+            genre_counts = defaultdict(int)
+            for genre in predictions_dict.values():
+                genre_counts[genre] += 1
+
+            # print "Genre counts"
+            # print genre_counts
+
+            # get the prevailing genre
+            prevailing_genre = max(genre_counts, key=lambda key: genre_counts[key])
+
+            # get the experiments that agree on the prevailing genre
+            agreement_dict = {}
+            for k, v in predictions_dict.iteritems():
+                agreement_dict.setdefault(v, []).append(k)
+
+            # print "Agreement dictionary"
+            # print agreement_dict
+            dicts_to_merge[article["_id"]] = agreement_dict
+
+            tabular_data_row["mutual_agreement_exp"] = agreement_dict[prevailing_genre]
+            tabular_data_row["gold_agreement_exp"] = []
+            tabular_data_row["agreed_genre_prediction"] = prevailing_genre
+            tabular_data_row["true_genre"] = article["genre_friendly"] if article["genre_friendly"] is not None else "N/A"
+
+            count += 1
+            tabular_data_all.append(tabular_data_row)
+
+        # quantity_genre = defaultdict(set)
+        # for d in dicts_to_merge:
+        #     for k, v in d.iteritems():
+        #         quantity_genre[k].add(v)
+
+        combinations = {}
+        # create combinations of the experiments
+        # set based overview - venn diagram information
+        for i, combo in enumerate(UT.powerset(iterable=self.experiments), 1):
+            if i != 1:
+                combinations[combo] = {}
+
+        # for each article find the combination that agrees on the prediction
+        for art_id, d in dicts_to_merge.items():
+            for pred, exp_list in d.items():
+                for key in combinations.keys():
+                    if set(key) == set(exp_list):
+                        if pred not in combinations[key].keys():
+                            combinations[key][pred] = []
+                        # combinations[key][pred].append(DataSource.get_processed_article_by_id(art_id))
+                        combinations[key][pred].append(art_id)
+                        break
+
+
+
+        return tabular_data_all, combinations
+
+

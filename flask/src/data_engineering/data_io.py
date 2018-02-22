@@ -45,7 +45,7 @@ def load_preprocessed_data_from_file(filename):
 #TODO: test this method
 def load_preprocessed_data_from_db(data_source_id):
 
-    non_feature_columns = ['_id', 'date', 'genre', 'genre_friendly' 'article_raw_text', 'data_source_id']
+    non_feature_columns = ['_id', 'date', 'genre', 'genre_friendly', 'article_raw_text', 'data_source_id']
     articles = DataSource.get_articles_by_data_source(data_source_id)
 
     # Get number of examples
@@ -56,17 +56,22 @@ def load_preprocessed_data_from_db(data_source_id):
     num_features = len(articles[0].keys()) - len(non_feature_columns)
     print('Number of features', num_features)
 
-    dataset = np.ndarray(shape=(num_examples, num_features),
-                         dtype=np.float64)
-    labels = np.ndarray(shape=(num_examples, 2), dtype=np.int32)
+    # dataset = np.ndarray(shape=(num_examples, num_features),
+    #                      dtype=np.float64)
+    # labels = np.ndarray(shape=(num_examples, 2))
 
+    dataset = []
+    labels = []
     # Add features and label for each article
 
     for i, row in enumerate(articles):
-        dataset[i, :] = [row[f] for f in articles[i].keys() if f not in non_feature_columns]
-        labels[i] = [row['genre'], row['_id']]
+        dataset.append([row[f] for f in articles[i].keys() if f not in non_feature_columns])
+        labels.append([row['genre'], str(row['_id'])])
 
-    print('Features:', dataset.shape)
-    print('Labels:', labels.shape)
+    print('Features:', len(dataset))
+    print('Labels:', len(labels))
     return dataset, labels
 
+def strip_data_row(data):
+    non_feature_columns = ['_id', 'date', 'genre', 'genre_friendly', 'article_raw_text', 'data_source_id']
+    return [[data[f] for f in data.keys() if f not in non_feature_columns]]

@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import dill
 
+from src.models.data_sources.data_source import DataSource
 from src.data_engineering.feature_extraction import Article
 from src.machine_learning.svm import SVM_SVC
 from src.models.configurations.configuration_svc import ConfigurationSVC
@@ -13,6 +14,7 @@ import src.data_engineering.utils as DataUtilities
 from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.users.user import User
 import sklearn
+import src.data_engineering.data_io as DataIO
 
 DATABASE = Database()
 UT = Utilities.Utils()
@@ -55,12 +57,12 @@ class Experiment(object):
         return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION, {"public_flag": True, "run_finished": {"$ne" : None}})]
 
     @classmethod
-    def get_finished_experiments(cls, user_email):
+    def get_finished_user_experiments(cls, user_email):
         return [cls(**elem) for elem in
                 DATABASE.find(ExperimentConstants.COLLECTION, {"user_email": user_email, "run_finished": {"$ne": None}})]
 
     @classmethod
-    def get_finished_experiments_using_data_id(cls, user_email, ds_id):
+    def get_finished_user_experiments_using_data_id(cls, user_email, ds_id):
         return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION,
                               {"user_email": user_email, "data_source_id": ds_id, "run_finished": {"$ne": None}})]
 
@@ -69,6 +71,10 @@ class Experiment(object):
         return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION,
                                                       {"public_flag": True, "data_source_id": ds_id,
                                                        "run_finished": {"$ne": None}})]
+
+    @staticmethod
+    def get_used_data_sources_for_user(user_email):
+        return DATABASE.find(ExperimentConstants.COLLECTION, {"user_email": user_email}).distinct("data_source_id")
 
     def get_public_username(self):
         return User.get_by_email(self.user_email).username
@@ -99,6 +105,25 @@ class Experiment(object):
         pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
         return dill.loads(pickled_results)
 
+    def predict_from_db(self, data_row):
+        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+        classifier = dill.loads(pickled_model)
+        sorted_resp = {}
+
+        if type(classifier) is sklearn.svm.classes.SVC:
+            # convert raw text to structured example
+            example = DataIO.strip_data_row(data_row)
+            proba = SVM_SVC.predict(classifier, example)
+            probabilities = proba[0].tolist()
+
+            resp = {}
+            for i, p in enumerate(probabilities):
+                resp[DataUtilities.genres[i + 1][0].split('/')[0]] = format(p, '.2f')
+
+            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=False))
+
+        return sorted_resp
+
     def predict(self, raw_text):
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
         classifier = dill.loads(pickled_model)
@@ -117,7 +142,6 @@ class Experiment(object):
             sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=False))
 
         return sorted_resp
-
 
 
 class ExperimentDT(Experiment, ConfigurationDT):
@@ -201,7 +225,13 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         self.run_finished = datetime.datetime.utcnow()
         self.save_to_db()
 
-
     def get_test_instances(self):
         svc = SVM_SVC(self)
-        return svc.retrieve_test_instances()
+        test_ids = svc.retrieve_test_instances()
+        instances = []
+
+        for test_id in test_ids:
+            instances.append(DataSource.get_processed_article_by_id(test_id))
+
+        return instances
+

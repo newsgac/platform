@@ -177,7 +177,7 @@ def predict(experiment_id):
 @back.anchor
 def user_experiments_overview_for_prediction():
     # call overview method with the finished experiments that belong to the user
-    finished_experiments = Experiment.get_finished_experiments(session['email'])
+    finished_experiments = Experiment.get_finished_user_experiments(session['email'])
     comparator = ExperimentComparator(finished_experiments)
 
     if request.method == 'POST':
@@ -198,37 +198,50 @@ def user_experiments_overview_for_prediction():
 @user_decorators.requires_login
 @back.anchor
 def user_experiments_overview():
-    processed_data_source_list = DataSource.get_processed_by_user_email(user_email=session['email'])
+    if not session['email']:
+        return redirect(url_for("experiments.public_overview"))
+
+    test_articles = []
+    processed_data_source_list = []
+    used_data_source_ids_by_user = Experiment.get_used_data_sources_for_user(user_email=session['email'])
+
+    for ds_id in used_data_source_ids_by_user:
+        processed_data_source_list.append(DataSource.get_by_id(ds_id))
 
     if request.method == 'POST':
-        try:
-            if not session['email']:
-                return redirect(url_for("experiments.public_overview"))
+        # try:
 
-            if request.form['data_source'] == "ALL":
-                # call overview method with the finished experiments that belong to the user
-                finished_experiments = Experiment.get_finished_experiments(user_email=session['email'])
-            elif request.form['data_source'] == "":
-                finished_experiments = Experiment.get_finished_experiments_using_data_id(user_email=session['email'],
-                                                                                         ds_id=None)
-            else:
-                finished_experiments = Experiment.get_finished_experiments_using_data_id(user_email=session['email'],
-                                                                                         ds_id=request.form['data_source'])
+        if request.form['data_source'] == "ALL":
+            # call overview method with the finished experiments that belong to the user
+            finished_experiments = Experiment.get_finished_user_experiments(user_email=session['email'])
+        elif request.form['data_source'] == "":
+            finished_experiments = Experiment.get_finished_user_experiments_using_data_id(user_email=session['email'],
+                                                                                          ds_id=None)
+        else:
+            finished_experiments = Experiment.get_finished_user_experiments_using_data_id(user_email=session['email'],
+                                                                                          ds_id=request.form['data_source'])
 
-            comparator = ExperimentComparator(finished_experiments)
-            articles = comparator.get_common_test_articles()
-            script, div = comparator.performComparison()
-            script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-            script.append(script_cm)
-            div.append(div_cm)
+        comparator = ExperimentComparator(finished_experiments)
 
-            return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
-                           js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
-                           articles=articles,
-                           css_resources=INLINE.render_css(), mimetype='text/html')
-        except Exception as e:
-            flash(e.message, 'error')
-            return render_template('experiments/overview.html', data_sources_db=processed_data_source_list, request=request.form)
+        # get the test articles
+        test_articles = comparator.retrieveTestArticles()
+        tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles)
+
+
+        script, div = comparator.performComparison()
+        script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
+        script.append(script_cm)
+        div.append(div_cm)
+
+        return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
+                       js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
+                       articles=test_articles, tabular_data_dict=tabular_data_dict,
+                       combinations=combinations,
+                       css_resources=INLINE.render_css(), mimetype='text/html')
+        # except Exception as e:
+        #     flash(e.message, 'error')
+        #     return render_template('experiments/overview.html', data_sources_db=processed_data_source_list,
+        #                            request=request.form)
 
     return render_template('experiments/overview.html', data_sources_db=processed_data_source_list)
 

@@ -12,14 +12,14 @@ $(document).ready(function () {
         }
     });
 
-    $(".next-step").click(function (e) {
+    $(".next-step-tab").click(function (e) {
 
         var $active = $('.wizard .nav-tabs li.active');
         $active.next().removeClass('disabled');
         nextTab($active);
 
     });
-    $(".prev-step").click(function (e) {
+    $(".prev-step-tab").click(function (e) {
 
         var $active = $('.wizard .nav-tabs li.active');
         prevTab($active);
@@ -175,8 +175,99 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-    $('#data_sources_table').DataTable( {
-        stateSave: true
+    $('#combinations_table').DataTable(
+    {
+    columnDefs: [ {
+        targets: 1,
+        render: $.fn.dataTable.render.ellipsis(75, true)
+        } ],
+    initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                })
+                })
+                },
+        stateSave: true,
+        responsive: true,
+
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+    } );
+} );
+
+
+$(document).ready(function() {
+    $('#experiments_comparison_table').DataTable(
+    {
+    columnDefs: [ {
+        targets: 1,
+        render: $.fn.dataTable.render.ellipsis(75, true)
+        } ],
+    initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                })
+                })
+                },
+        stateSave: true,
+        responsive: true,
+
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+    } );
+} );
+
+
+$(document).ready(function() {
+    $('#data_sources_table').DataTable(
+    {
+    initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                })
+                })
+                },
+        stateSave: true,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
     } );
 } );

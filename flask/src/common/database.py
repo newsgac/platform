@@ -20,7 +20,7 @@ class Database(object):
         self.db[collection].insert(data)
 
     def find(self, collection, query):
-        return self.db[collection].find(query)
+        return self.db[collection].find(query).sort("_id", pymongo.ASCENDING)
 
     def find_one(self, collection, query):
         return self.db[collection].find_one(query)

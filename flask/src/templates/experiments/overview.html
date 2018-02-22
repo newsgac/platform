@@ -9,14 +9,11 @@
         <div>
             <div class="row">
 
-                <div class="col-md-3 control-group">
+                <div class="col-md-5 control-group">
                     <label>Choose the dataset to filter experiments under comparison</label>
                 </div>
-                <div class="col-md-8" id="datasource_div">
+                <div class="col-md-6" id="datasource_div">
                     <select name="data_source" id="data_source" class="selectpicker show-tick" title="Select a data source...">
-                        {% if data_sources_db|length == 0 %}
-                            <option value="">Default</option>
-                        {% endif %}
                         {% for data_source in data_sources_db %}
                             <option value="{{ data_source._id }}">{{ data_source.display_title }}</option>
                         {% endfor %}
@@ -40,41 +37,80 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <table id="experiments_comparison_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                <table id="combinations_table" class="table table-bordered table-hover dt-responsive" width="100%">
                 <!--<caption class="text-center">DataTables</caption>-->
                 <thead>
                     <tr>
-                        <th>Experiment Title</th>
-                        <th>Training Dataset</th>
+                        <th>Mutually Agreeing Experiments</th>
                         <th>Predicted Genre</th>
-                        <th>True Genre</th>
-                        <th>Agreement</th>
+                        <th>Number of Articles</th>
+                        <th>Articles</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    {% for data_source in data_sources %}
-                    <tr>
-                        <td><a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
-                        {% if data_source.processing_completed != None and data_source.processing_started != None %}
-                            <td>Yes</td>
-                        {% elif data_source.processing_completed == None and data_source.processing_started != None %}
-                            <td>In progress</td>
-                        {% else %}
-                            <td>No</td>
-                        {% endif %}
-                        <td>{{ data_source.description }}</td>
-                        <td>{{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}</td>
-                        {% if data_source.processing_completed != None and data_source.processing_started != None %}
-                            <td>{{ data_source.get_processing_duration() }}</td>
-                        {% elif data_source.processing_completed == None and data_source.processing_started != None %}
-                            <td>In progress</td>
-                        {% else %}
-                            <td>N/A</td>
-                        {% endif %}
+                    {% for exp_set, agreement_dict in combinations.items() %}
+                        {% for genre, articles_ids in agreement_dict.items() %}
+                            {% if articles_ids|length > 0%}
+                            <tr>
+                                <td>
+                                    {% for exp in exp_set %}
+                                         <a href="{{ url_for('experiments.get_experiment_page', experiment_id = exp._id) }}">{{ exp.display_title }}</a><br/>
+                                    {% endfor %}
+                                </td>
+                                <td>{{ genre }}</td>
+                                <td>{{ articles_ids|length }}</td>
+                                <td>
+                                    {% set count = [] %}
+                                    {% for article_id in articles_ids|sort %}
+                                        {% for tab_data in tabular_data_dict if tab_data['article_id'] == article_id %}
+                                            <a href="{{ url_for('data_sources.get_article_page', article_id = article_id) }}">[Article {{ tab_data['article_number'] }}] </a>
+                                            {% if count.append(1) %}{% endif %}
+                                            {% if count|length % 10 == 0 %}
+                                                <br/>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
 
-                        <td>{{ data_source.get_number_of_instances() }}</td>
+                </table>
+            </div>
+        </div>
+
+        <br/><br/>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="experiments_comparison_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                <!--<caption class="text-center">DataTables</caption>-->
+                <thead>
+                    <tr>
+                        <th>Article #</th>
+                        <th>Article text</th>
+                        <th>Mutually Agreeing <br/>Experiments</th>
+                        <th>Prevailing Genre <br/>(prediction)</th>
+                        <th>True Genre</th>
                     </tr>
+                </thead>
+
+                <tbody>
+                    {% for tab_data in tabular_data_dict %}
+                        <tr>
+                            <td>{{ tab_data['article_number'] }}</td>
+                            <td>{{ tab_data['article_text'] }}</td>
+                            <td>
+                                {% for experiment in tab_data['mutual_agreement_exp']  %}
+                                    <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">{{ experiment.display_title }}</a><br/>
+                                {% endfor %}
+                            </td>
+                            <td>{{ tab_data['agreed_genre_prediction'] }}</td>
+                            <td>{{ tab_data['true_genre'] }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
 

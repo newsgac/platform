@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import time
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
+from src.app import app
 from src.celery_tasks.tasks import process_data, del_data
 from src.common.database import Database
 from src.models.data_sources.data_source import DataSource
@@ -10,6 +11,7 @@ import src.models.data_sources.errors as DataSourceErrors
 from src.common.back import back
 import src.models.users.decorators as user_decorators
 from werkzeug.utils import secure_filename
+import src.data_engineering.utils as DataUtils
 
 __author__ = 'abilgin'
 
@@ -58,13 +60,23 @@ def get_data_source_page(data_source_id):
 
     return render_template('data_sources/data_source.html', data_source=ds)
 
+@data_source_blueprint.route('/article/<string:article_id>')
+@user_decorators.requires_login
+def get_article_page(article_id):
+    # display the processed data source instance which is an article
+    art = DataSource.get_processed_article_by_id(article_id)
+
+    return render_template('data_sources/article.html', article=art, descriptions=DataUtils.feature_descriptions)
+
 @data_source_blueprint.route('/process/<string:data_source_id>')
 @user_decorators.requires_login
 def process_data_source(data_source_id):
-    # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-    task = process_data.delay(data_source_id)
-    # without celery
-    # DataSource.get_by_id(data_source_id).process_data_source()
+    if app.DOCKER_RUN:
+        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
+        task = process_data.delay(data_source_id)
+    else:
+        # without celery
+        DataSource.get_by_id(data_source_id).process_data_source()
 
     time.sleep(0.5)
     return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
@@ -93,10 +105,12 @@ def sources_overview():
 @data_source_blueprint.route('/delete/<string:data_source_id>')
 @user_decorators.requires_login
 def delete_data_source(data_source_id):
-    # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-    task = del_data.delay(data_source_id)
-    # without celery
-    # DataSource.get_by_id(data_source_id).delete()
+    if app.DOCKER_RUN:
+        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
+        task = del_data.delay(data_source_id)
+    else:
+        # without celery
+        DataSource.get_by_id(data_source_id).delete()
 
     time.sleep(0.5)
     return back.redirect()

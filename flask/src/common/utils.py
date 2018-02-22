@@ -1,6 +1,7 @@
 from passlib.hash import pbkdf2_sha512
 import re
 from dateutil import tz
+from itertools import chain, combinations
 
 __author__ = 'abilgin'
 
@@ -45,6 +46,12 @@ class Utils(object):
         utc = timestamp.replace(tzinfo=from_zone)
         # Convert time zone
         return utc.astimezone(to_zone)
+
+    def powerset(self, iterable):
+        "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+        # s = list(iterable)  # allows duplicate elements
+        s = list(set(iterable))
+        return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
 
