@@ -31,9 +31,9 @@ import src.data_engineering.utils as Utilities
 
 from lxml import etree
 from segtok import segmenter
-import spacy
-
-NL_NLP = spacy.load('nl')
+# import spacy
+#
+# NL_NLP = spacy.load('nl')
 
 FROG_URL = 'http://www.kbresearch.nl/frogger/?'
 
@@ -281,13 +281,13 @@ class Article(object):
         print tokens[0]
 
         # Alternative to FROG use NLTK or spaCy
-        tokens_spacy = []
-        article_nlp = NL_NLP(self.text)
-        for token in article_nlp:
-            tokens_spacy.append(token.pos_)
-            print(token.text, token.pos_, token.dep_, token.head.text)
-
-        print tokens_spacy[0]
+        # tokens_spacy = []
+        # article_nlp = NL_NLP(self.text)
+        # for token in article_nlp:
+        #     tokens_spacy.append(token.pos_)
+        #     print(token.text, token.pos_, token.dep_, token.head.text)
+        #
+        # print tokens_spacy[0]
 
         # Word count
         token_count = len(tokens)
