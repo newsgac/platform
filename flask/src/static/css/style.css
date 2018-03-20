@@ -130,6 +130,12 @@ table.dataTable td {
   white-space: nowrap;
 }
 
+tfoot input {
+    width: 100%;
+    padding: 3px;
+    box-sizing: border-box;
+}
+
 .p {
   text-align: center;
   padding-top: 140px;

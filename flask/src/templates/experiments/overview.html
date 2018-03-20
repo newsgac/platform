@@ -37,7 +37,7 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <table id="combinations_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                <table id="combinations_table" cellspacing="0" class="table table-bordered table-hover display" width="100%">
                 <!--<caption class="text-center">DataTables</caption>-->
                 <thead>
                     <tr>
@@ -66,7 +66,11 @@
                                         {% for tab_data in tabular_data_dict if tab_data['article_id'] == article_id %}
                                             <a href="{{ url_for('data_sources.get_article_page', article_id = article_id) }}">[Article {{ tab_data['article_number'] }}] </a>
                                             {% if count.append(1) %}{% endif %}
-                                            {% if count|length % 10 == 0 %}
+                                            {% if count|length % 9 == 0 and articles_ids|length < 100 %}
+                                                <br/>
+                                            {% elif count|length % 7 == 0 and articles_ids|length > 99 and articles_ids|length < 1000 %}
+                                                <br/>
+                                            {% elif count|length % 5 == 0 and articles_ids|length > 999 %}
                                                 <br/>
                                             {% endif %}
                                         {% endfor %}
@@ -77,6 +81,15 @@
                         {% endfor %}
                     {% endfor %}
                 </tbody>
+
+                <tfoot>
+                    <tr>
+                        <th>Mutually Agreeing Experiments</th>
+                        <th>Predicted Genre</th>
+                        <th>Number of Articles</th>
+                        <th>Articles</th>
+                    </tr>
+                </tfoot>
 
                 </table>
             </div>

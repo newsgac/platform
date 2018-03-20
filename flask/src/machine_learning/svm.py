@@ -36,6 +36,11 @@ class SVM_SVC():
         self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
                       class_weight=self.class_weight, probability=True, random_state=experiment.random_state)
 
+        if experiment.kernel == 'linear':
+            self.feature_weights = []
+        else:
+            self.feature_weights = None
+
         # Load an existing training set
         if experiment.data_source_id is None:
             X, y = io.load_preprocessed_data_from_file('training.txt')
@@ -60,6 +65,10 @@ class SVM_SVC():
     def train(self):
         trained_model = self.clf.fit(self.X_train, self.y_train)
         return trained_model
+
+    @staticmethod
+    def get_feature_weights(classifier):
+        return classifier.coef_
 
     @staticmethod
     def predict(classifier, example):

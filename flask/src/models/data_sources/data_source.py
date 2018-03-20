@@ -100,8 +100,15 @@ class DataSource(object):
 
         for article in articles_from_db:
             art_id = article['_id']
-            art = Article(text=article['article_raw_text'])
-            self.add_features_to_db(article_id=art_id, dict=art.get_features_frog())
+            if not self.processed(art_id):
+                try:
+                    art = Article(text=article['article_raw_text'])
+                    self.add_features_to_db(article_id=art_id, dict=art.features)
+                except Exception as e:
+                    print "Exception processing"
+                    print e.message
+            else:
+                print "Skipping frog processing"
 
         self.processing_completed = datetime.datetime.utcnow()
         self.save_to_db()
@@ -141,19 +148,32 @@ class DataSource(object):
     def save_raw_to_db(self, dict):
         DATABASE.insert(DataSourceConstants.COLLECTION_PROCESSED, dict)
 
+    def does_raw_text_exist(self, raw_text):
+        if DATABASE.find_one(DataSourceConstants.COLLECTION_PROCESSED, {'data_source_id': self._id, 'article_raw_text': raw_text}):
+            return True
+
+        return False
+
     @staticmethod
     def get_articles_by_data_source(data_source_id):
-        return [elem for elem in DATABASE.find(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": data_source_id})]
+        # BUG FIX: retrieve the documents having all the features, checking with one is sufficient
+        return [elem for elem in DATABASE.find(DataSourceConstants.COLLECTION_PROCESSED,
+                                               {"data_source_id": data_source_id, "adjectives": { '$exists': True}})]
 
     def add_features_to_db(self, article_id, dict):
         DATABASE.update(DataSourceConstants.COLLECTION_PROCESSED, {'_id': article_id, 'data_source_id': self._id}, {'$set': dict})
 
+    def processed(self, article_id):
+        doc = DATABASE.find_one(DataSourceConstants.COLLECTION_PROCESSED, {'_id': article_id})
+        if set(doc.keys()) == set(DataUtils.feature_descriptions.keys()):
+            return True
+
+        return False
+
     def read_and_upload_raw_text_input_file(self):
 
         file = DATABASE.getGridFS().get(self.file_handler_db).read()
-        data = []
-
-        limit = 100
+        count = 0
         for line in file.splitlines():
             line = line.rstrip()
 
@@ -169,7 +189,6 @@ class DataSource(object):
             else:
                 label = groups[0].rstrip()
                 date_str = groups[1].rstrip()
-                # TODO: Need to test the following
                 day = date_str.split("/")[0]
                 month = date_str.split("/")[1]
                 year = date_str.split("/")[2]
@@ -179,16 +198,15 @@ class DataSource(object):
                 date = datetime.datetime.strptime(date_str_corr, "%d/%m/%Y").strftime("%d-%m-%Y")
                 raw_text = groups[2].rstrip()
 
-            row = dict(data_source_id=self._id, genre_friendly=DataUtils.genre_codebook_friendly[label], genre=DataUtils.genre_codebook[label], date=date, article_raw_text=raw_text)
-            self.save_raw_to_db(row)
-            data.append(row)
-
-            if limit < 1:
-                break
+            if not self.does_raw_text_exist(raw_text):
+                row = dict(data_source_id=self._id, genre_friendly=DataUtils.genre_codebook_friendly[label],
+                       genre=DataUtils.genre_codebook[label], date=date, article_raw_text=raw_text)
+                self.save_raw_to_db(row)
             else:
-                limit -= 1
+                count += 1
+                print "Raw text exists"
+                print count
 
-        return data
 
     def get_number_of_instances(self):
         return DATABASE.get_count(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": self._id})

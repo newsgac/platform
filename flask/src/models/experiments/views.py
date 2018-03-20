@@ -171,6 +171,25 @@ def predict(experiment_id):
 
     return render_template('experiments/prediction.html', experiment=experiment)
 
+@experiment_blueprint.route('/features_visualisation/<string:experiment_id>')
+@user_decorators.requires_login
+def visualise_features(experiment_id):
+    f_weights = None
+    experiment = Experiment.get_by_id(experiment_id)
+    if experiment.type == "SVC":
+        f_weights = ExperimentSVC.get_by_id(experiment_id).get_features_weights()
+
+    if f_weights is not None:
+        p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights, main_title=experiment.display_title)
+
+        return render_template('experiments/features.html',
+                               experiment=experiment,
+                               plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
+                               css_resources=INLINE.render_css(),
+                               mimetype='text/html')
+
+    return render_template('experiments/features.html', experiment=experiment)
+
 
 @experiment_blueprint.route('/prediction_overview',  methods=['GET', 'POST'])
 @user_decorators.requires_login

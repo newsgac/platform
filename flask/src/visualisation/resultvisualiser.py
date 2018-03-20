@@ -9,8 +9,11 @@ from bokeh.models import (
     FixedTicker)
 from bokeh.embed import components
 from bokeh.plotting import figure
+from bokeh.layouts import gridplot
 import colorcet
 import numpy as np
+import src.data_engineering.data_io as DataIO
+import src.data_engineering.utils as DataUtils
 
 
 __author__ = 'abilgin'
@@ -131,4 +134,76 @@ class ResultVisualiser(object):
 
         return p, script, div
 
+    @staticmethod
+    def retrievePlotForFeatureWeights(coefficients, main_title):
 
+        print coefficients.shape
+        names = DataIO.get_feature_names()
+        top_features = 5
+
+        i = 1
+        j = i + 1
+        plots = []
+        for classifier in coefficients:
+
+            title =  str(DataUtils.genres[i]) + " vs " + str(DataUtils.genres[j])
+            top_coeff_pos = np.argsort(classifier)[-top_features:]
+            top_coeff_neg = np.argsort(classifier)[:top_features]
+
+            pos_features_names = []
+            pos_features_weights = []
+            for index in top_coeff_pos:
+                pos_features_weights.append(format(classifier[index], '.3f'))
+                pos_features_names.append(names[index])
+
+            neg_features_names = []
+            neg_features_weights = []
+            for index in top_coeff_neg:
+                neg_features_weights.append(format(classifier[index], '.3f'))
+                neg_features_names.append(names[index])
+
+            if j == len(DataUtils.genres):
+                i += 1
+                j = i + 1
+            else:
+                j += 1
+
+            all_feats = np.hstack([neg_features_names, pos_features_names])
+            weight_data_pos = {'names': pos_features_names,
+                            'weights': pos_features_weights}
+            pred_source_pos = ColumnDataSource(data=weight_data_pos)
+
+            weight_data_neg = {'names': neg_features_names,
+                            'weights': neg_features_weights}
+            pred_source_neg = ColumnDataSource(data=weight_data_neg)
+
+            p = figure(y_range=all_feats, plot_height=int(30*len(all_feats)),
+                       # title='Feature importance weights for ' + main_title + ": " + title,
+                       title = title,
+                       plot_width=int(500), x_range=[-3, 3], toolbar_location='right',
+                       tools="save,pan,box_zoom,reset,wheel_zoom")
+
+            p.hbar(y=pos_features_names, height=0.5, left=0, right=pos_features_weights, color='navy')
+            p.hbar(y=neg_features_names, height=0.5, left=neg_features_weights, right=0, color='red')
+
+            labels_pos = LabelSet(x='weights', y='names', text='weights', level='glyph', text_font_size='8pt',
+                              x_offset=2, y_offset=-1, source=pred_source_pos, render_mode='canvas')
+            labels_neg = LabelSet(x='weights', y='names', text='weights', level='glyph', text_font_size='8pt',
+                              x_offset=-35, y_offset=-1, source=pred_source_neg, render_mode='canvas')
+
+            p.y_range.range_padding = 0.4
+            p.axis.major_label_text_font_size = '8pt'
+            p.xgrid.grid_line_color = None
+            p.legend.location = "top_left"
+            p.legend.orientation = "horizontal"
+            p.xaxis.major_label_orientation = "horizontal"
+
+            p.add_layout(labels_pos)
+            p.add_layout(labels_neg)
+
+            plots.append(p)
+
+        overview_layout = gridplot(list(plots), ncols=3)
+        script, div = components(overview_layout)
+
+        return plots, script, div

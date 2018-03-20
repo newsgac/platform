@@ -24,8 +24,9 @@ class Result(object):
             self.genre_names.append(''.join(name).split('/')[0])
             genre_order.append(number)
 
+
         #TODO: DEBUG here to see whether genre names and confusion matrix match
-        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=genre_order)
+        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=sorted(genre_order))
         print self.confusion_matrix
 
         self.precision_weighted = format(metrics.precision_score(self.y_test, self.y_pred, average='weighted'), '.2f')
@@ -56,30 +57,30 @@ class Result(object):
         # return cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
         return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
 
-    @staticmethod
-    def predict_raw_example(experiment, text=None, url=None):
-
-        if text:
-            art = Article(text=text)
-        elif url:
-            art = Article(url=url)
-        else:
-            return {}
-
-        example = [art.features[f] for f in DataUtils.features] #TODO: change to DB
-        print example
-
-        # experiment = Experiment.get_by_id("312a051d991e4b16ae7042ed27428ecb")
-        # experiment = Experiment.get_by_id("6e5220a1e1f942c884ebe0cf82817182")
-
-        proba = experiment.predict([example])
-        probabilities = proba[0].tolist()
-
-        resp = {}
-        for i, p in enumerate(probabilities):
-            resp[DataUtils.genres[i + 1][0].split('/')[0]] = p
-
-        sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
-        print sorted_resp
-
-        return sorted_resp
+    # @staticmethod
+    # def predict_raw_example(experiment, text=None, url=None):
+    #
+    #     if text:
+    #         art = Article(text=text)
+    #     elif url:
+    #         art = Article(url=url)
+    #     else:
+    #         return {}
+    #
+    #     example = [art.features[f] for f in DataUtils.features] #TODO: change to DB
+    #     print example
+    #
+    #     # experiment = Experiment.get_by_id("312a051d991e4b16ae7042ed27428ecb")
+    #     # experiment = Experiment.get_by_id("6e5220a1e1f942c884ebe0cf82817182")
+    #
+    #     proba = experiment.predict([example])
+    #     probabilities = proba[0].tolist()
+    #
+    #     resp = {}
+    #     for i, p in enumerate(probabilities):
+    #         resp[DataUtils.genres[i + 1][0].split('/')[0]] = p
+    #
+    #     sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
+    #     print sorted_resp
+    #
+    #     return sorted_resp

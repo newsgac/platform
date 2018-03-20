@@ -11,10 +11,13 @@
         {% if experiment.run_started != None and experiment.run_finished != None %}
             <a class="btn btn-info "
                 href="{{ url_for('experiments.visualise_results', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-eye-open"></span> Results Analysis</a>
+                <span class="glyphicon glyphicon-eye-open"></span> Result Analysis</a>
             <a class="btn btn-primary "
                 href="{{ url_for('experiments.predict', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
+            <a class="btn btn-warning "
+                href="{{ url_for('experiments.visualise_features', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-list-alt"></span> Feature Analysis</a>
             <a class="btn btn-danger"
                href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>

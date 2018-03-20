@@ -26,6 +26,7 @@ import re
 import sys
 import time
 import urllib
+from collections import OrderedDict
 
 import src.data_engineering.utils as Utilities
 
@@ -451,7 +452,11 @@ class Article(object):
     @staticmethod
     def convert_raw_to_features(raw_text):
         art = Article(text=raw_text)
-        example = art.features.values()
+        #sort
+        sorted_feats = OrderedDict(sorted(art.features.items(), key=lambda t: t[0]))
+        print sorted_feats
+        example = sorted_feats.values()
+        print example
         return [example]
 #
 # if __name__=='__main__':

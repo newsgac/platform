@@ -118,9 +118,9 @@ class Experiment(object):
 
             resp = {}
             for i, p in enumerate(probabilities):
-                resp[DataUtilities.genres[i + 1][0].split('/')[0]] = format(p, '.2f')
+                resp[DataUtilities.genres[i + 1][0].split('/')[0]] = float(format(p, '.2f'))
 
-            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=False))
+            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
 
         return sorted_resp
 
@@ -234,4 +234,16 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
             instances.append(DataSource.get_processed_article_by_id(test_id))
 
         return instances
+
+    def get_features_weights(self):
+        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+        classifier = dill.loads(pickled_model)
+        feature_weights = None
+
+        # check if kernel is linear
+        if self.kernel == 'linear':
+            feature_weights = SVM_SVC.get_feature_weights(classifier)
+
+        return feature_weights
+
 

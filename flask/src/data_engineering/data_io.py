@@ -34,7 +34,7 @@ def load_preprocessed_data_from_file(filename):
         csvfile.seek(0)
         reader.next()
         for i, row in enumerate(reader):
-            dataset[i, :] = [row[f] for f in utils.features]
+            dataset[i, :] = [row[f] for f in sorted(utils.features)]
             labels[i] = row['label']
 
         print('Features:', dataset.shape)
@@ -65,7 +65,8 @@ def load_preprocessed_data_from_db(data_source_id):
     # Add features and label for each article
 
     for i, row in enumerate(articles):
-        dataset.append([row[f] for f in articles[i].keys() if f not in non_feature_columns])
+        sorted_keys = sorted(articles[i].keys())
+        dataset.append([row[f] for f in sorted_keys if f not in non_feature_columns])
         labels.append([row['genre'], str(row['_id'])])
 
     print('Features:', len(dataset))
@@ -74,4 +75,8 @@ def load_preprocessed_data_from_db(data_source_id):
 
 def strip_data_row(data):
     non_feature_columns = ['_id', 'date', 'genre', 'genre_friendly', 'article_raw_text', 'data_source_id']
-    return [[data[f] for f in data.keys() if f not in non_feature_columns]]
+    return [[data[f] for f in sorted(data.keys()) if f not in non_feature_columns]]
+
+def get_feature_names():
+    non_feature_columns = ['_id', 'date', 'genre', 'genre_friendly', 'article_raw_text', 'data_source_id']
+    return [ f for f in sorted(utils.features) if f not in non_feature_columns]

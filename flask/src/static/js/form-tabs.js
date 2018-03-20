@@ -177,34 +177,33 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#combinations_table').DataTable(
     {
-    columnDefs: [ {
-        targets: 1,
-        render: $.fn.dataTable.render.ellipsis(75, true)
-        } ],
+    columnDefs: [
+        {targets: 1, render: $.fn.dataTable.render.ellipsis(75, true)},
+        {width: "55%", targets: 3 }
+        ],
+
     initComplete: function () {
+             // Setup - add a text input to each footer cell
+            $('#combinations_table tfoot th').each( function () {
+                var title = $(this).text();
+                $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+            } );
             this.api().columns().every( function () {
-                var column = this;
-                var select = $('<select><option value=""></option></select>')
-                    .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
-                        var val = $.fn.dataTable.util.escapeRegex(
-                            $(this).val()
-                        );
 
-                        column
-                            .search( val ? '^'+val+'$' : '', true, false )
+                var that = this;
+
+                $( 'input', this.footer() ).on( 'keyup change', function () {
+                    if ( that.search() !== this.value ) {
+                        that
+                            .search( this.value )
                             .draw();
-                    } );
+                    }
+                } );
+                });
 
-                column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+'</option>' )
-                })
-                })
-                },
-        stateSave: true,
-        responsive: true,
-
-        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        },
+        stateSave: false,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
     } );
 } );
 
@@ -212,10 +211,11 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#experiments_comparison_table').DataTable(
     {
-    columnDefs: [ {
-        targets: 1,
-        render: $.fn.dataTable.render.ellipsis(75, true)
-        } ],
+    columnDefs: [
+        {targets: 1, render: $.fn.dataTable.render.ellipsis(75, true)},
+        {width: "10%", targets: 0 },
+        {width: "30%", targets: 1 },
+        ],
     initComplete: function () {
             this.api().columns().every( function () {
                 var column = this;
@@ -238,7 +238,7 @@ $(document).ready(function() {
                 },
         stateSave: true,
         responsive: true,
-
+        "scrollX": true,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
     } );
 } );
@@ -247,6 +247,10 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#data_sources_table').DataTable(
     {
+    columnDefs: [ {
+        targets: 2,
+        render: $.fn.dataTable.render.ellipsis(75, true)
+        } ],
     initComplete: function () {
             this.api().columns().every( function () {
                 var column = this;
@@ -268,6 +272,7 @@ $(document).ready(function() {
                 })
                 },
         stateSave: true,
+        "scrollX": true,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
     } );
 } );
