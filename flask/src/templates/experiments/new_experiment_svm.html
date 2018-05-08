@@ -15,7 +15,7 @@
 
                         <li role="presentation" class="active">
                             <a href="#step1" data-toggle="tab" aria-controls="step1" role="tab"
-                               title="Step 1: Data Pre-processing and Feature Selection">
+                               title="Step 1: Training data and Feature Selection">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-file"></i>
                             </span>
@@ -47,7 +47,7 @@
 
                         <div class="tab-pane active" role="tabpanel" id="step1">
                             <div class="step33">
-                                <h5><strong>Pre-process training data and select features</strong></h5>
+                                <h5><strong>Select training data and features</strong></h5>
                                 <hr>
                                 <div class="row mar_ned">
                                     <div class="col-md-4">
@@ -56,18 +56,15 @@
                                             <span class="help-block"><i>The experiment will use the chosen dataset for training and testing.</i></span>
                                         </p>
                                     </div>
-                                    <div class="col-md-8" id="datasource_div">
-                                        <select name="data_source" id="data_source" class="selectpicker show-tick" title="Select a data source...">
-
-                                            <option id="default_data_source" value="">Default</option>
-
+                                    <div class="col-md-4 form-group" id="datasource_div">
+                                        <select required name="data_source" id="data_source" class="data_source selectpicker show-tick form-control" title="Select a data source...">
                                             {% for ds_title in ds_titles_from_db %}
                                                 <option id="{{ ds_title }}" value="{{ ds_title }}">{{ ds_title }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
-
+                                <div class="features_div" id="features_div">
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
                                     <div class="col-md-3">
@@ -78,7 +75,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="auto_pp" id="auto_pp" value="{{request['auto_pp']}}">
+                                                <input type="checkbox" class="auto_feat" name="auto_feat" id="auto_feat" {% if 'auto_feat' in request.keys()%} checked {% endif%}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
@@ -88,99 +85,30 @@
                                     </div>
                                 </div>
                                 <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Stemming</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox" id="stemming_div">
-                                            <label>
-                                                <input type="checkbox" name="stemming" id="stemming" value="{{request['stemming']}}">
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                            </label>
+
+                                <div class="details_div_feat">
+                                    {% for feature, description in feature_dict|dictsort %}
+                                    <div class="row mar_ned">
+                                        <div class="col-md-3">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>{{feature|capitalize}}</strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox" id={{feature}}"_div">
+                                                <label>
+                                                    <input type="checkbox" name={{feature}} id="{{feature}}" {% if feature in request.keys()%} checked {% endif%}>
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span class="help-block"><i>{{description}}<br/></i></span>
                                         </div>
                                     </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>Different forms of the same word are consolidated into a single word.<br/></i></span>
-                                    </div>
+                                    <div class="row mar_ned"></div>
+                                    {% endfor %}
                                 </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Stop-word removal</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox" id="sw_removal_div">
-                                            <label>
-                                                <input type="checkbox" name="sw_removal" id="sw_removal" value="{{request['sw_removal']}}">
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The most common words that are not specific to the different classes are removed.</i></span>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Average sentence length</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox" id="avg_sent_length_div">
-                                            <label>
-                                                <input type="checkbox" name="avg_sent_length" id="avg_sent_length" value="{{request['avg_sent_length']}}">
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The average number of words per sentence in the document.</i></span>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Percentage of exclamation marks</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox" id="perc_exclamation_mark_div">
-                                            <label>
-                                                <input type="checkbox" name="perc_exclamation_mark" id="perc_exclamation_mark" value="{{request['perc_exclamation_mark']}}">
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The percentage of exclamation marks used in the document.</i></span>
-                                    </div>
-                                </div>
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Percentage of adjectives</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox" id="perc_adjectives_div">
-                                            <label>
-                                                <input type="checkbox" name="perc_adjectives" id="perc_adjectives" value="{{request['perc_adjectives']}}">
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>The percentage of adjectives used in the document.</i></span>
-                                    </div>
                                 </div>
                             </div>
                             <ul class="list-inline pull-right">
@@ -205,57 +133,58 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="auto_alg" id="auto_alg" value="{{request['auto_alg']}}">
+                                                <input type="checkbox" class="auto_alg" name="auto_alg" id="auto_alg" {% if 'auto_alg' in request.keys()%} checked {% endif%}>
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Penalty parameter C</strong>
-                                            <span class="help-block"><i>Penalty parameter C of the error term.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group" id="penalty_parameter_c_div">
-                                            <input class="form-control" type="text" name="penalty_parameter_c" id="penalty_parameter_c" value="{{request['penalty_parameter_c']}}" placeholder="1.0">
+                                <div class="details_div_alg">
+                                    <div class="row mar_ned"></div>
+                                    <div class="row mar_ned">
+                                        <div class="col-md-6">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Penalty parameter C</strong>
+                                                <span class="help-block"><i>Penalty parameter C of the error term.</i></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" id="penalty_parameter_c_div">
+                                                <input class="form-control" type="text" name="penalty_parameter_c" id="penalty_parameter_c" value="{{request['penalty_parameter_c']}}" placeholder="1.0">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Kernel</strong>
-                                            <span class="help-block"><i>The kernel type to be used in the algorithm.</i></span>
-                                        </p>
+                                    <div class="row mar_ned"></div>
+                                    <div class="row mar_ned">
+                                        <div class="col-md-6">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Kernel</strong>
+                                                <span class="help-block"><i>The kernel type to be used in the algorithm.</i></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6" id="kernel_div">
+                                            <select name="kernel" id="kernel" class="selectpicker show-tick" title="Select a kernel...">
+                                                <option id="linear" value="linear" {% if request['kernel'] == 'linear'%} selected{% endif %}>Linear</option>
+                                                <option id="poly" value="poly" {% if request['kernel'] == 'poly'%} selected{% endif %}>Polynomial</option>
+                                                <option id="rbf" value="rbf" {% if request['kernel'] == 'rbf'%} selected{% endif %}>Radial Basis Function</option>
+                                                <option id="sigmoid" value="sigmoid" {% if request['kernel'] == 'sigmoid'%} selected{% endif %}>Sigmoid</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6" id="kernel_div">
-                                        <select name="kernel" id="kernel" class="selectpicker show-tick" title="Select a kernel...">
-                                            <option id="linear" value="linear">Linear</option>
-                                            <option id="poly" value="poly">Polynomial</option>
-                                            <option id="rbf" value="rbf">Radial Basis Function</option>
-                                            <option id="sigmoid" value="sigmoid">Sigmoid</option>
-                                        </select>
-                                    </div>
-                                </div>
 
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-6">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Random state</strong>
-                                            <span class="help-block"><i>Enter an integer for a random seed.</i></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group" id="random_state_div">
-                                            <input class="form-control" type="text" name="random_state" id="random_state" value="{{request['random_state']}}" placeholder="8">
+                                    <div class="row mar_ned"></div>
+                                    <div class="row mar_ned">
+                                        <div class="col-md-6">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Random state</strong>
+                                                <span class="help-block"><i>Enter an integer for a random seed.</i></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" id="random_state_div">
+                                                <input class="form-control" type="text" name="random_state" id="random_state" value="{{request['random_state']}}" placeholder="8">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -301,7 +230,7 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="public_flag" id="public_flag" value="{{request['public_flag']}}">
+                                                <input type="checkbox" name="public_flag" id="public_flag" {% if 'public_flag' in request.keys()%} checked {% endif%}>
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>

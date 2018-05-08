@@ -3,7 +3,6 @@ from markupsafe import Markup
 from werkzeug.utils import redirect
 import src.models.users.errors as UserErrors
 import src.models.users.decorators as user_decorators
-from src.common.back import back
 from src.models.users.user import User
 
 __author__ = 'abilgin'

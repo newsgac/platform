@@ -98,88 +98,94 @@ $(function()
 });
 
 $(document).ready(function() {
-
-    $('input[type=checkbox][id=auto_pp]').change(function(){
-        if($(this).is(':checked')) {
-            $('input[type=checkbox][id=stemming]').prop("disabled",true);
-            $('input[type=checkbox][id=stemming]').prop("checked",false);
-            $('input[type=checkbox][id=sw_removal]').prop("disabled",true);
-            $('input[type=checkbox][id=sw_removal]').prop("checked",false);
-            $('input[type=checkbox][id=avg_sent_length]').prop("disabled",true);
-            $('input[type=checkbox][id=avg_sent_length]').prop("checked",false);
-            $('input[type=checkbox][id=perc_exclamation_mark]').prop("disabled",true);
-            $('input[type=checkbox][id=perc_exclamation_mark]').prop("checked",false);
-            $('input[type=checkbox][id=perc_adjectives]').prop("disabled",true);
-            $('input[type=checkbox][id=perc_adjectives]').prop("checked",false);
-            $('#stemming_div').addClass("disabled");
-            $('#sw_removal_div').addClass("disabled");
-            $('#avg_sent_length_div').addClass("disabled");
-            $('#perc_exclamation_mark_div').addClass("disabled");
-            $('#perc_adjectives_div').addClass("disabled");
+    console.log("here")
+    $('.features_div').hide();
+    $('#data_source').change(function(){
+        if($('#data_source').val().toLowerCase().indexOf("nltk") < 0) {
+            $('.features_div').fadeIn();
         } else {
-            $('input[type=checkbox][id=stemming]').prop("disabled",false);
-            $('input[type=checkbox][id=sw_removal]').prop("disabled",false);
-            $('input[type=checkbox][id=avg_sent_length]').prop("disabled",false);
-            $('input[type=checkbox][id=perc_exclamation_mark]').prop("disabled",false);
-            $('input[type=checkbox][id=perc_adjectives]').prop("disabled",false);
-            $('#stemming_div').removeClass("disabled");
-            $('#sw_removal_div').removeClass("disabled");
-            $('#avg_sent_length_div').removeClass("disabled");
-            $('#perc_exclamation_mark_div').removeClass("disabled");
-            $('#perc_adjectives_div').removeClass("disabled");
+            $('.features_div').fadeOut();
         }
     });
 });
 
 $(document).ready(function() {
-
-    $('input[type=checkbox][id=auto_alg]').change(function(){
-        if($(this).is(':checked')) {
-            $('#penalty_parameter_c_div').prop("disabled", true);
-            $('#penalty_parameter_c_div').addClass("disabled");
-            $('#kernel_div').addClass("disabled");
-            $('#probability_div').addClass("disabled");
-            $('#random_state_div').addClass("disabled");
-        } else {
-            $('#penalty_parameter_c_div').removeClass("disabled");
-            $('#kernel_div').removeClass("disabled");
-            $('#probability_div').removeClass("disabled");
-            $('#random_state_div').removeClass("disabled");
-        }
+    $('.auto_data').change(function () {
+        if ($('.auto_data').is(":checked")) {
+            $('.details_div_data').fadeOut();
+            return; }
+       $('.details_div_data').fadeIn();
     });
+    if ($('.auto_data').is(":checked")) {
+            $('.details_div_data').fadeOut();
+            return; }
 });
 
 $(document).ready(function() {
-
-    $('input[type=checkbox][id=auto_alg]').change(function(){
-        if($(this).is(':checked')) {
-            $('#criterion_div').prop("disabled", true);
-            $('#criterion_div:input').attr("disabled", true);
-            $('#criterion_div').addClass("disabled");
-            $('#splitter_div').addClass("disabled");
-            $('#min_samples_split_div').addClass("disabled");
-            $('#min_samples_leaf_div').addClass("disabled");
-            $('#max_features_div').addClass("disabled");
-            $('#random_state_div').addClass("disabled");
-        } else {
-            $('#criterion_div:input').removeAttr('disabled');
-            $('#criterion_div').removeClass("disabled");
-            $('#splitter_div').removeClass("disabled");
-            $('#min_samples_split_div').removeClass("disabled");
-            $('#min_samples_leaf_div').removeClass("disabled");
-            $('#max_features_div').removeClass("disabled");
-            $('#random_state_div').removeClass("disabled");
-        }
+    $('.auto_feat').change(function () {
+        if ($('.auto_feat').is(":checked")) {
+            $('.details_div_feat').fadeOut();
+            return; }
+       $('.details_div_feat').fadeIn();
     });
+    if ($('.auto_feat').is(":checked")) {
+            $('.details_div_feat').fadeOut();
+            return; }
 });
+
+$(document).ready(function() {
+    $('.auto_alg').change(function () {
+        if ($('.auto_alg').is(":checked")) {
+            $('.details_div_alg').fadeOut();
+            return; }
+       $('.details_div_alg').fadeIn();
+    });
+    if ($('.auto_alg').is(":checked")) {
+            $('.details_div_alg').fadeOut();
+            return; }
+});
+
+
+$(document).ready(function() {
+    $('#explanations_table').DataTable(
+    {
+    columnDefs: [
+//        {targets: 1, render: $.fn.dataTable.render.ellipsis(100, true)},
+        {width: "8%", targets: 0 }, {width: "25%", targets: 1 }, {width: "15%", targets: 2 },
+        ],
+
+    initComplete: function () {
+             // Setup - add a text input to each footer cell
+            $('#explanations_table tfoot th').each( function () {
+                var title = $(this).text();
+                $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+            } );
+            this.api().columns().every( function () {
+
+                var that = this;
+
+                $( 'input', this.footer() ).on( 'keyup change', function () {
+                    if ( that.search() !== this.value ) {
+                        that
+                            .search( this.value, false, false, true )
+                            .draw();
+                    }
+                } );
+                });
+
+        },
+        stateSave: false,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+    } );
+} );
 
 
 $(document).ready(function() {
     $('#combinations_table').DataTable(
     {
     columnDefs: [
-        {targets: 1, render: $.fn.dataTable.render.ellipsis(75, true)},
-        {width: "55%", targets: 3 }
+//        {targets: 0, render: $.fn.dataTable.render.ellipsis(75, true)},
+        {width: "55%", targets: 3 }, {width: "10%", targets: 2}, {width: "25%", targets: 0},
         ],
 
     initComplete: function () {
@@ -247,10 +253,12 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#data_sources_table').DataTable(
     {
-    columnDefs: [ {
-        targets: 2,
-        render: $.fn.dataTable.render.ellipsis(75, true)
-        } ],
+    columnDefs: [
+        {targets: 4, render: $.fn.dataTable.render.ellipsis(75, true)},
+        {width: "8%", targets: 1 },
+        {width: "5%", targets: 2 },
+        {width: "7%", targets: 7 },
+         ],
     initComplete: function () {
             this.api().columns().every( function () {
                 var column = this;

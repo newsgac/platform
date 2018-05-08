@@ -22,8 +22,8 @@ def del_exp(self, exp_id):
         ExperimentDT.get_by_id(exp_id).delete()
 
 @celery_app.task(bind=True)
-def process_data(self, data_source_id):
-    DataSource.get_by_id(data_source_id).process_data_source()
+def process_data(self, data_source_id, config):
+    DataSource.get_by_id(data_source_id).process_data_source(config)
     self.update_state(state='PROCESSING', meta={'data_source_id': data_source_id})
 
 @celery_app.task(bind=True)

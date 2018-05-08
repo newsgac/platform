@@ -23,20 +23,71 @@ stylistic features (e.g. frequency of particular punctuation), morphological fea
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 import re
-import sys
 import time
 import urllib
-from collections import OrderedDict
-
+import numpy as np
+from sklearn.externals.joblib import Parallel
+from sklearn.externals.joblib import delayed
+from scipy import sparse
 import src.data_engineering.utils as Utilities
-
+from collections import OrderedDict
 from lxml import etree
 from segtok import segmenter
-# import spacy
+from sklearn.base import BaseEstimator, TransformerMixin
+import spacy
+import frog
+frog_nl = frog.Frog(frog.FrogOptions(parser=False))
+# FROG_URL = 'http://www.kbresearch.nl/frogger/?'
+# from pynlpl.clients.frogclient import FrogClient
 #
-# NL_NLP = spacy.load('nl')
+# port = 8020
+# frogclient = FrogClient('localhost',port)
 
-FROG_URL = 'http://www.kbresearch.nl/frogger/?'
+
+class ArticleTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, url=None, text=None, preprocessor=None):
+        self.art = Article(text=text)
+        self.preprocessor = preprocessor
+
+    def fit(self, X, y):
+        return None
+
+    def transform(self, X):
+        self.X = X
+        # count = 0
+        # results = []
+        # for x in X:
+        #     print count
+        #     new_art = Article(text=x)
+        #     new_art.get_features_spacy()
+        #     print new_art.features.values()
+        #     res = np.reshape(new_art.features.values(), (1, len(new_art.features.values())))
+        #     print "Result reshaped ", res
+        #     results.append(res)
+        #     count += 1
+        # print "Article Transformer : ", results
+        # return np.array(results)
+
+        Xs = Parallel(n_jobs=50)(
+            delayed(_transform_one)(x, self.preprocessor) for x in self.X if len(x)>10)
+        if not Xs:
+            # All transformers are None
+            return np.zeros((X.shape[0], 0))
+        if any(sparse.issparse(f) for f in Xs):
+            # Xs = sparse.hstack(Xs).tocsr()
+            Xs = sparse.vstack(Xs).tocsr()
+        else:
+            # Xs = np.hstack(Xs)
+            Xs = np.vstack(Xs)
+        return Xs
+
+def _transform_one(x, preprocessor):
+    from src.data_engineering.preprocessing import process_raw_text_for_config
+    processed_text, features, id = process_raw_text_for_config(preprocessor, x)
+    # new_art = Article(text=x)
+    # new_art.get_features_spacy()
+    res = np.reshape(features.values(), (1, len(features.values())))
+    return res
 
 
 class Article(object):
@@ -50,7 +101,7 @@ class Article(object):
         '''
         self.url = url
         self.text = text
-        self.features = self.get_features_frog()
+        self.features = {}
 
     def get_features_frog(self):
         '''
@@ -62,7 +113,10 @@ class Article(object):
         if self.url:
             ocr = self.get_ocr(self.url)
         elif self.text:
-            ocr = self.text
+            if type(self.text) is list:
+                ocr = self.text[0]
+            else:
+                ocr = self.text
 
         # Remove unwanted characters
         unwanted_chars = [u'|', u'_', u'=', u'(', u')', u'[', u']', u'<',
@@ -122,34 +176,36 @@ class Article(object):
         # Word count
         token_count = len(tokens)
         features['tokens'] = token_count
-        features['avg_sentence_length'] = token_count / sentence_count
+        features['avg_sentence_length'] = (token_count / sentence_count) if sentence_count > 0 else 0
 
         # Adjective count and percentage
         adj_count = len([t for t in tokens if t[4].startswith('ADJ')])
         features['adjectives'] = adj_count
-        features['adjectives_perc'] = adj_count / float(token_count)
+        features['adjectives_perc'] = (adj_count / float(token_count)) if float(token_count) > 0 else 0
 
         # Verbs and adverbs count and percentage
+        modal_verb = [t for t in tokens if t[4].startswith('WW') and
+                                t[2].capitalize() in Utilities.modal_verbs]
         modal_verb_count = len([t for t in tokens if t[4].startswith('WW') and
             t[2].capitalize() in Utilities.modal_verbs])
         features['modal_verbs'] = modal_verb_count
-        features['modal_verbs_perc'] = modal_verb_count / float(token_count)
+        features['modal_verbs_perc'] = (modal_verb_count / float(token_count)) if float(token_count) > 0 else 0
 
         modal_adverb_count = len([t for t in tokens if t[4].startswith('BW')
             and t[2].capitalize() in Utilities.modal_adverbs])
         features['modal_adverbs'] = modal_adverb_count
         features['modal_adverbs_perc'] = (modal_adverb_count /
-            float(token_count))
+            float(token_count)) if float(token_count) > 0 else 0
 
         cogn_verb_count = len([t for t in tokens if t[4].startswith('WW') and
             t[2].capitalize() in Utilities.cogn_verbs])
         features['cogn_verbs'] = cogn_verb_count
-        features['cogn_verbs_perc'] = cogn_verb_count / float(token_count)
+        features['cogn_verbs_perc'] = (cogn_verb_count / float(token_count)) if float(token_count) > 0 else 0
 
         intensifier_count = len([t for t in tokens if t[2].capitalize() in
             Utilities.intensifiers])
         features['intensifiers'] = intensifier_count
-        features['intensifiers_perc'] = intensifier_count / float(token_count)
+        features['intensifiers_perc'] = (intensifier_count / float(token_count)) if float(token_count) > 0 else 0
 
         # Personal pronoun counts and percentages
         pronoun_1_count = len([t for t in tokens if t[4].startswith('VNW') and
@@ -163,9 +219,9 @@ class Article(object):
         features['pronoun_1'] = pronoun_1_count
         features['pronoun_2'] = pronoun_2_count
         features['pronoun_3'] = pronoun_3_count
-        features['pronoun_1_perc'] = pronoun_1_count / float(token_count)
-        features['pronoun_2_perc'] = pronoun_2_count / float(token_count)
-        features['pronoun_3_perc'] = pronoun_3_count / float(token_count)
+        features['pronoun_1_perc'] = (pronoun_1_count / float(token_count)) if float(token_count) > 0 else 0
+        features['pronoun_2_perc'] = (pronoun_2_count / float(token_count)) if float(token_count) > 0 else 0
+        features['pronoun_3_perc'] = (pronoun_3_count / float(token_count)) if float(token_count) > 0 else 0
         features['pronoun_1_perc_rel'] = (pronoun_1_count / float(pronoun_count)
             if pronoun_count > 0 else 0)
         features['pronoun_2_perc_rel'] = (pronoun_2_count / float(pronoun_count)
@@ -179,12 +235,12 @@ class Article(object):
         # NE count
         features['named_entities'] = len(named_entities)
         features['named_entities_perc'] = (len(named_entities) /
-            float(token_count))
+            float(token_count)) if float(token_count) > 0 else 0
 
         # NE position
         features['named_entities_pos'] = ((sum([tokens.index(t) for t in
             named_entities]) / float(len(named_entities))) /
-            float(token_count)) if len(named_entities) else 0
+            float(token_count)) if len(named_entities) and token_count > 0 else 0
 
         # Unique named entities
         unique_ne_strings = []
@@ -210,10 +266,37 @@ class Article(object):
                 if w in lemmas:
                     features[feature_name] += 1
 
-        return features
+        #New features
+        self.add_common_features(self.text, features)
+
+        self.features = OrderedDict(sorted(features.items(), key=lambda t: t[0]))
+        return self.features
+
+    def add_common_features(self, text, features):
+
+        from pattern.nl import sentiment
+        polarity, subjectivity = sentiment(text)
+        features['polarity'] = polarity
+        features['subjectivity'] = subjectivity
+        count_past = 0
+        count_pres = 0
+        # prevailing tense in ADJ, VERB
+        # for token in tokens:
+        #     if "Tense=Past" in token.tag_:
+        #         count_past += 1
+        #     elif "Tense=Pres" in token.tag_:
+        #         count_pres += 1
+        # if count_past > count_pres:
+        #     # PAST TENSE
+        #     features['prevailing_tense'] = -1
+        # elif count_past < count_pres:
+        #     # PRESENT TENSE
+        #     features['prevailing_tense'] = 1
+        # else:
+        #     features['prevailing_tense'] = 0
 
     def get_features_spacy(self):
-        # TODO: work out with spacy
+        spacy_nl = spacy.load('nl')
         '''
         Calculate article features.
         '''
@@ -277,18 +360,15 @@ class Article(object):
         sentence_count = len(sentences)
         features['sentences'] = sentence_count
 
-        # Chunk, tokenize, tag, lemmatize with Frog
-        tokens = self.frog(sentences)
-        print tokens[0]
-
-        # Alternative to FROG use NLTK or spaCy
-        # tokens_spacy = []
-        # article_nlp = NL_NLP(self.text)
-        # for token in article_nlp:
-        #     tokens_spacy.append(token.pos_)
-        #     print(token.text, token.pos_, token.dep_, token.head.text)
-        #
-        # print tokens_spacy[0]
+        # Chunk, tokenize, tag, lemmatize with Spacy
+        tokens = []
+        doc = spacy_nl(self.text)
+        named_entities = [t.text for t in doc.ents]
+        for token in doc:
+            if token.text in named_entities:
+                tokens.append([token.text, token.pos_, token.lemma_, token.tag_, "NE"])
+            else:
+                tokens.append([token.text, token.pos_, token.lemma_, token.tag_, "NNE"])
 
         # Word count
         token_count = len(tokens)
@@ -296,39 +376,42 @@ class Article(object):
         features['avg_sentence_length'] = token_count / sentence_count
 
         # Adjective count and percentage
-        adj_count = len([t for t in tokens if t[4].startswith('ADJ')])
+        adj_count = len([t for t in tokens if t[1].startswith('ADJ')])
         features['adjectives'] = adj_count
         features['adjectives_perc'] = adj_count / float(token_count)
 
         # Verbs and adverbs count and percentage
-        modal_verb_count = len([t for t in tokens if t[4].startswith('WW') and
-            t[2].capitalize() in Utilities.modal_verbs])
+        # look at the lemma
+        modal_verb = [t for t in tokens if t[1].startswith('VERB') and
+                      t[2].capitalize() in Utilities.modal_verbs]
+        modal_verb_count = len([t for t in tokens if t[1].startswith('VERB') and
+                                t[2].capitalize() in Utilities.modal_verbs])
         features['modal_verbs'] = modal_verb_count
         features['modal_verbs_perc'] = modal_verb_count / float(token_count)
 
-        modal_adverb_count = len([t for t in tokens if t[4].startswith('BW')
+        modal_adverb_count = len([t for t in tokens if t[1].startswith('ADV')
             and t[2].capitalize() in Utilities.modal_adverbs])
         features['modal_adverbs'] = modal_adverb_count
         features['modal_adverbs_perc'] = (modal_adverb_count /
             float(token_count))
 
-        cogn_verb_count = len([t for t in tokens if t[4].startswith('WW') and
+        cogn_verb_count = len([t for t in tokens if t[1].startswith('VERB') and
             t[2].capitalize() in Utilities.cogn_verbs])
         features['cogn_verbs'] = cogn_verb_count
         features['cogn_verbs_perc'] = cogn_verb_count / float(token_count)
 
-        intensifier_count = len([t for t in tokens if t[2].capitalize() in
+        intensifier_count = len([t for t in tokens if t[0].capitalize() in
             Utilities.intensifiers])
         features['intensifiers'] = intensifier_count
         features['intensifiers_perc'] = intensifier_count / float(token_count)
 
         # Personal pronoun counts and percentages
-        pronoun_1_count = len([t for t in tokens if t[4].startswith('VNW') and
-            t[2] in Utilities.pronouns_1])
-        pronoun_2_count = len([t for t in tokens if t[4].startswith('VNW') and
-            t[2] in Utilities.pronouns_2])
-        pronoun_3_count = len([t for t in tokens if t[4].startswith('VNW') and
-            t[2] in Utilities.pronouns_3])
+        pronoun_1_count = len([t for t in tokens if t[1].startswith('PRON') and
+            t[0].lower() in Utilities.pronouns_1])
+        pronoun_2_count = len([t for t in tokens if t[1].startswith('PRON') and
+            t[0].lower() in Utilities.pronouns_2])
+        pronoun_3_count = len([t for t in tokens if t[1].startswith('PRON') and
+            t[0].lower() in Utilities.pronouns_3])
         pronoun_count = pronoun_1_count + pronoun_2_count + pronoun_3_count
 
         features['pronoun_1'] = pronoun_1_count
@@ -345,7 +428,7 @@ class Article(object):
             if pronoun_count > 0 else 0)
 
         # Named entities
-        named_entities = [t for t in tokens if t[6].startswith('B')]
+        named_entities = [t.text for t in doc.ents]
 
         # NE count
         features['named_entities'] = len(named_entities)
@@ -353,13 +436,13 @@ class Article(object):
             float(token_count))
 
         # NE position
-        features['named_entities_pos'] = ((sum([tokens.index(t) for t in
-            named_entities]) / float(len(named_entities))) /
-            float(token_count)) if len(named_entities) else 0
+        features['named_entities_pos'] = ((sum([idx+1 for idx,t in
+                enumerate(tokens) if t[4]=='NE']) / float(len(named_entities))) /
+                float(token_count)) if len(named_entities) and token_count > 0 else 0
 
         # Unique named entities
         unique_ne_strings = []
-        ne_strings = set([t[1].lower() for t in named_entities])
+        ne_strings = set([t[0].lower() for t in named_entities])
         for ne_source in ne_strings:
             unique = True
             for ne_target in [n for n in ne_strings if n != ne_source]:
@@ -381,7 +464,11 @@ class Article(object):
                 if w in lemmas:
                     features[feature_name] += 1
 
-        return features
+        #New features
+        self.add_common_features(self.text, features)
+
+        self.features = OrderedDict(sorted(features.items(), key=lambda t: t[0]))
+        return self.features
 
     def get_ocr(self, url):
         '''
@@ -401,6 +488,7 @@ class Article(object):
         return ocr
 
     def frog(self, sentences):
+
         '''
         Analyze text with Frog NLP suite.
         '''
@@ -409,14 +497,18 @@ class Article(object):
         while len(to_frog):
             batch_size = 10 if len(to_frog) >= 10 else len(to_frog)
             batch = ' '.join(to_frog[:batch_size]).encode('utf-8')
-            query_string = urllib.urlencode({'text': batch})
+            # query_string = urllib.urlencode({'text': batch})
 
             data = ''
             i = 0
             while not data:
                 try:
-                    data = urllib.urlopen(FROG_URL + query_string).read()
-                    data = data.decode('utf-8')
+                    # data = urllib.urlopen(FROG_URL + query_string).read()
+                    data = frog_nl.process_raw(batch)
+                    # data_pro = frog.process(batch)
+                    # print("PARSED OUTPUT=", data_pro)
+                    # print("RAW OUTPUT=", data)
+                    # data = data.decode('utf-8')
                 except IOError:
                     if i < 3:
                         print('Frog data_sources not found, retrying ...')
@@ -434,7 +526,7 @@ class Article(object):
                 assert len(lines[0]) == 10, msg
             except AssertionError as e:
                 self.frog_log(msg)
-                raise
+                print e.message
 
             tokens += [l for l in lines if len(l) == 10]
             to_frog = to_frog[batch_size:]
@@ -449,21 +541,31 @@ class Article(object):
             # f.write(self.url + ' | ' + message + '\n')
             f.write(message + '\n')
 
-    @staticmethod
-    def convert_raw_to_features(raw_text):
-        art = Article(text=raw_text)
-        #sort
-        sorted_feats = OrderedDict(sorted(art.features.items(), key=lambda t: t[0]))
-        print sorted_feats
-        example = sorted_feats.values()
-        print example
-        return [example]
 #
-# if __name__=='__main__':
-#     text = "Churchill, die jarenlang de eerste plaats innam onder de meest bewonderde mannen, doch deze het vorige jaar moest afstaan aan dr Drees, heeft kans gezien de eerste plaats weer te halen met een stijging in populariteit van vijf procent, terwijl dr Drees met een daling van vier procent weer op de tweede plaats kwam te staan. Dit is een van de resultaten van het onderzoek van het Nederlands Instituut voor de Publieke Opinie, dat onlangs alleen aan mannen over het gehele land verspreid en uit alle lagen van de bevolking de vraag stelde: Welke van alle nu levende mannen, leden van de koninklijke familie niet meegerekend, bewondert U het meest? Churchill kreeg vijftien procent van de \"stemmen\", dr Drees 13, Eisenhower 6, Jan van Zutfen 6, Albert Schweitzer 3, Paus Pius XII 2, Adenauer 2, oud-rninifter Lieftinck 2, Einstein 1 en Abe Lenstra tenslotte ook 1 procent. Jan van Zutfen, Adenauer en Einstein komen dit jaar voor het eerst op de lijst van de meest bewonderde mannen voor. (ANP)"
-#     art = Article(text=text)
-#     example = [art.features[f] for f in Utilities.features]
-#     print example
+if __name__=='__main__':
+    text = "Churchill, die jarenlang de eerste plaats innam onder de meest bewonderde mannen, doch deze het vorige jaar moest afstaan aan dr Drees, heeft kans gezien de eerste plaats weer te halen met een stijging in populariteit van vijf procent, terwijl dr Drees met een daling van vier procent weer op de tweede plaats kwam te staan. Dit is een van de resultaten van het onderzoek van het Nederlands Instituut voor de Publieke Opinie, dat onlangs alleen aan mannen over het gehele land verspreid en uit alle lagen van de bevolking de vraag stelde: Welke van alle nu levende mannen, leden van de koninklijke familie niet meegerekend, bewondert U het meest? Churchill kreeg vijftien procent van de stemmen, dr Drees 13, Eisenhower 6, Jan van Zutfen 6, Albert Schweitzer 3, Paus Pius XII 2, Adenauer 2, oud-rninifter Lieftinck 2, Einstein 1 en Abe Lenstra tenslotte ook 1 procent. Jan van Zutfen, Adenauer en Einstein komen dit jaar voor het eerst op de lijst van de meest bewonderde mannen voor. (ANP)"
+    text = text.decode('utf-8')
+    art = Article(text=text)
+    # print "\nFROG\n"
+    for item_f, item_s in zip(art.get_features_frog().items(), art.get_features_spacy().items()):
+        if item_f[1] != item_s[1]:
+            print item_f[0], "-", item_s[0], " => frog: ", item_f[1], " spacy: ", item_s[1]
+    # print "\nSPACY\n"
+    # for feat, val in art.get_features_spacy().items():
+    #     print feat, " : ", val
+
+
+    # output = frog.process_raw("Dit is een test")
+    # print("RAW OUTPUT=", output)
+    # output = frog.process("Dit is nog een test.")
+    # print("PARSED OUTPUT=", output)
+
+    # for data in frogclient.process("Een voorbeeldbericht om te froggen"):
+    #     word, lemma, morph, pos = data[:4]
+    #     print data
+
+    # example = [art.features[f] for f in Utilities.features]
+    # print example
 #
 #     # experiment = Experiment.get_by_id("312a051d991e4b16ae7042ed27428ecb")
 #     experiment = Experiment.get_by_id("6e5220a1e1f942c884ebe0cf82817182")

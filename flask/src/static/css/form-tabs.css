@@ -323,3 +323,13 @@ span.round-tab:hover {
 }
 
 
+/* wrong prediction */
+a.wrong {
+    color: red;
+}
+
+/* correct prediction */
+a.correct {
+    color: green;
+}
+

@@ -135,16 +135,22 @@ class ResultVisualiser(object):
         return p, script, div
 
     @staticmethod
-    def retrievePlotForFeatureWeights(coefficients, main_title):
+    def retrievePlotForFeatureWeights(coefficients, vectorizer=None):
 
-        print coefficients.shape
-        names = DataIO.get_feature_names()
-        top_features = 5
+        if vectorizer == None:
+            names = DataIO.get_feature_names()
+        else:
+            names = vectorizer.get_feature_names()
+        top_features = 10
 
         i = 1
         j = i + 1
         plots = []
         for classifier in coefficients:
+
+            if vectorizer != None:
+                # For classifiers using vectorizer
+                classifier = np.asarray(classifier.todense()).reshape(-1)
 
             title =  str(DataUtils.genres[i]) + " vs " + str(DataUtils.genres[j])
             top_coeff_pos = np.argsort(classifier)[-top_features:]
@@ -162,7 +168,8 @@ class ResultVisualiser(object):
                 neg_features_weights.append(format(classifier[index], '.3f'))
                 neg_features_names.append(names[index])
 
-            if j == len(DataUtils.genres):
+
+            if j == len(DataUtils.genres)-1:
                 i += 1
                 j = i + 1
             else:

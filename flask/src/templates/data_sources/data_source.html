@@ -8,10 +8,16 @@
             </a>
         </h1>
 
-        {% if data_source.processing_started != None and data_source.processing_completed !=None  %}
-            <a class="btn btn-info "
-                href="{{ url_for('data_sources.visualise_stats', data_source_id=data_source._id) }}">
-                <span class="glyphicon glyphicon-eye-open"></span> Data Analysis</a>
+        {% if data_source.processing_started == None and data_source.processing_completed == None  %}
+            {% if data_source.training_purpose %}
+                <a class="btn btn-primary"
+                href="{{ url_for('data_sources.process_data_source', data_source_id=data_source._id) }}">
+                <span class="glyphicon glyphicon-play"></span> Process</a>
+            {% else %}
+                <a class="btn btn-primary"
+                href="{{ url_for('data_sources.process_data_source_unlabelled', data_source_id=data_source._id) }}">
+                <span class="glyphicon glyphicon-play"></span> Process</a>
+            {% endif %}
             <a class="btn btn-danger"
                href="{{ url_for('data_sources.delete_data_source', data_source_id=data_source._id) }}">
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>
@@ -24,9 +30,9 @@
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>
 
         {% else %}
-            <a class="btn btn-primary"
-                href="{{ url_for('data_sources.process_data_source', data_source_id=data_source._id) }}">
-                <span class="glyphicon glyphicon-play"></span> Process</a>
+            <a class="btn btn-info "
+                href="{{ url_for('data_sources.visualise_stats', data_source_id=data_source._id) }}">
+                <span class="glyphicon glyphicon-eye-open"></span> Data Analysis</a>
             <a class="btn btn-danger"
                href="{{ url_for('data_sources.delete_data_source', data_source_id=data_source._id) }}">
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>
@@ -41,7 +47,23 @@
         <div class="col-md-10">
             <p align="left" class="center-align-pad">{{ data_source.description  }}</p>
         </div>
-
     </div>
+
+    {% if data_source.pre_processing_config != None %}
+        <div class="row">
+            <div class="col-md-2">
+                <p align="left" class="center-align-pad"><strong>Configuration</strong></p>
+            </div>
+            <div class="col-md-10">
+                {% if 'auto_data' in data_source.pre_processing_config.keys() %}
+                    <p align="left" class="center-align-pad">Auto</p>
+                {% else %}
+                    {% for key, value in data_source.pre_processing_config.items() %}
+                        <p align="left" class="center-align-pad">{{ key|capitalize }} : {{ value|capitalize }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 
 {% endblock %}

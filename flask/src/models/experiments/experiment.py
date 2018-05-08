@@ -2,21 +2,20 @@ import datetime
 from collections import OrderedDict
 
 import dill
-
+from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
+    remove_stop_words, apply_lemmatization
 from src.models.data_sources.data_source import DataSource
-from src.data_engineering.feature_extraction import Article
 from src.machine_learning.svm import SVM_SVC
 from src.models.configurations.configuration_svc import ConfigurationSVC
-from src.common.database import Database
+from src.run import DATABASE
 import src.models.experiments.constants as ExperimentConstants
 import src.common.utils as Utilities
 import src.data_engineering.utils as DataUtilities
 from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.users.user import User
 import sklearn
-import src.data_engineering.data_io as DataIO
 
-DATABASE = Database()
+
 UT = Utilities.Utils()
 
 __author__ = 'abilgin'
@@ -67,6 +66,11 @@ class Experiment(object):
                               {"user_email": user_email, "data_source_id": ds_id, "run_finished": {"$ne": None}})]
 
     @classmethod
+    def get_any_user_experiments_using_data_id(cls, user_email, ds_id):
+        return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION,
+                                                      {"user_email": user_email, "data_source_id": ds_id})]
+
+    @classmethod
     def get_public_experiments_using_data_id(cls, ds_id):
         return [cls(**elem) for elem in DATABASE.find(ExperimentConstants.COLLECTION,
                                                       {"public_flag": True, "data_source_id": ds_id,
@@ -105,43 +109,73 @@ class Experiment(object):
         pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
         return dill.loads(pickled_results)
 
-    def predict_from_db(self, data_row):
+    # def predict_from_db(self, data_row):
+    #     pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+    #     classifier = dill.loads(pickled_model)
+    #     sorted_resp = {}
+    #
+    #     if type(classifier) is sklearn.svm.classes.SVC:
+    #         # convert raw text to structured example
+    #         example = DataIO.strip_data_row(data_row, self)
+    #         proba = SVM_SVC.predict(classifier, example)
+    #         probabilities = proba[0].tolist()
+    #
+    #         resp = {}
+    #         for i, p in enumerate(probabilities):
+    #             resp[DataUtilities.genres[i + 1][0].split('/')[0]] = float(format(p, '.2f'))
+    #
+    #         sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
+    #
+    #     return sorted_resp
+
+    def predict(self, raw_text, ds):
+        # TODO: test this bit
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
         classifier = dill.loads(pickled_model)
         sorted_resp = {}
+        preprocessor = Preprocessor(ds.pre_processing_config)
 
         if type(classifier) is sklearn.svm.classes.SVC:
             # convert raw text to structured example
-            example = DataIO.strip_data_row(data_row)
-            proba = SVM_SVC.predict(classifier, example)
-            probabilities = proba[0].tolist()
 
-            resp = {}
-            for i, p in enumerate(probabilities):
-                resp[DataUtilities.genres[i + 1][0].split('/')[0]] = float(format(p, '.2f'))
+            # processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
+            if 'nltk' in ds.pre_processing_config.values():
+                #NLTK case
+                pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
+                vectorizer = dill.loads(pickled_model)
 
-            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
+                clean_ocr = get_clean_ocr(raw_text.lower())
 
-        return sorted_resp
+                if 'sw_removal' in ds.pre_processing_config.keys():
+                    clean_ocr = remove_stop_words(clean_ocr)
+                if 'lemmatization' in ds.pre_processing_config.keys():
+                    clean_ocr = apply_lemmatization(clean_ocr)
 
-    def predict(self, raw_text):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-        sorted_resp = {}
-
-        if type(classifier) is sklearn.svm.classes.SVC:
-            # convert raw text to structured example
-            example = Article.convert_raw_to_features(raw_text)
-            proba = SVM_SVC.predict(classifier, example)
+                tfidf_vectors = vectorizer.transform([clean_ocr])
+                proba = SVM_SVC.predict(classifier, tfidf_vectors)
+            else:
+                processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
+                if 'scaling' in ds.pre_processing_config.keys():
+                    scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
+                    feature_set = scaler.transform([features.values()])
+                else:
+                    feature_set = features.values()
+                proba = SVM_SVC.predict(classifier, [feature_set])
             probabilities = proba[0].tolist()
 
             resp = {}
             for i, p in enumerate(probabilities):
                 resp[DataUtilities.genres[i + 1][0].split('/')[0]] = format(p, '.2f')
 
-            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=False))
+            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
 
         return sorted_resp
+
+    def get_classifier(self):
+        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+        classifier = dill.loads(pickled_model)
+
+        return classifier
 
 
 class ExperimentDT(Experiment, ConfigurationDT):
@@ -212,28 +246,25 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         self.run_started = datetime.datetime.utcnow()
         self.save_to_db()
 
+        ds = DataSource.get_by_id(self.data_source_id)
         # train
         svc = SVM_SVC(self)
-        trained_model = svc.train()
-        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
 
-        # populate results
-        results = svc.populate_results(trained_model)
+        if "nltk" not in ds.pre_processing_config.values():
+            trained_model = svc.train()
+            # populate results
+            results = svc.populate_results(trained_model)
+        else:
+            trained_model = svc.train_nltk(ds.train_vectors_handler)
+            # populate results
+            results = svc.populate_results_nltk(trained_model, ds.vectorizer_handler)
+
+        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
         self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
 
         # update the timestamp
         self.run_finished = datetime.datetime.utcnow()
         self.save_to_db()
-
-    def get_test_instances(self):
-        svc = SVM_SVC(self)
-        test_ids = svc.retrieve_test_instances()
-        instances = []
-
-        for test_id in test_ids:
-            instances.append(DataSource.get_processed_article_by_id(test_id))
-
-        return instances
 
     def get_features_weights(self):
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()

@@ -12,3 +12,6 @@ class ResourceFilenameAlreadyExistsError(ResourceError):
 
 class ResourceAlreadyExistsError(ResourceError):
     pass
+
+class ProcessingConfigAlreadyExists(ResourceError):
+    pass

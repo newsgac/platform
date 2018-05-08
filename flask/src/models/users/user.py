@@ -1,10 +1,11 @@
 import uuid
-from src.common.database import Database
+
+from run import DATABASE
 from src.common.utils import Utils
 import src.models.users.errors as UserErrors
 import src.models.users.constants as UserConstants
 
-DATABASE = Database()
+
 UT = Utils()
 
 __author__ = 'abilgin'

@@ -20,6 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 genres = {
+    -1: ['Unlabelled'],
     1: ['Nieuwsbericht'],
     2: ['Interview'],
     3: ['Reportage/feature'],
@@ -30,7 +31,20 @@ genres = {
     8: ['Column']
 }
 
+genres_labels = {
+    'Unlabelled': -1,
+    'Nieuwsbericht': 1,
+    'Interview': 2,
+    'Reportage': 3,
+    'Verslag': 4,
+    'Opiniestuk': 5,
+    'Recensie': 6,
+    'Achtergrond': 7,
+    'Column': 8
+}
+
 genre_codebook = {
+    'UNL' : -1,
     'INT' : 2,
     'NIE' : 1,
     'REP' : 3,
@@ -53,7 +67,8 @@ genre_codebook_friendly = {
     'HOO' : 'Opiniestuk',
     'REC' : 'Recensie',
     'ACH' : 'Achtergrond',
-    'COL' : 'Column'
+    'COL' : 'Column',
+    'UNL' : 'Unlabelled'
 }
 
 features = [
@@ -102,7 +117,10 @@ features = [
     'self_cl_7',
     'self_cl_8',
     'self_cl_3-4',
-    'self_cl_3-8'
+    'self_cl_3-8',
+    'polarity',
+    'subjectivity',
+    # 'prevailing_tense'
 ]
 
 
@@ -153,6 +171,9 @@ feature_descriptions = {
     'self_cl_8' : 'Self classification bucket 8 includes column, cursiefje and rubriek',
     'self_cl_3-4' : 'Self classification bucket 3-4 includes verslag',
     'self_cl_3-8' : 'Self classification bucket 3-8 includes kroniek',
+    'polarity': 'A value between -1 and +1 calculated based on a lexicon of adjectives (pattern.nl)',
+    'subjectivity': 'A value between 0 and +1 calculated based on a lexicon of adjectives (pattern.nl)',
+    # 'prevailing_tense' : 'The prevailing tense used in the document (-1:past, 0:equal, 1:present)',
     # manually added features
     'article_raw_text' : 'Raw text of the article before pre-processing',
     'data_source_id' : 'The data source uploaded by the user that the article is a part of',
@@ -201,7 +222,7 @@ modal_verbs = [
     'Hoeven',
     'Lijken',
     'Kunnen',
-    'Moeten',
+    'Moeten', 'Moest',
     'Mogen',
     'Schijnen',
     'Toeschijnen',

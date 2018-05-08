@@ -1,9 +1,7 @@
 import uuid
 import src.models.configurations.constants as ConfigurationConstants
 import src.models.configurations.errors as ConfigurationErrors
-from src.common.database import Database
-
-DATABASE = Database()
+from src.run import DATABASE
 
 __author__ = 'abilgin'
 

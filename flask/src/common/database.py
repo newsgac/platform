@@ -38,7 +38,7 @@ class Database(object):
         """Creates a cursor to iterate over and returns it
         a key can be given to limit the results from the find command
         """
-        cursor = self.db[collection].find(key, no_cursor_timeout=True)
+        cursor = self.db[collection].find(key, no_cursor_timeout=True).sort("_id", pymongo.ASCENDING)
         for item in cursor:
             yield item
         cursor.close()

@@ -24,7 +24,9 @@
                     <thead>
                         <tr>
                             <th>Title</th>
+                            <th>Purpose</th>
                             <th>Processed</th>
+                            <th>Configuration</th>
                             <th>Description</th>
                             <th>Time of creation</th>
                             <th>Processing duration</th>
@@ -36,12 +38,27 @@
                         {% for data_source in data_sources %}
                         <tr>
                             <td><a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
+                            {% if data_source.training_purpose %}
+                                <td>Training</td>
+                            {% else %}
+                                <td> </td>
+                            {% endif %}
                             {% if data_source.processing_completed != None and data_source.processing_started != None %}
                                 <td>Yes</td>
                             {% elif data_source.processing_completed == None and data_source.processing_started != None %}
                                 <td>In progress</td>
                             {% else %}
                                 <td>No</td>
+                            {% endif %}
+
+                            {% if data_source.pre_processing_config == None %}
+                                <td>N/A</td>
+                            {% else %}
+                                <td>
+                                {% for config, value in data_source.pre_processing_config|dictsort %}
+                                    {{ config|capitalize }}: {{ value|capitalize }}
+                                {% endfor %}
+                                </td>
                             {% endif %}
                             <td>{{ data_source.description }}</td>
                             <td>{{ data_source.get_user_friendly_created().strftime("%d-%m-%Y at %H:%M") }}</td>

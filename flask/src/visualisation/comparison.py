@@ -22,11 +22,13 @@ __author__ = 'abilgin'
 class ExperimentComparator:
 
     def __init__(self, experiments):
-        self.experiments = experiments
+        # self.experiments = experiments
+        self.experiments = sorted(experiments, key=lambda x: x.display_title)
         self.experiment_titles = []
         for experiment in self.experiments:
             self.experiment_titles.append(experiment.display_title)
 
+        self.experiment_titles = sorted(self.experiment_titles)
         # construct data_sources x axis experiment names, y axis result
         self.fmeasure = {}
         self.precision = {}
@@ -309,29 +311,21 @@ class ExperimentComparator:
 
         return scripts, divs
 
-    def retrieveTestArticles(self):
-        test_articles = []
-        unique_data_sources = []
-        unique_exp = []
-        for exp in self.experiments:
-            if exp.data_source_id not in unique_data_sources:
-                unique_data_sources.append(exp.data_source_id)
-                unique_exp.append(exp)
+    def retrieveUniqueTestArticleGenreTuplesBasedOnRawText(self, processed_data_source_list):
+        test_articles_genres = []
+        used_raw_text = []
+        for ds in processed_data_source_list:
+            # ds = DataSource.get_by_id(ds_id)
+            for art in ds.get_test_instances():
+                if (art['article_raw_text'],art["genre_friendly"]) not in used_raw_text:
+                    used_raw_text.append((art['article_raw_text'],art["genre_friendly"]))
+                    test_articles_genres.append((art['_id'],art['article_raw_text'],art["genre_friendly"]))
 
-        print unique_data_sources
-        print unique_exp
-
-        for exp in unique_exp:
-            if exp.type == "SVC":
-                test_articles.extend(ExperimentSVC.get_by_id(exp._id).get_test_instances())
-            elif exp.type == "DT":
-                pass
+        print "Total unique articles : ", len(test_articles_genres)
+        return test_articles_genres
 
 
-        return test_articles
-
-
-    def generateAgreementOverview(self, test_articles):
+    def generateAgreementOverview(self, test_articles_genres):
         # generate a dictionary to be displayed in the format of article_text, mutually agreeing experiments,
         # quantity for the chosen genre
         # test_articles is a list of documents from DB.collection("processed_data")
@@ -339,17 +333,19 @@ class ExperimentComparator:
         count = 1
 
         dicts_to_merge = {}
-        for article in test_articles:
+        for article_id, article_text, article_genre in test_articles_genres:
             tabular_data_row = {}
             tabular_data_row["article_number"] = count
-            tabular_data_row["article_text"] = article["article_raw_text"]
-            tabular_data_row["article_id"] = article["_id"]
+            tabular_data_row["article_text"] = article_text
+            tabular_data_row["article_id"] = article_id
 
             # get prediction from each experiment
             predictions_dict = {}
 
             for exp in self.experiments:
-                predictions_dict[exp] = (exp.predict_from_db(article)).keys()[0]
+                # predictions_dict[exp] = (exp.predict_from_db(article)).keys()[0]
+                ds = DataSource.get_by_id(exp.data_source_id)
+                predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
 
             # print "Predictions dictionary"
             # print predictions_dict
@@ -372,12 +368,13 @@ class ExperimentComparator:
 
             # print "Agreement dictionary"
             # print agreement_dict
-            dicts_to_merge[article["_id"]] = agreement_dict
+            dicts_to_merge[count] = agreement_dict
 
             tabular_data_row["mutual_agreement_exp"] = agreement_dict[prevailing_genre]
             tabular_data_row["gold_agreement_exp"] = []
             tabular_data_row["agreed_genre_prediction"] = prevailing_genre
-            tabular_data_row["true_genre"] = article["genre_friendly"] if article["genre_friendly"] is not None else "N/A"
+            tabular_data_row["true_genre"] = article_genre if (article_genre is not None or article_genre is not "UNL") else "N/A"
+            # TODO:Test for unlabelled data here
 
             count += 1
             tabular_data_all.append(tabular_data_row)
@@ -395,18 +392,67 @@ class ExperimentComparator:
                 combinations[combo] = {}
 
         # for each article find the combination that agrees on the prediction
-        for art_id, d in dicts_to_merge.items():
+        for art_num, d in dicts_to_merge.items():
             for pred, exp_list in d.items():
                 for key in combinations.keys():
                     if set(key) == set(exp_list):
                         if pred not in combinations[key].keys():
                             combinations[key][pred] = []
                         # combinations[key][pred].append(DataSource.get_processed_article_by_id(art_id))
-                        combinations[key][pred].append(art_id)
+                        combinations[key][pred].append(art_num)
                         break
 
 
 
         return tabular_data_all, combinations
+
+
+    @staticmethod
+    def visualize_hypotheses_using_DF(df, data_title, exp_title):
+
+        df = df.reset_index().rename(columns={'index': 'genre'})
+        print df
+        data = df.to_dict(orient='list')
+        idx = df['genre'].tolist()
+        print data
+        source = ColumnDataSource(data=data)
+
+        p = figure(x_range=idx, y_range=(0, df[["1965", "1985"]].values.max() + 5),
+                   plot_height=500, plot_width=1200, title="Relative distribution of genres over time using "+ exp_title+" on "+data_title,
+                   toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
+
+        p.vbar(x=dodge('genre', -0.1, range=p.x_range), top=df.columns[1], width=0.2, source=source,
+               color="#c9d9d3", legend=value("1965"))
+        labels = LabelSet(x='genre', y='1965', text='1965', level='glyph', text_font_size="7pt",
+                          x_offset=-25, y_offset=1, source=source, render_mode='canvas')
+        p.add_layout(labels)
+        p.vbar(x=dodge('genre', 0.1, range=p.x_range), top=df.columns[2], width=0.2, source=source,
+               color="#718dbf", legend=value("1985"))
+        labels = LabelSet(x='genre', y='1985', text='1985', level='glyph', text_font_size="7pt",
+                          x_offset=6, y_offset=1, source=source, render_mode='canvas')
+        p.add_layout(labels)
+
+        # p.vbar(x=dodge('freq', 0.1, range=p.x_range), top='C', width=0.2, source=source,
+        #        color="#e84d60", legend=value("C"))
+        #
+        # p.vbar(x=dodge('freq',  0.3,  range=p.x_range), top='D', width=0.2, source=source,
+        #        color="#ddb7b1", legend=value("D"))
+
+        # labels = LabelSet(x='genre', text='macro', level='glyph', text_font_size="7pt",
+        #                       y_offset=2, source=source,
+        #                       render_mode='canvas')
+        #
+        # p.add_layout(labels)
+
+        p.x_range.range_padding = 0.1
+        p.xgrid.grid_line_color = None
+        p.yaxis.axis_label = "Percentage (%)"
+        p.yaxis.major_label_text_font_size = '10pt'
+        p.xaxis.major_label_text_font_size = '10pt'
+        p.legend.location = "top_left"
+        p.legend.orientation = "horizontal"
+        script, div = components(p)
+
+        return script, div
 
 

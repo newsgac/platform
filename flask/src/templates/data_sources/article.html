@@ -33,4 +33,18 @@
         </div>
     {% endfor %}
 
+    {% for key, value in article['features']|dictsort(false, by='key') %}
+        <div class="row">
+            <div class="col-md-2">
+                <p align="left" class="center-align-pad">{{ key }}</p>
+            </div>
+            <div class="col-md-3">
+                <p align="left" class="center-align-pad">{{ descriptions[key] }}</p>
+            </div>
+            <div class="col-md-7">
+                <p align="left" class="center-align-pad">{{ value }}</p>
+            </div>
+        </div>
+    {% endfor %}
+
 {% endblock %}
