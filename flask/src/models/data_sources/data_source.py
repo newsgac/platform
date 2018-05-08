@@ -156,7 +156,8 @@ class DataSource(object):
 
                     processed_X.append(clean_ocr)
 
-                X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(processed_X, y, random_state=42, shuffle=False)
+                X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(processed_X, y, random_state=42,
+                                                                                      test_size=0.2, shuffle=False)
 
                 # fit the vectorizer
                 vectorizer = TfidfVectorizer(lowercase=False)
@@ -181,7 +182,8 @@ class DataSource(object):
 
                 X, y = self.get_data_with_labels_from_articles(DataSource.get_articles_by_data_source(self._id))
 
-                X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(X, y, random_state=42, shuffle=False)
+                X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(X, y, random_state=42,
+                                                                                      test_size=0.2, shuffle=False)
 
                 if 'scaling' in self.pre_processing_config.keys():
                     print ("Scaling the data..")
@@ -280,18 +282,14 @@ class DataSource(object):
         raw_text_list = []
         date_list = []
         count = 0
-        full_date = False
         no_date = False
         for line in file.splitlines():
             line = line.rstrip()
 
             # groups = re.search(r'^__label__(.{3}.+)DATE\=([\0-9]+) ((?s).*)$', line).groups()
             # groups = re.search(r'^__label__(.{3}.+)DATE\=([\0-9]+[^&]) ((?s).*)$', line).groups()
-            reg_res = re.search(r'^__label__(.{3}.+)DATE\=(.{8}) ((?s).*)$', line)
-            if not reg_res:
-                # full date
-                reg_res = re.search(r'^__label__(.{3}.+)DATE\=(.{10}) ((?s).*)$', line)
-                full_date = True
+            reg_res = re.search(r'^__label__(.{3}.+)DATE\=(\d{1,}\/\d{1,}\/\d{2,}) ((?s).*)$', line)
+
             if not reg_res:
                 # no date
                 reg_res = re.search(r'^__label__(.{3})((?s).*)', line)
@@ -308,7 +306,7 @@ class DataSource(object):
                 day = date_str.split("/")[1]
                 year = date_str.split("/")[2]
 
-                if not full_date:
+                if len(year) == 2:
                     # fix for conversion 20xx where xx < 69 although the data is from 1900s
                     date_str_corr = day + "/" + month + "/19" + year
                 else:
