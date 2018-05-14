@@ -32,7 +32,8 @@ from scipy import sparse
 import src.data_engineering.utils as Utilities
 from collections import OrderedDict
 from lxml import etree
-from segtok import segmenter
+# from segtok import segmenter
+from nltk.tokenize import sent_tokenize
 from sklearn.base import BaseEstimator, TransformerMixin
 import spacy
 import frog
@@ -166,9 +167,11 @@ class Article(object):
             float(len(clean_ocr)))
 
         # Sentence chunk cleaned OCR with Segtok
-        sentences = [s for s in segmenter.split_single(clean_ocr) if s]
+        # sentences = [s for s in segmenter.split_single(clean_ocr) if s]
+        sentences = [s for s in sent_tokenize(clean_ocr) if s]
         sentence_count = len(sentences)
         features['sentences'] = sentence_count
+
 
         # Chunk, tokenize, tag, lemmatize with Frog
         tokens = self.frog(sentences)
@@ -258,13 +261,13 @@ class Article(object):
             float(len(named_entities))) if len(named_entities) else 0
 
         # Self classification
-        lemmas = [t[2].lower() for t in tokens]
-        for cl in Utilities.self_classifications:
-            feature_name = 'self_cl_' + cl
-            features[feature_name] = 0
-            for w in Utilities.self_classifications[cl]:
-                if w in lemmas:
-                    features[feature_name] += 1
+        # lemmas = [t[2].lower() for t in tokens]
+        # for cl in Utilities.self_classifications:
+        #     feature_name = 'self_cl_' + cl
+        #     features[feature_name] = 0
+        #     for w in Utilities.self_classifications[cl]:
+        #         if w in lemmas:
+        #             features[feature_name] += 1
 
         #New features
         self.add_common_features(self.text, features)
@@ -356,7 +359,8 @@ class Article(object):
             float(len(clean_ocr)))
 
         # Sentence chunk cleaned OCR with Segtok
-        sentences = [s for s in segmenter.split_single(clean_ocr) if s]
+        # sentences = [s for s in segmenter.split_single(clean_ocr) if s]
+        sentences = [s for s in sent_tokenize(clean_ocr) if s]
         sentence_count = len(sentences)
         features['sentences'] = sentence_count
 
@@ -456,13 +460,13 @@ class Article(object):
             float(len(named_entities))) if len(named_entities) else 0
 
         # Self classification
-        lemmas = [t[2].lower() for t in tokens]
-        for cl in Utilities.self_classifications:
-            feature_name = 'self_cl_' + cl
-            features[feature_name] = 0
-            for w in Utilities.self_classifications[cl]:
-                if w in lemmas:
-                    features[feature_name] += 1
+        # lemmas = [t[2].lower() for t in tokens]
+        # for cl in Utilities.self_classifications:
+        #     feature_name = 'self_cl_' + cl
+        #     features[feature_name] = 0
+        #     for w in Utilities.self_classifications[cl]:
+        #         if w in lemmas:
+        #             features[feature_name] += 1
 
         #New features
         self.add_common_features(self.text, features)

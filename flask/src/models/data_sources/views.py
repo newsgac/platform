@@ -176,6 +176,24 @@ def visualise_stats(data_source_id):
 
     return render_template('underconstruction.html')
 
+@data_source_blueprint.route('/recommend/<string:data_source_id>')
+@user_decorators.requires_login
+def apply_grid_search(data_source_id):
+    ds = DataSource.get_by_id(data_source_id)
+    report_per_score, feature_reduction = ds.apply_grid_search()
+
+    # results = ds.get_stats()
+    # plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
+    #
+    # return render_template('experiments/results.html',
+    #                        experiment=experiment,
+    #                        results=results,
+    #                        plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+    #                        mimetype='text/html')
+
+    return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
+                           feature_reduction=feature_reduction)
+
 @data_source_blueprint.route('/overview',  methods=['GET'])
 @user_decorators.requires_login
 @back.anchor

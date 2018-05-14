@@ -333,3 +333,6 @@ a.correct {
     color: green;
 }
 
+td.break-word {
+    word-break: break-word;
+}

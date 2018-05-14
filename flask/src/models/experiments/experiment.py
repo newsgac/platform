@@ -109,25 +109,6 @@ class Experiment(object):
         pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
         return dill.loads(pickled_results)
 
-    # def predict_from_db(self, data_row):
-    #     pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-    #     classifier = dill.loads(pickled_model)
-    #     sorted_resp = {}
-    #
-    #     if type(classifier) is sklearn.svm.classes.SVC:
-    #         # convert raw text to structured example
-    #         example = DataIO.strip_data_row(data_row, self)
-    #         proba = SVM_SVC.predict(classifier, example)
-    #         probabilities = proba[0].tolist()
-    #
-    #         resp = {}
-    #         for i, p in enumerate(probabilities):
-    #             resp[DataUtilities.genres[i + 1][0].split('/')[0]] = float(format(p, '.2f'))
-    #
-    #         sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
-    #
-    #     return sorted_resp
-
     def predict(self, raw_text, ds):
         # TODO: test this bit
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()

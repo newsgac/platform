@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Recommendation for
+            <a href="{{ url_for('data_sources.get_data_source_page', data_source_id=data_source._id) }}">
+                <small> {{ data_source.display_title }} </small>
+            </a>
+        </h1>
+    </div>
+
+{% if report_per_score is defined %}
+    <div class="row">
+        <div class="col-xs-12">
+            <table id="recommendation_table" cellspacing="0" class="table table-bordered table-hover display wrap stripe" width="100%">
+            <thead>
+                <tr>
+                    <th rowspan="2">Scoring</th>
+                    <th rowspan="2">Suggested Algorithm </th>
+                    <th rowspan="2">Suggested Hyper-parameters</th>
+                    <th colspan="5">Classification Report</th>
+                </tr>
+                <tr>
+                    <th>Genre</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-score</th>
+                    <th>Support</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for score, model_params_report in report_per_score.items() %}
+                    {% for genre, val in model_params_report['report'].items() %}
+                        <tr>
+                            <td>{{ score|capitalize }}</td>
+                            <td>{{ model_params_report['algorithm'] }}</td>
+                            <td>{% for param, val in model_params_report['params'].items() %}
+                                {% set list1 = param.split('__') %}
+                                {% if list1[1]|length > 0 %}
+                                    {{ list1[1] }}:{{ val }} <br/>
+                                {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ genre }}</td>
+                            <td>{{ val['precision'] }}</td>
+                            <td>{{ val['recall'] }}</td>
+                            <td>{{ val['f1-score'] }}</td>
+                            <td>{{ val['support'] }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <th>Scoring</th>
+                    <th>Suggested Algorithm</th>
+                    <th>Suggested Hyper-parameters</th>
+                    <th>Genre</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-score</th>
+                    <th>Support</th>
+                </tr>
+            </tfoot>
+
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+{% if feature_reduction is defined and feature_reduction|length > 0 %}
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Feature Reduction</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6">
+            <p>Features to discard</p>
+        </div>
+        <div class="col-xs-6">
+            {% for feat in feature_reduction['non-selected'] %}
+                {{ feat| capitalize }}<br/>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

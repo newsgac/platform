@@ -1,5 +1,6 @@
 import uuid
 import datetime
+from StringIO import StringIO
 
 from sklearn.model_selection import train_test_split
 import src.models.data_sources.constants as DataSourceConstants
@@ -157,7 +158,7 @@ class DataSource(object):
                     processed_X.append(clean_ocr)
 
                 X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(processed_X, y, random_state=42,
-                                                                                      test_size=0.2, shuffle=False)
+                                                                                      test_size=0.1, shuffle=False)
 
                 # fit the vectorizer
                 vectorizer = TfidfVectorizer(lowercase=False)
@@ -183,7 +184,7 @@ class DataSource(object):
                 X, y = self.get_data_with_labels_from_articles(DataSource.get_articles_by_data_source(self._id))
 
                 X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(X, y, random_state=42,
-                                                                                      test_size=0.2, shuffle=False)
+                                                                                      test_size=0.1, shuffle=False)
 
                 if 'scaling' in self.pre_processing_config.keys():
                     print ("Scaling the data..")
@@ -412,5 +413,170 @@ class DataSource(object):
 
         return instances
 
+    def apply_grid_search(self):
 
+        from sklearn.model_selection import GridSearchCV
+        from sklearn.model_selection import StratifiedKFold
+        from sklearn.pipeline import Pipeline
+        from sklearn import svm
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.linear_model import SGDClassifier
+        from sklearn.preprocessing import StandardScaler
+        from sklearn.decomposition import PCA
+        from sklearn.feature_selection import SelectKBest, chi2
+        from sklearn.feature_selection import RFECV
+        from sklearn.feature_selection import mutual_info_classif
+        from sklearn.ensemble import RandomForestClassifier
+        import matplotlib.pyplot as plt
+        from sklearn.metrics import classification_report
+        import src.data_engineering.utils as DataUtils
+        import scipy
+
+        target_names = []
+        for number, name in DataUtils.genres.items():
+            if 'Unlabelled' not in name:
+                target_names.append(''.join(name).split('/')[0])
+        print target_names
+
+        X_train = np.asarray(dill.loads(DATABASE.getGridFS().get(self.X_train_handler).read()))
+        X_test = np.asarray(dill.loads(DATABASE.getGridFS().get(self.X_test_handler).read()))
+        y_train_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_train_with_ids_handler).read())
+        y_test_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_test_with_ids_handler).read())
+        y_train = np.asarray([row[0] for row in y_train_with_ids])
+        y_test = np.asarray([row[0] for row in y_test_with_ids])
+
+        if 'nltk' in self.pre_processing_config.values():
+            pickled_model = DATABASE.getGridFS().get(self.vectorizer_handler).read()
+            vectorizer = dill.loads(pickled_model)
+            X_train = vectorizer.transform(X_train)
+            X_test = vectorizer.transform(X_test)
+
+        # Create a pipeline
+        pipe = Pipeline([
+            # ('reduce_dim', PCA()),
+            # ('scale', StandardScaler()),
+            ('classify', svm.SVC())
+        ])
+
+        # Create space of candidate learning algorithms and their hyperparameters
+        N_FEATURES_OPTIONS = [5, 10, 20, 30, 38]
+        KERNEL_OPTIONS = ['linear']
+        C_OPTIONS = [1, 2, 3, 5, 10]
+        # C_OPTIONS = scipy.stats.expon(scale=100)
+        # GAMMA_OPTIONS = [1e-3, 1e-4]
+        param_grid = [
+            # {
+            # 'reduce_dim': [PCA()],
+            # 'reduce_dim__n_components': N_FEATURES_OPTIONS,
+            # 'classify__kernel': KERNEL_OPTIONS,
+            # 'classify__C': C_OPTIONS,
+            # 'classify__gamma': GAMMA_OPTIONS
+            # },
+            {
+                # 'reduce_dim': [SelectKBest(mutual_info_classif)],
+                # 'reduce_dim': [RFECV],
+                # 'reduce_dim__k': N_FEATURES_OPTIONS,
+                'classify__kernel': KERNEL_OPTIONS,
+                'classify__C': C_OPTIONS,
+                # 'classify__gamma': GAMMA_OPTIONS
+            },
+            {
+                # 'scale': [StandardScaler()],
+                'classify': [SGDClassifier()],
+                'classify__loss': ['hinge', 'log'],
+                'classify__penalty': ['l2'] ,
+            },
+            {
+                'classify': [RandomForestClassifier()],
+                'classify__n_estimators': [10, 100, 1000],
+                'classify__max_features': [1, 2, 3, 4, 5, 6]
+            },
+        ]
+        # reducer_labels = ['PCA', 'NMF', 'KBest(chi2)']
+
+        scores = ['accuracy', 'recall_weighted', 'precision_weighted', 'f1_weighted']
+        data_table_recommendation = {}
+        for score in scores:
+            print("# Tuning hyper-parameters for %s" % score)
+            print()
+            grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid, scoring=score)
+            grid.fit(X_train, y_train)
+
+            print("Best parameters set found on development set:")
+            print()
+            print(grid.best_params_)
+            print()
+            print("Grid scores on development set:")
+            print()
+            means = grid.cv_results_['mean_test_score']
+            stds = grid.cv_results_['std_test_score']
+            for mean, std, params in zip(means, stds, grid.cv_results_['params']):
+                print("%0.3f (+/-%0.03f) for %r"
+                      % (mean, std * 2, params))
+            print()
+
+            print("Detailed classification report:")
+            # print()
+            # print("The model is trained on the full development set.")
+            # print("The scores are computed on the full evaluation set.")
+
+            y_true, y_pred = y_test, grid.predict(X_test)
+            report = classification_report(y_true, y_pred, target_names=target_names)
+            print report
+            report_dict = DataSource.report_to_df(report).to_dict()
+            html_dict = {}
+            for measure, gen_val in report_dict.items():
+                for genre, value in gen_val.items():
+                    if genre != 'avg/total':
+                        if genre not in html_dict.keys():
+                            html_dict[genre] = {}
+                        html_dict[genre][measure] = value
+
+            print()
+            data_table_recommendation[score] = {}
+            data_table_recommendation[score]['algorithm'] = grid.best_estimator_.get_params()['classify'].__class__.__name__
+            data_table_recommendation[score]['params'] = grid.best_params_
+            data_table_recommendation[score]['report'] = html_dict
+
+
+            print("Best model and parameters")
+            print(grid.best_estimator_.get_params()['classify'])
+
+        feature_reduction_data = {}
+        if 'nltk' not in self.pre_processing_config.values():
+            rfecv = RFECV(estimator=LogisticRegression(), step=1, cv=StratifiedKFold(5),
+                          scoring='accuracy')
+            rfecv.fit(X_train, y_train)
+
+            print("Optimal number of features : %d" % rfecv.n_features_)
+            print("Optimal features :")
+            selected = rfecv.get_support()
+            indices = []
+            ind = 0
+            print selected
+            for b in selected:
+                if not b:
+                    indices.append(ind)
+                ind += 1
+
+            sorted_keys = sorted(DataUtils.features)
+            print sorted_keys
+            f_names = [f for f in sorted_keys if f not in DataSourceConstants.NON_FEATURE_COLUMNS]
+
+            print ("Non-Selected features are:")
+            print (np.array(f_names)[indices])
+            feature_reduction_data['non-selected'] = np.array(f_names)[indices]
+            feature_reduction_data['selected'] = rfecv.get_support()
+            feature_reduction_data['optimal_number'] = rfecv.n_features_
+
+        return data_table_recommendation, feature_reduction_data
+
+    @staticmethod
+    def report_to_df(report):
+        import pandas as pd
+        report = re.sub(r" +", " ", report).replace("avg / total", "avg/total").replace("\n ", "\n")
+        report_df = pd.read_csv(StringIO("Classes" + report), sep=' ', index_col=0)
+        print report_df.to_dict()
+        return (report_df)
+        # dataframe.to_csv('classification_report.csv', index=False)
 

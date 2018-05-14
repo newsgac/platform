@@ -12,6 +12,7 @@ from nltk.stem.snowball import SnowballStemmer
 from sklearn.externals.joblib import Parallel
 from sklearn.externals.joblib import delayed
 import src.data_engineering.feature_extraction as FE
+import src.data_engineering.utils as DataUtils
 
 
 class Preprocessor():
@@ -95,7 +96,11 @@ def process_raw_text_for_config(preprocessor, raw_text, id=None):
     elif preprocessor.nlp_tool == 'spacy':
         features = art.get_features_spacy()
 
-    return processed_text, features, id
+    #eliminate features according to the feature list
+    valid_feats = DataUtils.features
+    valid_dict = dict([(k, v) for k, v in features.items() if k in valid_feats])
+
+    return processed_text, valid_dict, id
 
 def remove_stop_words(text):
     stopwords = get_stop_words('nl')

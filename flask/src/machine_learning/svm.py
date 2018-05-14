@@ -23,19 +23,20 @@ from collections import OrderedDict
 from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
-from sklearn.model_selection import cross_val_score, StratifiedShuffleSplit
+from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
 from src.data_engineering.postprocessing import Result
 from src.run import DATABASE
 import numpy as np
 import dill
 
+np.random.seed(42)
 
 class SVM_SVC():
 
     def __init__(self, experiment):
-        self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
+        # self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
         self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
-                      class_weight=self.class_weight,
+                      # class_weight=self.class_weight,
                            probability=True, random_state=experiment.random_state)
 
         if experiment.kernel == 'linear':
@@ -102,19 +103,41 @@ class SVM_SVC():
             self.y_train = training_labels
             self.y_test = testing_labels
 
+        # mean_scores = np.array(grid.cv_results_['mean_test_score'])
+        # # scores are in the order of param_grid iteration, which is alphabetical
+        # mean_scores = mean_scores.reshape(len(C_OPTIONS), -1, len(N_FEATURES_OPTIONS))
+        # # select score for best C
+        # mean_scores = mean_scores.max(axis=0)
+        # bar_offsets = (np.arange(len(N_FEATURES_OPTIONS)) *
+        #                (len(reducer_labels) + 1) + .5)
+        #
+        # plt.figure()
+        # COLORS = 'bgrcmyk'
+        # for i, (label, reducer_scores) in enumerate(zip(reducer_labels, mean_scores)):
+        #     plt.bar(bar_offsets + i, reducer_scores, label=label, color=COLORS[i])
+        #
+        # plt.title("Comparing feature reduction techniques")
+        # plt.xlabel('Reduced number of features')
+        # plt.xticks(bar_offsets + len(reducer_labels) / 2, N_FEATURES_OPTIONS)
+        # plt.ylabel('Digit classification accuracy')
+        # plt.ylim((0, 1))
+        # plt.legend(loc='upper left')
 
     def cross_validate(self):
-        # Ten-fold cross-validation with stratified sampling
-        cv = StratifiedShuffleSplit(n_splits=10)
-        print self.X_train[0]
-        scores = cross_val_score(self.clf, self.X_train, self.y_train, cv=cv)
+        # Five-fold cross-validation with stratified sampling
+        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        X_all = np.vstack((self.X_train, self.X_test))
+        y_all = np.hstack((self.y_train, self.y_test))
+        scores = cross_val_score(self.clf, X_all, y_all, cv=cv)
         print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
         return scores
 
     def cross_validate_nltk(self, vectorizer):
-        # Ten-fold cross-validation with stratified sampling
-        cv = StratifiedShuffleSplit(n_splits=10)
-        scores = cross_val_score(self.clf, vectorizer.transform(self.X_train), self.y_train, cv=cv)
+        # Five-fold cross-validation with stratified sampling
+        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        X_all = np.vstack((self.X_train, self.X_test))
+        y_all = np.hstack((self.y_train, self.y_test))
+        scores = cross_val_score(self.clf, vectorizer.transform(X_all), y_all, cv=cv)
         print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
         return scores
 
@@ -134,10 +157,15 @@ class SVM_SVC():
 
     @staticmethod
     def predict(classifier, example):
-        return classifier.predict_proba(example)
+        # return classifier.predict_proba(example)
+        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        return cross_val_predict(classifier, example, method='predict_proba')
+
 
     def populate_results(self, classifier):
-        y_pred = classifier.predict(self.X_test)
+        # y_pred = classifier.predict(self.X_test)
+        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        y_pred = cross_val_predict(estimator=classifier, X=self.X_test, y=self.y_test, method='predict')
         results = Result(y_test=self.y_test, y_pred=y_pred)
         print ("Number of samples")
         print len(self.y_test)
@@ -148,7 +176,10 @@ class SVM_SVC():
     def populate_results_nltk(self, classifier, vectorizer_handler):
         pickled_model = DATABASE.getGridFS().get(vectorizer_handler).read()
         vectorizer = dill.loads(pickled_model)
-        y_pred = classifier.predict(vectorizer.transform(self.X_test))
+        # y_pred = classifier.predict(vectorizer.transform(self.X_test))
+        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        y_pred = cross_val_predict(estimator=classifier, X=vectorizer.transform(self.X_test),
+                                   y=vectorizer.transform(self.y_test), method='predict')
         results = Result(y_test=self.y_test, y_pred=y_pred)
         print ("Number of samples")
         print len(self.y_test)
@@ -156,9 +187,4 @@ class SVM_SVC():
         results.accuracy = format(scores.mean(), '.2f')
         return results
 
-    # def retrieve_test_instances(self):
-    #     # first column is the genre, and the second column is the article id
-    #     genres = np.asarray([row[0] for row in self.y_test_with_ids])
-    #     article_ids = np.asarray([row[1] for row in self.y_test_with_ids])
-    #     return article_ids
 

@@ -35,7 +35,7 @@ class Result(object):
 
         #TODO: DEBUG here to see whether genre names and confusion matrix match
         self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=sorted(genre_order))
-        # print self.confusion_matrix
+        print self.confusion_matrix
 
         self.precision_weighted = format(metrics.precision_score(self.y_test, self.y_pred, average='weighted'), '.2f')
         self.precision_micro = format(metrics.precision_score(self.y_test, self.y_pred, average='micro'), '.2f')
