@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="page-header">
-        <h1>Create Support Vector Machine Experiment </h1>
+        <h1>Create Random Forest Experiment </h1>
     </div>
 
 <!--You can change the '.connecting-line' width to 70% and the '.wizard .nav-tabs > li' width to 33% in the CSS.-->
@@ -24,7 +24,7 @@
 
                         <li role="presentation" class="disabled">
                             <a href="#step2" data-toggle="tab" aria-controls="step2" role="tab"
-                               title="Step 2: SVC Configuration">
+                               title="Step 2: RF Configuration">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-pencil"></i>
                             </span>
@@ -42,7 +42,7 @@
                     </ul>
                 </div>
 
-                <form role="form" id="experiment_svm" method="post">
+                <form role="form" id="experiment_rf" method="post">
                     <div class="tab-content">
 
                         <div class="tab-pane active" role="tabpanel" id="step1">
@@ -120,7 +120,7 @@
 
                         <div class="tab-pane" role="tabpanel" id="step2">
                             <div class="step33">
-                                <h5><strong>Configure support vector algorithmic hyperparameters</strong></h5>
+                                <h5><strong>Configure random forest algorithmic hyperparameters</strong></h5>
                                 <hr>
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">

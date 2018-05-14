@@ -153,26 +153,26 @@ $(document).ready(function() {
         {width: "8%", targets: 0 }, {width: "20%", targets: 1 }, {width: "30%", targets: 2 },
         ],
 
-    initComplete: function () {
-             // Setup - add a text input to each footer cell
-            $('#recommendation_table tfoot th').each( function () {
-                var title = $(this).text();
-                $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-            } );
-            this.api().columns().every( function () {
-
-                var that = this;
-
-                $( 'input', this.footer() ).on( 'keyup change', function () {
-                    if ( that.search() !== this.value ) {
-                        that
-                            .search( this.value, false, false, true )
-                            .draw();
-                    }
-                } );
-                });
-
-        },
+//    initComplete: function () {
+//             // Setup - add a text input to each footer cell
+//            $('#recommendation_table tfoot th').each( function () {
+//                var title = $(this).text();
+//                $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+//            } );
+//            this.api().columns().every( function () {
+//
+//                var that = this;
+//
+//                $( 'input', this.footer() ).on( 'keyup change', function () {
+//                    if ( that.search() !== this.value ) {
+//                        that
+//                            .search( this.value, false, false, true )
+//                            .draw();
+//                    }
+//                } );
+//                });
+//
+//        },
         stateSave: false,
         "scrollX": true,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]

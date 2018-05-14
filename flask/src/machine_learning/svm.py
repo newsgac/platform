@@ -20,6 +20,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 from collections import OrderedDict
 
+from sklearn.model_selection import KFold
+from sklearn.model_selection import ShuffleSplit
+
 from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
@@ -29,7 +32,7 @@ from src.run import DATABASE
 import numpy as np
 import dill
 
-np.random.seed(42)
+# np.random.seed(42)
 
 class SVM_SVC():
 
@@ -124,8 +127,8 @@ class SVM_SVC():
         # plt.legend(loc='upper left')
 
     def cross_validate(self):
-        # Five-fold cross-validation with stratified sampling
-        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        # Ten-fold cross-validation with stratified sampling
+        cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
         X_all = np.vstack((self.X_train, self.X_test))
         y_all = np.hstack((self.y_train, self.y_test))
         scores = cross_val_score(self.clf, X_all, y_all, cv=cv)
@@ -133,9 +136,9 @@ class SVM_SVC():
         return scores
 
     def cross_validate_nltk(self, vectorizer):
-        # Five-fold cross-validation with stratified sampling
-        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
-        X_all = np.vstack((self.X_train, self.X_test))
+        # Ten-fold cross-validation with stratified sampling
+        cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+        X_all = np.hstack((self.X_train, self.X_test))
         y_all = np.hstack((self.y_train, self.y_test))
         scores = cross_val_score(self.clf, vectorizer.transform(X_all), y_all, cv=cv)
         print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
@@ -158,17 +161,20 @@ class SVM_SVC():
     @staticmethod
     def predict(classifier, example):
         # return classifier.predict_proba(example)
-        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
+        cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
         return cross_val_predict(classifier, example, method='predict_proba')
 
 
     def populate_results(self, classifier):
         # y_pred = classifier.predict(self.X_test)
-        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
-        y_pred = cross_val_predict(estimator=classifier, X=self.X_test, y=self.y_test, method='predict')
-        results = Result(y_test=self.y_test, y_pred=y_pred)
+        # cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+        cv = KFold(n_splits=10, random_state=42, shuffle=True)
+        X_all = np.vstack((self.X_train, self.X_test))
+        y_all = np.hstack((self.y_train, self.y_test))
+        y_pred = cross_val_predict(estimator=classifier, X=X_all, y=y_all, method='predict', cv=cv)
+        results = Result(y_test=y_all, y_pred=y_pred)
         print ("Number of samples")
-        print len(self.y_test)
+        print len(y_all)
         scores = self.cross_validate()
         results.accuracy = format(scores.mean(), '.2f')
         return results
@@ -177,12 +183,15 @@ class SVM_SVC():
         pickled_model = DATABASE.getGridFS().get(vectorizer_handler).read()
         vectorizer = dill.loads(pickled_model)
         # y_pred = classifier.predict(vectorizer.transform(self.X_test))
-        cv = StratifiedShuffleSplit(n_splits=5, test_size=0.1, random_state=42)
-        y_pred = cross_val_predict(estimator=classifier, X=vectorizer.transform(self.X_test),
-                                   y=vectorizer.transform(self.y_test), method='predict')
-        results = Result(y_test=self.y_test, y_pred=y_pred)
+        # cv = ShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+        cv = KFold(n_splits=10, random_state=42, shuffle=True)
+        X_all = np.hstack((self.X_train, self.X_test))
+        y_all = np.hstack((self.y_train, self.y_test))
+        y_pred = cross_val_predict(estimator=classifier, X=vectorizer.transform(X_all),
+                                   y=y_all, method='predict', cv=cv)
+        results = Result(y_test=y_all, y_pred=y_pred)
         print ("Number of samples")
-        print len(self.y_test)
+        print len(y_all)
         scores = self.cross_validate_nltk(vectorizer)
         results.accuracy = format(scores.mean(), '.2f')
         return results

@@ -14,7 +14,7 @@ from sklearn.pipeline import make_pipeline
 import src.data_engineering.feature_extraction as FE
 from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config
 
-np.random.seed(8)
+# np.random.seed(42)
 
 __author__ = 'abilgin'
 

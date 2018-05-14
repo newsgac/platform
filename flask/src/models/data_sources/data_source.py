@@ -499,7 +499,7 @@ class DataSource(object):
         for score in scores:
             print("# Tuning hyper-parameters for %s" % score)
             print()
-            grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid, scoring=score)
+            grid = GridSearchCV(pipe, cv=10, n_jobs=1, param_grid=param_grid, scoring=score)
             grid.fit(X_train, y_train)
 
             print("Best parameters set found on development set:")
@@ -544,7 +544,7 @@ class DataSource(object):
 
         feature_reduction_data = {}
         if 'nltk' not in self.pre_processing_config.values():
-            rfecv = RFECV(estimator=LogisticRegression(), step=1, cv=StratifiedKFold(5),
+            rfecv = RFECV(estimator=LogisticRegression(), step=1, cv=StratifiedKFold(10),
                           scoring='accuracy')
             rfecv.fit(X_train, y_train)
 
