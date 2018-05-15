@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="page-header">
-        <h1>Create Random Forest Experiment </h1>
+        <h1>Create Support Vector Machine Experiment </h1>
     </div>
 
 <!--You can change the '.connecting-line' width to 70% and the '.wizard .nav-tabs > li' width to 33% in the CSS.-->
@@ -24,7 +24,7 @@
 
                         <li role="presentation" class="disabled">
                             <a href="#step2" data-toggle="tab" aria-controls="step2" role="tab"
-                               title="Step 2: RF Configuration">
+                               title="Step 2: SVC Configuration">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-pencil"></i>
                             </span>
@@ -42,7 +42,7 @@
                     </ul>
                 </div>
 
-                <form role="form" id="experiment_rf" method="post">
+                <form role="form" id="experiment_svc" method="post">
                     <div class="tab-content">
 
                         <div class="tab-pane active" role="tabpanel" id="step1">
@@ -120,7 +120,7 @@
 
                         <div class="tab-pane" role="tabpanel" id="step2">
                             <div class="step33">
-                                <h5><strong>Configure random forest algorithmic hyperparameters</strong></h5>
+                                <h5><strong>Configure support vector algorithmic hyperparameters</strong></h5>
                                 <hr>
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
@@ -144,13 +144,13 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Number of estimators</strong>
-                                                <span class="help-block"><i>The number of decision trees in the forest.</i></span>
+                                                <strong>Penalty parameter C</strong>
+                                                <span class="help-block"><i>Penalty parameter C of the error term.</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <div class="form-group" id="n_estimators_div">
-                                                <input class="form-control" type="text" name="n_estimators" id="n_estimators" value="{{request['n_estimators']}}" placeholder="10">
+                                            <div class="form-group" id="penalty_parameter_c_div">
+                                                <input class="form-control" type="text" name="penalty_parameter_c" id="penalty_parameter_c" value="{{request['penalty_parameter_c']}}" placeholder="1.0">
                                             </div>
                                         </div>
                                     </div>
@@ -159,15 +159,17 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Maximum number of features</strong>
-                                                <span class="help-block"><i>The number of features to be considered when looking for the best split.<br/>
-                                                If float, then the value is taken as percentage.</i></span>
+                                                <strong>Kernel</strong>
+                                                <span class="help-block"><i>The kernel type to be used in the algorithm.</i></span>
                                             </p>
                                         </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group" id="max_features_div">
-                                                <input class="form-control" type="text" name="max_features" id="max_features" value="{{request['max_features']}}" placeholder="1">
-                                            </div>
+                                        <div class="col-md-6" id="kernel_div">
+                                            <select name="kernel" id="kernel" class="selectpicker show-tick" title="Select a kernel...">
+                                                <option id="linear" value="linear" {% if request['kernel'] == 'linear'%} selected{% endif %}>Linear</option>
+                                                <option id="poly" value="poly" {% if request['kernel'] == 'poly'%} selected{% endif %}>Polynomial</option>
+                                                <option id="rbf" value="rbf" {% if request['kernel'] == 'rbf'%} selected{% endif %}>Radial Basis Function</option>
+                                                <option id="sigmoid" value="sigmoid" {% if request['kernel'] == 'sigmoid'%} selected{% endif %}>Sigmoid</option>
+                                            </select>
                                         </div>
                                     </div>
 

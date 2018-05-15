@@ -69,8 +69,8 @@ $(document).ready(function()
 
 
 $(document).ready(function() {
-    $('#experiment_svm').bootstrapValidator();
-    $('#experiment_dt').bootstrapValidator();
+    $('#experiment_svc').bootstrapValidator();
+    $('#experiment_rf').bootstrapValidator();
 });
 
 $(function()

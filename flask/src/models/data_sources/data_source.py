@@ -527,10 +527,10 @@ class DataSource(object):
             html_dict = {}
             for measure, gen_val in report_dict.items():
                 for genre, value in gen_val.items():
-                    if genre != 'avg/total':
-                        if genre not in html_dict.keys():
-                            html_dict[genre] = {}
-                        html_dict[genre][measure] = value
+                    # if genre != 'avg/total':
+                    if genre not in html_dict.keys():
+                        html_dict[genre] = {}
+                    html_dict[genre][measure] = value
 
             print()
             data_table_recommendation[score] = {}

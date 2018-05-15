@@ -4,8 +4,8 @@
     {% if experiments|length == 0 %}
         <div class="page-header">
             <h1>Experiments <small>created by you</small></h1>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svm') }}"><span class="glyphicon glyphicon-plus "></span> SVM </a>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dt') }}"><span class="glyphicon glyphicon-plus "></span> Decision Trees </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svc') }}"><span class="glyphicon glyphicon-plus "></span> SVC </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_rf') }}"><span class="glyphicon glyphicon-plus "></span> Random Forest </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
         </div>
@@ -25,8 +25,8 @@
         {% endfor %}
         <div class="page-header">
             <h1>Experiments <small>created by you</small></h1>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svm') }}"><span class="glyphicon glyphicon-plus "></span> SVM </a>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dt') }}"><span class="glyphicon glyphicon-plus "></span> Decision Trees </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svc') }}"><span class="glyphicon glyphicon-plus "></span> SVC </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_rf') }}"><span class="glyphicon glyphicon-plus "></span> Random Forest </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
             {% if finished_experiments|length > 0 %}

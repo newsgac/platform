@@ -279,7 +279,8 @@ class ExperimentComparator:
             ds_param = 1/math.sqrt(len(self.experiments))
 
         for experiment in self.experiments:
-            prediction_results = experiment.predict(raw_text)
+            data_source = DataSource.get_by_id(experiment.data_source_id)
+            prediction_results = experiment.predict(raw_text, data_source)
             plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(prediction_results, experiment.display_title, ds_param)
             plots.append(plot)
 

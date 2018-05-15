@@ -9,8 +9,8 @@ import src.data_engineering.data_io as DataIO
 from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
 from src.run import DATABASE
-from src.models.configurations.configuration_dt import ConfigurationDT
-from src.models.experiments.experiment import Experiment, ExperimentDT, ExperimentSVC
+from src.models.configurations.configuration_rf import ConfigurationRF
+from src.models.experiments.experiment import Experiment, ExperimentRF, ExperimentSVC
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
@@ -43,36 +43,53 @@ def user_experiments():
     return render_template("experiments/experiments.html", experiments = Experiment.get_by_user_email(session['email']))
 
 
-@experiment_blueprint.route('/new_dt', methods=['GET', 'POST'])
+@experiment_blueprint.route('/new_rf', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
-def create_experiment_dt():
-    # get the list of data sources of the user
+def create_experiment_rf():
+    # get the list of processed data sources of the user
     existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True)
+    manual_feature_dict = DataIO.get_feature_names_with_descriptions()
+
+    if not existing_data_source_titles:
+        flash("There are no processed data sources for training, redirecting to data sources page.", 'warning')
+        return redirect((url_for('data_sources.user_data_sources')))
 
     if request.method == 'POST':
-        configuration = ConfigurationDT(user_email=session['email'], form=request.form)
-        try:
-            if ConfigurationDT.is_config_unique(configuration):
-                configuration.save_to_db()
-                display_title = request.form['experiment_display_title']
-                public_flag = 'public_flag' in request.form
-                experiment = ExperimentDT(user_email=session['email'], display_title=display_title, public_flag=public_flag,
-                                        **dict(configuration=configuration))
-                experiment.save_to_db()
-                return redirect(url_for('.user_experiments'))
-        except ConfigurationErrors.ConfigAlreadyExistsError as e:
-                error = e.message
-                flash(error, 'error')
-                return render_template('experiments/new_experiment_dt.html', request=request.form)
+        if request.form["data_source"]:
+            configuration = ConfigurationRF(user_email= session['email'], form = request.form)
+            try:
+                if ConfigurationRF.is_config_unique(configuration):
+                    configuration.save_to_db()
+                    display_title = request.form['experiment_display_title']
+                    public_flag = 'public_flag' in request.form
+                    experiment = ExperimentRF(user_email=session['email'],
+                                               display_title=display_title+" ("+configuration.data_source_title+")",
+                                               public_flag=public_flag,
+                                            **dict(configuration=configuration))
+                    experiment.save_to_db()
+                    return redirect(url_for('.user_experiments'))
+            except ConfigurationErrors.ConfigAlreadyExistsError as e:
+                    error = e.message
+                    flash(error, 'error')
+                    return render_template('experiments/new_experiment_rf.html', request=request.form,
+                                           ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+        else:
+            flash('Please choose a data source!', 'error')
+            return render_template('experiments/new_experiment_rf.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
 
-    return render_template('experiments/new_experiment_dt.html', ds_titles_from_db=existing_data_source_titles)
+
+    return render_template('experiments/new_experiment_rf.html', ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict, request={})
 
 
-@experiment_blueprint.route('/new_svm', methods=['GET', 'POST'])
+
+@experiment_blueprint.route('/new_svc', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
-def create_experiment_svm():
+def create_experiment_svc():
     # get the list of processed data sources of the user
     existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True)
     manual_feature_dict = DataIO.get_feature_names_with_descriptions()
@@ -98,16 +115,16 @@ def create_experiment_svm():
             except ConfigurationErrors.ConfigAlreadyExistsError as e:
                     error = e.message
                     flash(error, 'error')
-                    return render_template('experiments/new_experiment_svm.html', request=request.form,
+                    return render_template('experiments/new_experiment_svc.html', request=request.form,
                                            ds_titles_from_db=existing_data_source_titles,
                            feature_dict = manual_feature_dict)
         else:
             flash('Please choose a data source!', 'error')
-            return render_template('experiments/new_experiment_svm.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
+            return render_template('experiments/new_experiment_svc.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
                            feature_dict = manual_feature_dict)
 
 
-    return render_template('experiments/new_experiment_svm.html', ds_titles_from_db=existing_data_source_titles,
+    return render_template('experiments/new_experiment_svc.html', ds_titles_from_db=existing_data_source_titles,
                            feature_dict = manual_feature_dict, request={})
 
 
@@ -133,9 +150,9 @@ def get_experiment_page(experiment_id):
     # return the experiment page with the type code
     experiment = Experiment.get_by_id(experiment_id)
     if experiment.type == "SVC":
-        return render_template('experiments/experiment_svm.html', experiment=experiment)
-    elif experiment.type == "DT":
-        return render_template('experiments/experiment_dt.html', experiment=experiment)
+        return render_template('experiments/experiment_svc.html', experiment=experiment)
+    elif experiment.type == "RF":
+        return render_template('experiments/experiment_rf.html', experiment=experiment)
     elif experiment.type == "DL":
         return render_template('experiments/experiment_dl.html', experiment=experiment)
     else:
@@ -153,8 +170,8 @@ def run_experiment(experiment_id):
         exp = Experiment.get_by_id(experiment_id)
         if exp.type == "SVC":
             ExperimentSVC.get_by_id(experiment_id).run_svc()
-        elif exp.type == "DT":
-            ExperimentDT.get_by_id(experiment_id).run_dt()
+        elif exp.type == "RF":
+            ExperimentRF.get_by_id(experiment_id).run_rf()
 
     time.sleep(0.5)
     return redirect(url_for('.get_experiment_page', experiment_id=experiment_id))
@@ -435,8 +452,8 @@ def delete_experiment(experiment_id):
         exp = Experiment.get_by_id(experiment_id)
         if exp.type == "SVC":
             ExperimentSVC.get_by_id(experiment_id).delete()
-        elif exp.type == "DT":
-            ExperimentDT.get_by_id(experiment_id).delete()
+        elif exp.type == "RF":
+            ExperimentRF.get_by_id(experiment_id).delete()
 
     time.sleep(0.5)
     return back.redirect()

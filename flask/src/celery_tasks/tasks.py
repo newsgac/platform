@@ -1,6 +1,6 @@
 from src.celery_tasks.celery_app import celery_app
 from src.models.data_sources.data_source import DataSource
-from src.models.experiments.experiment import Experiment, ExperimentSVC, ExperimentDT
+from src.models.experiments.experiment import Experiment, ExperimentSVC, ExperimentRF
 
 
 @celery_app.task(bind=True)
@@ -9,8 +9,8 @@ def run_exp(self, exp_id):
     self.update_state(state='RUNNING', meta={'experiment_id': exp_id})
     if exp.type == "SVC":
         ExperimentSVC.get_by_id(exp_id).run_svc()
-    elif exp.type == "DT":
-        ExperimentDT.get_by_id(exp_id).run_dt()
+    elif exp.type == "RF":
+        ExperimentRF.get_by_id(exp_id).run_rf()
 
 
 @celery_app.task(bind=True)
@@ -18,8 +18,8 @@ def del_exp(self, exp_id):
     exp = Experiment.get_by_id(exp_id)
     if exp.type == "SVC":
         ExperimentSVC.get_by_id(exp_id).delete()
-    elif exp.type == "DT":
-        ExperimentDT.get_by_id(exp_id).delete()
+    elif exp.type == "RF":
+        ExperimentRF.get_by_id(exp_id).delete()
 
 @celery_app.task(bind=True)
 def process_data(self, data_source_id, config):

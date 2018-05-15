@@ -1,10 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="page-header">
-        <h1>Create Support Vector Machine Experiment </h1>
-    </div>
 
-<!--You can change the '.connecting-line' width to 70% and the '.wizard .nav-tabs > li' width to 33% in the CSS.-->
+    <div class="page-header">
+        <h1>Random Forest Experiment:
+            <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">
+                <small> {{ experiment.display_title }} </small>
+            </a>
+        </h1>
+
+        {% if experiment.run_started != None and experiment.run_finished != None %}
+            <a class="btn btn-info "
+                href="{{ url_for('experiments.visualise_results', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-eye-open"></span> Result Analysis</a>
+            <a class="btn btn-primary "
+                href="{{ url_for('experiments.predict', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
+            <a class="btn btn-danger"
+               href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-trash"></span> Delete</a>
+
+        {% elif experiment.run_started != None and experiment.run_finished == None %}
+            <a class="btn btn-primary disabled">
+                <span class="glyphicon glyphicon-play"></span> Running</a>
+            <a class="btn btn-danger"
+               href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-trash"></span> Delete</a>
+
+        {% else %}
+            <a class="btn btn-primary"
+                href="{{ url_for('experiments.run_experiment', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-play"></span> Run</a>
+            <a class="btn btn-danger"
+               href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-trash"></span> Delete</a>
+        {% endif %}
+
+    </div>
 
     <div class="row">
         <section>
@@ -24,7 +55,7 @@
 
                         <li role="presentation" class="disabled">
                             <a href="#step2" data-toggle="tab" aria-controls="step2" role="tab"
-                               title="Step 2: SVC Configuration">
+                               title="Step 2: RF Configuration">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-pencil"></i>
                             </span>
@@ -42,7 +73,7 @@
                     </ul>
                 </div>
 
-                <form role="form" id="experiment_svm" method="post">
+                <form role="form" id="experiment_rf" method="post">
                     <div class="tab-content">
 
                         <div class="tab-pane active" role="tabpanel" id="step1">
@@ -56,15 +87,11 @@
                                             <span class="help-block"><i>The experiment will use the chosen dataset for training and testing.</i></span>
                                         </p>
                                     </div>
-                                    <div class="col-md-4 form-group" id="datasource_div">
-                                        <select required name="data_source" id="data_source" class="data_source selectpicker show-tick form-control" title="Select a data source...">
-                                            {% for ds_title in ds_titles_from_db %}
-                                                <option id="{{ ds_title }}" value="{{ ds_title }}">{{ ds_title }}</option>
-                                            {% endfor %}
-                                        </select>
+                                    <div class="col-md-4" id="datasource_div">
+                                        <input type="text" class="form-control" value="{{ experiment.data_source_title|capitalize() }}" disabled>
                                     </div>
                                 </div>
-                                <div class="features_div" id="features_div">
+                                {% if experiment.auto_feat %}
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
                                     <div class="col-md-3">
@@ -75,19 +102,18 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" class="auto_feat" name="auto_feat" id="auto_feat" {% if 'auto_feat' in request.keys()%} checked {% endif%}">
+                                                <input type="checkbox" name="auto_feat" checked disabled>
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="col-md-8">
-                                        <span class="help-block"><i>Automated choice. Ignores all options below.<br/></i></span>
+                                        <span class="help-block"><i>Automated choice with default settings.<br/></i></span>
                                     </div>
                                 </div>
-                                <div class="row mar_ned"></div>
-
-                                <div class="details_div_feat">
-                                    {% for feature, description in feature_dict|dictsort %}
+                            {% else %}
+                            {% if experiment.features|safe %}
+                                {% for feature, value in experiment.features|dictsort %}
                                     <div class="row mar_ned">
                                         <div class="col-md-3">
                                             <p align="right" class="center-align-pad">
@@ -97,7 +123,7 @@
                                         <div class="col-md-1">
                                             <div class="checkbox" id={{feature}}"_div">
                                                 <label>
-                                                    <input type="checkbox" name={{feature}} id="{{feature}}" {% if feature in request.keys()%} checked {% endif%}>
+                                                    <input type="checkbox" name={{feature}} id="{{feature}}" {% if value== True%} checked {% endif%} disabled>
                                                     <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                                 </label>
                                             </div>
@@ -107,9 +133,11 @@
                                         </div>
                                     </div>
                                     <div class="row mar_ned"></div>
-                                    {% endfor %}
-                                </div>
-                                </div>
+                                {% endfor %}
+                            {% endif %}
+                            {% endif %}
+                            <div class="row mar_ned"></div>
+
                             </div>
                             <ul class="list-inline pull-right">
                                 <li>
@@ -120,7 +148,7 @@
 
                         <div class="tab-pane" role="tabpanel" id="step2">
                             <div class="step33">
-                                <h5><strong>Configure support vector algorithmic hyperparameters</strong></h5>
+                                <h5><strong>Configure random forest algorithmic hyperparameters</strong></h5>
                                 <hr>
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
@@ -133,8 +161,13 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" class="auto_alg" name="auto_alg" id="auto_alg" {% if 'auto_alg' in request.keys()%} checked {% endif%}>
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                {% if experiment.auto_alg %}
+                                                    <input type="checkbox" name="auto_alg" checked disabled>
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                {% else %}
+                                                    <input type="checkbox" name="auto_alg" disabled>
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                {% endif %}
                                             </label>
                                         </div>
                                     </div>
@@ -144,14 +177,12 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Penalty parameter C</strong>
-                                                <span class="help-block"><i>Penalty parameter C of the error term.</i></span>
+                                                <strong>Number of estimators</strong>
+                                                <span class="help-block"><i>The number of decision trees in the forest.</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <div class="form-group" id="penalty_parameter_c_div">
-                                                <input class="form-control" type="text" name="penalty_parameter_c" id="penalty_parameter_c" value="{{request['penalty_parameter_c']}}" placeholder="1.0">
-                                            </div>
+                                            <input type="text" class="form-control" value="{{ experiment.n_estimators }}" disabled>
                                         </div>
                                     </div>
 
@@ -159,17 +190,13 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Kernel</strong>
-                                                <span class="help-block"><i>The kernel type to be used in the algorithm.</i></span>
+                                                <strong>Maximum number of features</strong>
+                                                <span class="help-block"><i>The number of features to be considered when looking for the best split.<br/>
+                                                If float, then the value is taken as percentage.</i></span>
                                             </p>
                                         </div>
-                                        <div class="col-md-6" id="kernel_div">
-                                            <select name="kernel" id="kernel" class="selectpicker show-tick" title="Select a kernel...">
-                                                <option id="linear" value="linear" {% if request['kernel'] == 'linear'%} selected{% endif %}>Linear</option>
-                                                <option id="poly" value="poly" {% if request['kernel'] == 'poly'%} selected{% endif %}>Polynomial</option>
-                                                <option id="rbf" value="rbf" {% if request['kernel'] == 'rbf'%} selected{% endif %}>Radial Basis Function</option>
-                                                <option id="sigmoid" value="sigmoid" {% if request['kernel'] == 'sigmoid'%} selected{% endif %}>Sigmoid</option>
-                                            </select>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" value="{{ experiment.max_features }}" disabled>
                                         </div>
                                     </div>
 
@@ -182,9 +209,7 @@
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <div class="form-group" id="random_state_div">
-                                                <input class="form-control" type="text" name="random_state" id="random_state" value="{{request['random_state']}}" placeholder="42">
-                                            </div>
+                                            <input type="text" class="form-control" value="{{ experiment.random_state }}" disabled>
                                         </div>
                                     </div>
                                 </div>
@@ -213,10 +238,7 @@
                                         </p>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="form-group">
-                                            <input required class="form-control" type="text" name="experiment_display_title" id="experiment_display_title"
-                                                   value="{{request['experiment_display_title']}}" placeholder="Experiment Display Title">
-                                        </div>
+                                        <input type="text" class="form-control" value="{{ experiment.display_title }}" disabled>
                                     </div>
                                 </div>
                                 <div class="row mar_ned"></div>
@@ -226,12 +248,17 @@
                                             <strong>Public Visibility</strong>
                                             <span class="help-block"><i>Public experiments can be seen by all users.</i></span>
                                         </p>
-                                        </div>
+                                    </div>
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="public_flag" id="public_flag" {% if 'public_flag' in request.keys()%} checked {% endif%}>
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                {% if experiment.public_flag %}
+                                                    <input type="checkbox" name="public_flag" checked disabled>
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                {% else %}
+                                                    <input type="checkbox" name="public_flag" disabled>
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                {% endif %}
                                             </label>
                                         </div>
                                     </div>

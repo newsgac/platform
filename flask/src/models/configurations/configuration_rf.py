@@ -7,7 +7,7 @@ import src.data_engineering.data_io as DataIO
 
 __author__ = 'abilgin'
 
-class ConfigurationSVC():
+class ConfigurationRF():
 
     def __init__(self, user_email, **kwargs):
 
@@ -15,7 +15,7 @@ class ConfigurationSVC():
             # creation from the web
             self.user_email = user_email
             self._id = uuid.uuid4().hex
-            self.type = "SVC"
+            self.type = "RF"
             self.features = {}
             self.render_form(kwargs['form'])
         elif 'configuration' in kwargs:
@@ -36,8 +36,8 @@ class ConfigurationSVC():
         if self.type != other.type:
             return False
 
-        return self.features == other.features and self.kernel == other.kernel and \
-                self.penalty_parameter_c == other.penalty_parameter_c and self.random_state == other.random_state and \
+        return self.features == other.features and self.n_estimators == other.n_estimators and \
+                self.max_features == other.max_features and self.random_state == other.random_state and \
                 self.data_source_id == other.data_source_id
 
     def render_form(self, form):
@@ -64,38 +64,49 @@ class ConfigurationSVC():
             self.data_source_id = None
             self.data_source_title = None
 
-
         # algorithm specific parameters
         self.auto_alg = "auto_alg" in form
 
         if self.auto_alg:
-            self.penalty_parameter_c = ConfigurationConstants.SVC_DEFAULT_PENALTY_PARAMETER_C
-            self.kernel = str(ConfigurationConstants.SVC_DEFAULT_KERNEL)
+            self.n_estimators = ConfigurationConstants.RF_DEFAULT_N_ESTIMATORS
+            self.max_features = ConfigurationConstants.RF_DEFAULT_MAX_FEATURES
             self.random_state = ConfigurationConstants.SVC_DEFAULT_RANDOM_STATE
         else:
-            self.kernel = str(form['kernel']) if form['kernel'] != "" else str(ConfigurationConstants.SVC_DEFAULT_KERNEL)
 
             try:
-                val = float(form['penalty_parameter_c'])
+                val = int(form['n_estimators'])
             except ValueError:
-                val = ConfigurationConstants.SVC_DEFAULT_PENALTY_PARAMETER_C
+                try:
+                    val = float(form['n_estimators'])
+                except ValueError:
+                    try:
+                        val = str(form['n_estimators'])
+                    except ValueError:
+                        val = ConfigurationConstants.RF_DEFAULT_N_ESTIMATORS
 
-            self.penalty_parameter_c = val
+            self.n_estimators = val
+
+            try:
+                val = int(form['max_features'])
+            except ValueError:
+                val = ConfigurationConstants.RF_DEFAULT_MAX_FEATURES
+
+            self.max_features = val
 
             try:
                 val = int(form['random_state'])
             except ValueError:
-                val = ConfigurationConstants.SVC_DEFAULT_RANDOM_STATE
+                val = ConfigurationConstants.RF_DEFAULT_RANDOM_STATE
 
             self.random_state = int(val)
 
     @classmethod
     def get_by_user_email(cls, user_email):
-        return [cls(**elem) for elem in DATABASE.find(ConfigurationConstants.COLLECTION, {"user_email": user_email, "type":"SVC"})]
+        return [cls(**elem) for elem in DATABASE.find(ConfigurationConstants.COLLECTION, {"user_email": user_email, "type":"RF"})]
 
     @staticmethod
     def is_config_unique(new_config):
-        user_config_list = ConfigurationSVC.get_by_user_email(new_config.user_email)
+        user_config_list = ConfigurationRF.get_by_user_email(new_config.user_email)
 
         for config in user_config_list:
             if config == new_config:

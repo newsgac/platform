@@ -5,13 +5,13 @@ import dill
 from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
     remove_stop_words, apply_lemmatization
 from src.models.data_sources.data_source import DataSource
-from src.machine_learning.svm import SVM_SVC
+from src.machine_learning.clf import CLF
 from src.models.configurations.configuration_svc import ConfigurationSVC
+from src.models.configurations.configuration_rf import ConfigurationRF
 from src.run import DATABASE
 import src.models.experiments.constants as ExperimentConstants
 import src.common.utils as Utilities
 import src.data_engineering.utils as DataUtilities
-from src.models.configurations.configuration_dt import ConfigurationDT
 from src.models.users.user import User
 import sklearn
 
@@ -116,39 +116,38 @@ class Experiment(object):
         sorted_resp = {}
         preprocessor = Preprocessor(ds.pre_processing_config)
 
-        if type(classifier) is sklearn.svm.classes.SVC:
-            # convert raw text to structured example
+        # processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
+        if 'nltk' in ds.pre_processing_config.values():
+            #NLTK case
+            pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
+            vectorizer = dill.loads(pickled_model)
 
-            # processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
-            if 'nltk' in ds.pre_processing_config.values():
-                #NLTK case
-                pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
-                vectorizer = dill.loads(pickled_model)
+            clean_ocr = get_clean_ocr(raw_text.lower())
 
-                clean_ocr = get_clean_ocr(raw_text.lower())
+            if 'sw_removal' in ds.pre_processing_config.keys():
+                clean_ocr = remove_stop_words(clean_ocr)
+            if 'lemmatization' in ds.pre_processing_config.keys():
+                clean_ocr = apply_lemmatization(clean_ocr)
 
-                if 'sw_removal' in ds.pre_processing_config.keys():
-                    clean_ocr = remove_stop_words(clean_ocr)
-                if 'lemmatization' in ds.pre_processing_config.keys():
-                    clean_ocr = apply_lemmatization(clean_ocr)
-
-                tfidf_vectors = vectorizer.transform([clean_ocr])
-                proba = SVM_SVC.predict(classifier, tfidf_vectors)
+            tfidf_vectors = vectorizer.transform([clean_ocr])
+            proba = CLF.predict(classifier, tfidf_vectors)
+        else:
+            processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
+            if 'scaling' in ds.pre_processing_config.keys():
+                scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
+                feature_set = scaler.transform([features.values()])
             else:
-                processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
-                if 'scaling' in ds.pre_processing_config.keys():
-                    scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
-                    feature_set = scaler.transform([features.values()])
-                else:
-                    feature_set = features.values()
-                proba = SVM_SVC.predict(classifier, [feature_set])
-            probabilities = proba[0].tolist()
+                feature_set = features.values()
+            # nsamples, nx, ny = feature_set.shape
+            # d2_train_dataset = feature_set.reshape((nsamples, nx * ny))
+            proba = CLF.predict(classifier, feature_set)
+        probabilities = proba[0].tolist()
 
-            resp = {}
-            for i, p in enumerate(probabilities):
-                resp[DataUtilities.genres[i + 1][0].split('/')[0]] = format(p, '.2f')
+        resp = {}
+        for i, p in enumerate(probabilities):
+            resp[DataUtilities.genres[i + 1][0].split('/')[0]] = format(p, '.2f')
 
-            sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
+        sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
 
         return sorted_resp
 
@@ -157,44 +156,6 @@ class Experiment(object):
         classifier = dill.loads(pickled_model)
 
         return classifier
-
-
-class ExperimentDT(Experiment, ConfigurationDT):
-
-    def __init__(self, user_email, display_title, public_flag, **kwargs):
-        ConfigurationDT.__init__(self, user_email, **kwargs)
-        Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
-
-    def __repr__(self):
-        return "<Experiment {}>".format(self.display_title)
-
-    def save_to_db(self):
-        DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
-
-    def delete(self):
-        id = self._id
-        DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_handler)
-        ConfigurationDT.delete(self)
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
-
-
-    def run_dt(self):
-
-        # update the timestamp
-        self.run_started = datetime.datetime.utcnow()
-        self.save_to_db()
-
-        # TODO: under construction
-
-        # train
-
-        # populate results
-
-
-        # update the timestamp
-        self.run_finished = datetime.datetime.utcnow()
-        self.save_to_db()
 
 
 class ExperimentSVC(Experiment, ConfigurationSVC):
@@ -220,7 +181,6 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         ConfigurationSVC.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
 
-
     def run_svc(self):
 
         # update the timestamp
@@ -229,7 +189,7 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
 
         ds = DataSource.get_by_id(self.data_source_id)
         # train
-        svc = SVM_SVC(self)
+        svc = CLF(self)
 
         if "nltk" not in ds.pre_processing_config.values():
             trained_model = svc.train()
@@ -254,8 +214,56 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
 
         # check if kernel is linear
         if self.kernel == 'linear':
-            feature_weights = SVM_SVC.get_feature_weights(classifier)
+            feature_weights = classifier.coef_
 
         return feature_weights
 
 
+class ExperimentRF(Experiment, ConfigurationRF):
+
+    def __init__(self, user_email, display_title, public_flag, **kwargs):
+        ConfigurationRF.__init__(self, user_email, **kwargs)
+        Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
+
+    def __repr__(self):
+        return "<Experiment {}>".format(self.display_title)
+
+    @classmethod
+    def get_by_id(cls, id):
+        return cls(**DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id}))
+
+    def save_to_db(self):
+        DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
+
+    def delete(self):
+        id = self._id
+        DATABASE.getGridFS().delete(self.trained_model_handler)
+        DATABASE.getGridFS().delete(self.results_handler)
+        ConfigurationRF.delete(self)
+        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
+
+    def run_rf(self):
+
+        # update the timestamp
+        self.run_started = datetime.datetime.utcnow()
+        self.save_to_db()
+
+        ds = DataSource.get_by_id(self.data_source_id)
+        # train
+        rf = CLF(self)
+
+        if "nltk" not in ds.pre_processing_config.values():
+            trained_model = rf.train()
+            # populate results
+            results = rf.populate_results(trained_model)
+        else:
+            trained_model = rf.train_nltk(ds.train_vectors_handler)
+            # populate results
+            results = rf.populate_results_nltk(trained_model, ds.vectorizer_handler)
+
+        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
+        self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
+
+        # update the timestamp
+        self.run_finished = datetime.datetime.utcnow()
+        self.save_to_db()

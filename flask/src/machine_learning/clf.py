@@ -26,6 +26,7 @@ from sklearn.model_selection import ShuffleSplit
 from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
 from src.data_engineering.postprocessing import Result
 from src.run import DATABASE
@@ -34,18 +35,19 @@ import dill
 
 # np.random.seed(42)
 
-class SVM_SVC():
+class CLF():
 
     def __init__(self, experiment):
-        # self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
-        self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
-                      # class_weight=self.class_weight,
-                           probability=True, random_state=experiment.random_state)
 
-        if experiment.kernel == 'linear':
-            self.feature_weights = []
-        else:
-            self.feature_weights = None
+        if experiment.type == "SVC":
+            # self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
+            self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
+                          # class_weight=self.class_weight,
+                               probability=True, random_state=experiment.random_state)
+
+        elif experiment.type == "RF":
+            self.clf = RandomForestClassifier(n_estimators=experiment.n_estimators, max_features=experiment.max_features,
+                                              random_state=experiment.random_state)
 
         data_source = DataSource.get_by_id(experiment.data_source_id)
         ds_X_train = dill.loads(DATABASE.getGridFS().get(data_source.X_train_handler).read())
@@ -106,25 +108,6 @@ class SVM_SVC():
             self.y_train = training_labels
             self.y_test = testing_labels
 
-        # mean_scores = np.array(grid.cv_results_['mean_test_score'])
-        # # scores are in the order of param_grid iteration, which is alphabetical
-        # mean_scores = mean_scores.reshape(len(C_OPTIONS), -1, len(N_FEATURES_OPTIONS))
-        # # select score for best C
-        # mean_scores = mean_scores.max(axis=0)
-        # bar_offsets = (np.arange(len(N_FEATURES_OPTIONS)) *
-        #                (len(reducer_labels) + 1) + .5)
-        #
-        # plt.figure()
-        # COLORS = 'bgrcmyk'
-        # for i, (label, reducer_scores) in enumerate(zip(reducer_labels, mean_scores)):
-        #     plt.bar(bar_offsets + i, reducer_scores, label=label, color=COLORS[i])
-        #
-        # plt.title("Comparing feature reduction techniques")
-        # plt.xlabel('Reduced number of features')
-        # plt.xticks(bar_offsets + len(reducer_labels) / 2, N_FEATURES_OPTIONS)
-        # plt.ylabel('Digit classification accuracy')
-        # plt.ylim((0, 1))
-        # plt.legend(loc='upper left')
 
     def cross_validate(self):
         # Ten-fold cross-validation with stratified sampling
@@ -155,15 +138,10 @@ class SVM_SVC():
         return trained_model
 
     @staticmethod
-    def get_feature_weights(classifier):
-        return classifier.coef_
-
-    @staticmethod
     def predict(classifier, example):
-        # return classifier.predict_proba(example)
-        cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
-        return cross_val_predict(classifier, example, method='predict_proba')
-
+        return classifier.predict_proba(example)
+        # cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+        # return cross_val_predict(classifier, example, method='predict_proba')
 
     def populate_results(self, classifier):
         # y_pred = classifier.predict(self.X_test)
