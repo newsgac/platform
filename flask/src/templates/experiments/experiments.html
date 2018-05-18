@@ -6,8 +6,8 @@
             <h1>Experiments <small>created by you</small></h1>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svc') }}"><span class="glyphicon glyphicon-plus "></span> SVC </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_rf') }}"><span class="glyphicon glyphicon-plus "></span> Random Forest </a>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
+            <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
+            <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
         </div>
         <p><i>There are no experiments to view.</i></p>
     {% else %}
@@ -27,17 +27,20 @@
             <h1>Experiments <small>created by you</small></h1>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svc') }}"><span class="glyphicon glyphicon-plus "></span> SVC </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_rf') }}"><span class="glyphicon glyphicon-plus "></span> Random Forest </a>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
-            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
+            <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
+            <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
             {% if finished_experiments|length > 0 %}
                 <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_overview') }}" target="_blank">
                     <span class="glyphicon glyphicon-eye-open "></span> Overview</a>
-            <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_analyse_compare_explain') }}" target="_blank">
+                <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_analyse_compare_explain') }}" target="_blank">
                     <span class="glyphicon glyphicon-blackboard "></span> ACE (Analyse, Compare, Explain)</a>
                 <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_overview_for_prediction') }}" target="_blank">
                     <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
                 <a class="btn btn-default" href="{{ url_for('experiments.hypotheses_testing') }}" target="_blank">
                     <span class="glyphicon glyphicon-stats"></span> Hypotheses Testing</a>
+                <a class="btn btn-danger" data-toggle="confirmation" data-popout="true"
+                   data-title="This action cannot be undone. Continue?" href="{{ url_for('experiments.delete_all') }}">
+                    <span class="glyphicon glyphicon-trash"></span> Delete All</a>
             {% endif %}
         </div>
 

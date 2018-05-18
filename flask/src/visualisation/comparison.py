@@ -51,7 +51,7 @@ class ExperimentComparator:
         self.other['kappas'] = []
 
         for exp in self.experiments:
-            results = exp.get_results()
+            results = exp.get_results_eval()
             self.fmeasure['weighted'].append(results.fmeasure_weighted)
             self.fmeasure['micro'].append(results.fmeasure_micro)
             self.fmeasure['macro'].append(results.fmeasure_macro)
@@ -251,14 +251,16 @@ class ExperimentComparator:
 
         plots = []
 
-        if len(self.experiments) > 2:
+        if len(self.experiments) == 2:
+            ds_param = 0.7
+        elif len(self.experiments) > 2:
             ds_param = 0.55
         else:
             ds_param = 1/math.sqrt(len(self.experiments))
 
         for experiment in self.experiments:
 
-            results = experiment.get_results()
+            results = experiment.get_results_model()
             plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results,
                                                                            title=experiment.display_title,
                                                                            ds_param = ds_param)
@@ -346,6 +348,7 @@ class ExperimentComparator:
             for exp in self.experiments:
                 # predictions_dict[exp] = (exp.predict_from_db(article)).keys()[0]
                 ds = DataSource.get_by_id(exp.data_source_id)
+                # predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
                 predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
 
             # print "Predictions dictionary"

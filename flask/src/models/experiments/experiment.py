@@ -30,7 +30,8 @@ class Experiment(object):
             self.run_started = None
             self.run_finished = None
             self.trained_model_handler = None
-            self.results_handler = None
+            self.results_eval_handler = None
+            self.results_model_handler = None
         else:
             # default constructor from the database
             self.__dict__.update(kwargs)
@@ -105,8 +106,12 @@ class Experiment(object):
 
         return "{:2d} hours {:2d} minutes {:2d} seconds".format(int(h), int(m), int(s))
 
-    def get_results(self):
-        pickled_results = DATABASE.getGridFS().get(self.results_handler).read()
+    def get_results_eval(self):
+        pickled_results = DATABASE.getGridFS().get(self.results_eval_handler).read()
+        return dill.loads(pickled_results)
+
+    def get_results_model(self):
+        pickled_results = DATABASE.getGridFS().get(self.results_model_handler).read()
         return dill.loads(pickled_results)
 
     def predict(self, raw_text, ds):
@@ -116,7 +121,6 @@ class Experiment(object):
         sorted_resp = {}
         preprocessor = Preprocessor(ds.pre_processing_config)
 
-        # processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
         if 'nltk' in ds.pre_processing_config.values():
             #NLTK case
             pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
@@ -133,14 +137,17 @@ class Experiment(object):
             proba = CLF.predict(classifier, tfidf_vectors)
         else:
             processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
+            sorted_keys = sorted(features.keys())
+            import src.models.data_sources.constants as DataSourceConstants
+            ordered_feature_values = [features[f] for f in sorted_keys if
+                                      f not in DataSourceConstants.NON_FEATURE_COLUMNS]
             if 'scaling' in ds.pre_processing_config.keys():
                 scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
-                feature_set = scaler.transform([features.values()])
+                feature_set = scaler.transform([ordered_feature_values])
             else:
-                feature_set = features.values()
-            # nsamples, nx, ny = feature_set.shape
-            # d2_train_dataset = feature_set.reshape((nsamples, nx * ny))
+                feature_set = ordered_feature_values
             proba = CLF.predict(classifier, feature_set)
+
         probabilities = proba[0].tolist()
 
         resp = {}
@@ -177,7 +184,8 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
     def delete(self):
         id = self._id
         DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_handler)
+        DATABASE.getGridFS().delete(self.results_eval_handler)
+        DATABASE.getGridFS().delete(self.results_model_handler)
         ConfigurationSVC.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
 
@@ -194,14 +202,17 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         if "nltk" not in ds.pre_processing_config.values():
             trained_model = svc.train()
             # populate results
-            results = svc.populate_results(trained_model)
+            results_eval, results_model = svc.populate_results(trained_model)
+            # results = svc.populate_results(CLF.get_untrained_classifier(self))
         else:
             trained_model = svc.train_nltk(ds.train_vectors_handler)
             # populate results
-            results = svc.populate_results_nltk(trained_model, ds.vectorizer_handler)
+            results_eval, results_model = svc.populate_results_nltk(trained_model, ds.vectorizer_handler)
+            # results = svc.populate_results_nltk(CLF.get_untrained_classifier(self), ds.vectorizer_handler)
 
         self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
+        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
+        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
 
         # update the timestamp
         self.run_finished = datetime.datetime.utcnow()
@@ -238,7 +249,8 @@ class ExperimentRF(Experiment, ConfigurationRF):
     def delete(self):
         id = self._id
         DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_handler)
+        DATABASE.getGridFS().delete(self.results_eval_handler)
+        DATABASE.getGridFS().delete(self.results_model_handler)
         ConfigurationRF.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
 
@@ -255,14 +267,15 @@ class ExperimentRF(Experiment, ConfigurationRF):
         if "nltk" not in ds.pre_processing_config.values():
             trained_model = rf.train()
             # populate results
-            results = rf.populate_results(trained_model)
+            results_eval, results_model = rf.populate_results(trained_model)
         else:
             trained_model = rf.train_nltk(ds.train_vectors_handler)
             # populate results
-            results = rf.populate_results_nltk(trained_model, ds.vectorizer_handler)
+            results_eval, results_model = rf.populate_results_nltk(trained_model, ds.vectorizer_handler)
 
         self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_handler = DATABASE.getGridFS().put(dill.dumps(results))
+        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
+        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
 
         # update the timestamp
         self.run_finished = datetime.datetime.utcnow()

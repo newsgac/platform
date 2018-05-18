@@ -73,6 +73,14 @@ $(document).ready(function() {
     $('#experiment_rf').bootstrapValidator();
 });
 
+//$('[data-toggle=confirmation]').confirmation({
+//  rootSelector: '[data-toggle=confirmation]',
+//  // other options
+//});
+
+//$(document).find('[data-toggle="confirmation"]').confirmation();
+//$('[data-toggle="confirmation"]').confirmation();
+
 $(function()
 {
     $(document).on('click', '.btn-add', function(e)

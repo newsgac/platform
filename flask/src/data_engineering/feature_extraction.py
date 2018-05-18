@@ -87,7 +87,11 @@ def _transform_one(x, preprocessor):
     processed_text, features, id = process_raw_text_for_config(preprocessor, x)
     # new_art = Article(text=x)
     # new_art.get_features_spacy()
-    res = np.reshape(features.values(), (1, len(features.values())))
+    sorted_keys = sorted(features.keys())
+    import src.models.data_sources.constants as DataSourceConstants
+    ordered_feature_values = [features[f] for f in sorted_keys if
+                              f not in DataSourceConstants.NON_FEATURE_COLUMNS]
+    res = np.reshape(ordered_feature_values, (1, len(ordered_feature_values)))
     return res
 
 
@@ -189,8 +193,7 @@ class Article(object):
         # Verbs and adverbs count and percentage
         modal_verb = [t for t in tokens if t[4].startswith('WW') and
                                 t[2].capitalize() in Utilities.modal_verbs]
-        modal_verb_count = len([t for t in tokens if t[4].startswith('WW') and
-            t[2].capitalize() in Utilities.modal_verbs])
+        modal_verb_count = len(modal_verb)
         features['modal_verbs'] = modal_verb_count
         features['modal_verbs_perc'] = (modal_verb_count / float(token_count)) if float(token_count) > 0 else 0
 
@@ -388,8 +391,7 @@ class Article(object):
         # look at the lemma
         modal_verb = [t for t in tokens if t[1].startswith('VERB') and
                       t[2].capitalize() in Utilities.modal_verbs]
-        modal_verb_count = len([t for t in tokens if t[1].startswith('VERB') and
-                                t[2].capitalize() in Utilities.modal_verbs])
+        modal_verb_count = len(modal_verb)
         features['modal_verbs'] = modal_verb_count
         features['modal_verbs_perc'] = modal_verb_count / float(token_count)
 

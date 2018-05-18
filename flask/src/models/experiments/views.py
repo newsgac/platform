@@ -18,6 +18,8 @@ from src.celery_tasks.tasks import run_exp, del_exp
 import time
 import dill
 from bokeh.resources import INLINE
+from bokeh.embed import components
+from bokeh.layouts import gridplot
 
 from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
@@ -181,13 +183,22 @@ def run_experiment(experiment_id):
 @user_decorators.requires_login
 def visualise_results(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
-    results = experiment.get_results()
-    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
+    results_eval = experiment.get_results_eval()
+    results_model = experiment.get_results_model()
+    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evalution", ds_param=0.7)
+    p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
+
+    plots = []
+    plots.append(p)
+    plots.append(p_mod)
+    overview_layout = gridplot(plots, ncols=2)
+    script, div = components(overview_layout)
 
     return render_template('experiments/results.html',
                            experiment=experiment,
-                           results=results,
-                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           results_eval=results_eval, results_model=results_model,
+                           plot_script=script, plot_div=div,
+                           js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
 
 
@@ -396,7 +407,8 @@ def public_overview():
 @experiment_blueprint.route('/hypotheses_testing', methods=['GET', 'POST'])
 @user_decorators.requires_login
 def hypotheses_testing():
-    test_data_sources = DataSource.get_testing_by_user_email(user_email=session['email'])
+    # test_data_sources = DataSource.get_testing_by_user_email(user_email=session['email'])
+    test_data_sources = DataSource.get_by_user_email(user_email=session['email'])
     finished_experiments = Experiment.get_finished_user_experiments(user_email=session['email'])
 
     if request.method == 'POST':
@@ -454,6 +466,24 @@ def delete_experiment(experiment_id):
             ExperimentSVC.get_by_id(experiment_id).delete()
         elif exp.type == "RF":
             ExperimentRF.get_by_id(experiment_id).delete()
+
+    time.sleep(0.5)
+    return back.redirect()
+
+@experiment_blueprint.route('/delete_all')
+@user_decorators.requires_login
+def delete_all():
+    experiments = Experiment.get_by_user_email(session['email'])
+    for exp in experiments:
+        if app.DOCKER_RUN:
+            # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
+            task = del_exp.delay(exp._id)
+        else:
+            # without celery
+            if exp.type == "SVC":
+                ExperimentSVC.get_by_id(exp._id).delete()
+            elif exp.type == "RF":
+                ExperimentRF.get_by_id(exp._id).delete()
 
     time.sleep(0.5)
     return back.redirect()

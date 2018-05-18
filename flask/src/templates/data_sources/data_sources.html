@@ -12,8 +12,11 @@
             <h1>Data sources <small>added by you</small></h1>
             <a class="btn btn-success" href="{{ url_for('data_sources.create_data_source') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
             {% if processed_data_sources|length > 0 %}
-                <a class="btn btn-info" href="{{ url_for('data_sources.sources_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
+                <a class="btn btn-info disabled" href="{{ url_for('data_sources.sources_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
             {% endif %}
+            <a class="btn btn-danger" data-toggle="confirmation" data-popout="true"
+                   data-title="This action cannot be undone. Continue?" href="{{ url_for('data_sources.delete_all') }}">
+                    <span class="glyphicon glyphicon-trash"></span> Delete All</a>
         </div>
 
         <!--<div class="container">-->

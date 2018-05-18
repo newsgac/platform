@@ -49,6 +49,10 @@ class DataSource(object):
         return cls(**DATABASE.find_one(DataSourceConstants.COLLECTION, {"_id": id}))
 
     @classmethod
+    def get_all_by_data_source_id(cls, data_source_id):
+        return [(elem) for elem in DATABASE.find(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": data_source_id})]
+
+    @classmethod
     def get_by_user_email(cls, user_email):
         return [cls(**elem) for elem in DATABASE.find(DataSourceConstants.COLLECTION, {"user_email": user_email})]
 
@@ -158,7 +162,7 @@ class DataSource(object):
                     processed_X.append(clean_ocr)
 
                 X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(processed_X, y, random_state=42,
-                                                                                      test_size=0.1, shuffle=False)
+                                                                                      test_size=0.1, shuffle=True)
 
                 # fit the vectorizer
                 vectorizer = TfidfVectorizer(lowercase=False)
@@ -184,12 +188,13 @@ class DataSource(object):
                 X, y = self.get_data_with_labels_from_articles(DataSource.get_articles_by_data_source(self._id))
 
                 X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(X, y, random_state=42,
-                                                                                      test_size=0.1, shuffle=False)
+                                                                                      test_size=0.1, shuffle=True)
 
                 if 'scaling' in self.pre_processing_config.keys():
                     print ("Scaling the data..")
-                    from sklearn.preprocessing import MinMaxScaler
-                    scaler = MinMaxScaler(feature_range=(-1, 1)).fit(X_train)
+                    from sklearn.preprocessing import MinMaxScaler, RobustScaler
+                    # scaler = MinMaxScaler(feature_range=(-1, 1)).fit(X_train)
+                    scaler = RobustScaler().fit(X_train)
                     X_train = scaler.transform(X_train)
                     X_test = scaler.transform(X_test)
                     self.scaler_handler = DATABASE.getGridFS().put(dill.dumps(scaler))
@@ -296,6 +301,9 @@ class DataSource(object):
                 reg_res = re.search(r'^__label__(.{3})((?s).*)', line)
                 no_date = True
 
+            if not reg_res:
+                print line
+
             groups = reg_res.groups()
             label = groups[0].rstrip()
             if no_date:
@@ -387,16 +395,16 @@ class DataSource(object):
 
         if not self.training_purpose:
             # For test datasets, the raw text is stored in the X_train variable
-            test_articles = dill.loads(DATABASE.getGridFS().get(self.X_train_handler).read())
-
-            for art_raw_text in test_articles:
-                art = DataSource.get_processed_article_by_raw_text(art_raw_text)
-                instances.append(art)
+            # test_articles = dill.loads(DATABASE.getGridFS().get(self.X_train_handler).read())
+            #
+            # for art_raw_text in test_articles:
+            #     art = DataSource.get_processed_article_by_raw_text(art_raw_text)
+            #     instances.append(art)
+            instances = DataSource.get_all_by_data_source_id(data_source_id=self._id)
 
         else:
             y_test_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_test_with_ids_handler).read())
             test_ids = np.asarray([row[1] for row in y_test_with_ids ])
-
 
             for test_id in test_ids:
                 instances.append(DataSource.get_processed_article_by_id(test_id))
@@ -459,11 +467,11 @@ class DataSource(object):
         ])
 
         # Create space of candidate learning algorithms and their hyperparameters
-        N_FEATURES_OPTIONS = [5, 10, 20, 30, 38]
-        KERNEL_OPTIONS = ['linear']
+        # N_FEATURES_OPTIONS = [5, 10, 20, 30, 38]
+        KERNEL_OPTIONS = ['linear', 'rbf', 'sigmoid']
         C_OPTIONS = [1, 2, 3, 5, 10]
         # C_OPTIONS = scipy.stats.expon(scale=100)
-        # GAMMA_OPTIONS = [1e-3, 1e-4]
+        GAMMA_OPTIONS = [1e-1, 1e-2, 1e-3, 1e-4]
         param_grid = [
             # {
             # 'reduce_dim': [PCA()],
@@ -478,18 +486,21 @@ class DataSource(object):
                 # 'reduce_dim__k': N_FEATURES_OPTIONS,
                 'classify__kernel': KERNEL_OPTIONS,
                 'classify__C': C_OPTIONS,
-                # 'classify__gamma': GAMMA_OPTIONS
+                'classify__gamma': GAMMA_OPTIONS,
             },
-            {
-                # 'scale': [StandardScaler()],
-                'classify': [SGDClassifier()],
-                'classify__loss': ['hinge', 'log'],
-                'classify__penalty': ['l2'] ,
-            },
+            # {
+            #     # 'scale': [StandardScaler()],
+            #     'classify': [SGDClassifier()],
+            #     'classify__loss': ['hinge', 'log'],
+            #     'classify__penalty': ['l2'] ,
+            # },
             {
                 'classify': [RandomForestClassifier()],
-                'classify__n_estimators': [10, 100, 1000],
-                'classify__max_features': [1, 2, 3, 4, 5, 6]
+                'classify__criterion':['gini'],
+                'classify__n_estimators': [10, 50, 100, 1000],
+                'classify__max_features': [1, 2, 3, 4, 5, 6],
+                # 'classify__max_depth': [1, 5, 10, 15, 20, 25, 30],
+                # 'classify__min_samples_leaf': [1, 2, 4, 6, 8, 10],
             },
         ]
         # reducer_labels = ['PCA', 'NMF', 'KBest(chi2)']
@@ -499,7 +510,7 @@ class DataSource(object):
         for score in scores:
             print("# Tuning hyper-parameters for %s" % score)
             print()
-            grid = GridSearchCV(pipe, cv=10, n_jobs=1, param_grid=param_grid, scoring=score)
+            grid = GridSearchCV(pipe, cv=10, n_jobs=3, param_grid=param_grid, scoring=score)
             grid.fit(X_train, y_train)
 
             print("Best parameters set found on development set:")

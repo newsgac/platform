@@ -22,7 +22,7 @@ from collections import OrderedDict
 
 from sklearn.model_selection import KFold
 from sklearn.model_selection import ShuffleSplit
-
+from sklearn.metrics import accuracy_score
 from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
@@ -43,7 +43,7 @@ class CLF():
             # self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
             self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
                           # class_weight=self.class_weight,
-                               probability=True, random_state=experiment.random_state)
+                               probability=True, random_state=experiment.random_state, gamma=0.1)
 
         elif experiment.type == "RF":
             self.clf = RandomForestClassifier(n_estimators=experiment.n_estimators, max_features=experiment.max_features,
@@ -109,23 +109,23 @@ class CLF():
             self.y_test = testing_labels
 
 
-    def cross_validate(self):
-        # Ten-fold cross-validation with stratified sampling
-        cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
-        X_all = np.vstack((self.X_train, self.X_test))
-        y_all = np.hstack((self.y_train, self.y_test))
-        scores = cross_val_score(self.clf, X_all, y_all, cv=cv)
-        print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-        return scores
-
-    def cross_validate_nltk(self, vectorizer):
-        # Ten-fold cross-validation with stratified sampling
-        cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
-        X_all = np.hstack((self.X_train, self.X_test))
-        y_all = np.hstack((self.y_train, self.y_test))
-        scores = cross_val_score(self.clf, vectorizer.transform(X_all), y_all, cv=cv)
-        print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-        return scores
+    # def cross_validate(self):
+    #     # Ten-fold cross-validation with stratified sampling
+    #     cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+    #     X_all = np.vstack((self.X_train, self.X_test))
+    #     y_all = np.hstack((self.y_train, self.y_test))
+    #     scores = cross_val_score(self.clf, X_all, y_all, cv=cv)
+    #     print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    #     return scores
+    #
+    # def cross_validate_nltk(self, vectorizer):
+    #     # Ten-fold cross-validation with stratified sampling
+    #     cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+    #     X_all = np.hstack((self.X_train, self.X_test))
+    #     y_all = np.hstack((self.y_train, self.y_test))
+    #     scores = cross_val_score(self.clf, vectorizer.transform(X_all), y_all, cv=cv)
+    #     print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    #     return scores
 
     def train(self):
         trained_model = self.clf.fit(self.X_train, self.y_train)
@@ -140,8 +140,6 @@ class CLF():
     @staticmethod
     def predict(classifier, example):
         return classifier.predict_proba(example)
-        # cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
-        # return cross_val_predict(classifier, example, method='predict_proba')
 
     def populate_results(self, classifier):
         # y_pred = classifier.predict(self.X_test)
@@ -150,28 +148,70 @@ class CLF():
         X_all = np.vstack((self.X_train, self.X_test))
         y_all = np.hstack((self.y_train, self.y_test))
         y_pred = cross_val_predict(estimator=classifier, X=X_all, y=y_all, method='predict', cv=cv)
-        results = Result(y_test=y_all, y_pred=y_pred)
-        print ("Number of samples")
+        results_eval = Result(y_test=y_all, y_pred=y_pred)
+
+        print ("Number of eval samples")
         print len(y_all)
-        scores = self.cross_validate()
-        results.accuracy = format(scores.mean(), '.2f')
-        return results
+        scores = cross_val_score(classifier, X_all, y_all, cv=cv)
+        print("Eval Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        results_eval.accuracy = format(scores.mean(), '.2f')
+
+        # trained_model results
+        y_pred_mod = classifier.predict(self.X_test)
+        results_model = Result(y_test=self.y_test, y_pred=y_pred_mod)
+
+        print ("Number of test samples")
+        print len(self.y_test)
+        scores = cross_val_score(classifier, self.X_test, self.y_test, cv=cv)
+        print("Test CrossVal Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        acc = accuracy_score(y_true=self.y_test, y_pred=y_pred_mod)
+        print("Test Accuracy: %0.4f" % acc)
+        # results_model.accuracy = format(scores.mean(), '.2f')
+        results_model.accuracy = format(acc, '.2f')
+
+        return results_eval, results_model
 
     def populate_results_nltk(self, classifier, vectorizer_handler):
         pickled_model = DATABASE.getGridFS().get(vectorizer_handler).read()
         vectorizer = dill.loads(pickled_model)
-        # y_pred = classifier.predict(vectorizer.transform(self.X_test))
-        # cv = ShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
+
         cv = KFold(n_splits=10, random_state=42, shuffle=True)
         X_all = np.hstack((self.X_train, self.X_test))
         y_all = np.hstack((self.y_train, self.y_test))
-        y_pred = cross_val_predict(estimator=classifier, X=vectorizer.transform(X_all),
-                                   y=y_all, method='predict', cv=cv)
-        results = Result(y_test=y_all, y_pred=y_pred)
-        print ("Number of samples")
+        y_pred = cross_val_predict(estimator=classifier, X=vectorizer.transform(X_all), y=y_all, method='predict', cv=cv)
+        results_eval = Result(y_test=y_all, y_pred=y_pred)
+
+        print ("Number of eval samples")
         print len(y_all)
-        scores = self.cross_validate_nltk(vectorizer)
-        results.accuracy = format(scores.mean(), '.2f')
-        return results
+        scores = cross_val_score(classifier, vectorizer.transform(X_all), y_all, cv=cv)
+        print("Eval Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        results_eval.accuracy = format(scores.mean(), '.2f')
 
+        # trained_model results
+        y_pred_mod = classifier.predict(vectorizer.transform(self.X_test))
+        results_model = Result(y_test=self.y_test, y_pred=y_pred_mod)
 
+        print ("Number of test samples")
+        print len(self.y_test)
+        scores = cross_val_score(classifier, vectorizer.transform(self.X_test), self.y_test, cv=cv)
+        print("Test CrossVal Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        acc = accuracy_score(y_true=self.y_test, y_pred=y_pred_mod)
+        print("Test Accuracy: %0.4f" % acc)
+        # results_model.accuracy = format(scores.mean(), '.2f')
+        results_model.accuracy = format(acc, '.2f')
+
+        return results_eval, results_model
+
+    @staticmethod
+    def get_untrained_classifier(experiment):
+        if experiment.type == "SVC":
+            # self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
+            return svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
+                          # class_weight=self.class_weight,
+                               probability=True, random_state=experiment.random_state, gamma=0.1)
+
+        elif experiment.type == "RF":
+             return RandomForestClassifier(n_estimators=experiment.n_estimators, max_features=experiment.max_features,
+                                              random_state=experiment.random_state)
+
+        return None
