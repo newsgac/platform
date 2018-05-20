@@ -165,7 +165,8 @@ class DataSource(object):
                                                                                       test_size=0.1, shuffle=True)
 
                 # fit the vectorizer
-                vectorizer = TfidfVectorizer(lowercase=False)
+                # vectorizer = TfidfVectorizer(lowercase=False)
+                vectorizer = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2', ngram_range=(1, 2))
                 train_vectors = vectorizer.fit_transform(X_train)
                 self.vectorizer_handler = DATABASE.getGridFS().put(dill.dumps(vectorizer))
                 self.train_vectors_handler = DATABASE.getGridFS().put(dill.dumps(train_vectors))

@@ -36,7 +36,7 @@ div.jumbotron {
 
 }
 
-div.jumbotron h1,h3 {
+div.jumbotron, h1.jumbotron, h3.jumbotron {
     color: #66ceff;
     text-shadow: 1px 1px 2px black, 0 0 25px black, 0 0 5px black;
 }

@@ -65,7 +65,7 @@
                                         <td><a href="{{ url_for('data_sources.show_article_summary', article_id = tab_data['article_id']) }}" target="_blank">{{ tab_data['article_number'] }}</a></td>
                                         <td><a href="{{ url_for('experiments.get_experiment_page', experiment_id = exp._id) }}" target="_blank">{{ exp.display_title }}</a><br/></td>
                                         <td>{{ genre }}</td>
-                                        <td><a href="{{ url_for('data_sources.explain_article_for_experiment', article_text = tab_data['article_text'], article_num = tab_data['article_number'], genre=genre, experiment_id = exp._id)}}" target="_blank">Click here for textual explanation</a></td>
+                                        <td><a href="{{ url_for('data_sources.explain_article_for_experiment', article_id = tab_data['article_id'], article_num = tab_data['article_number'], genre=genre, experiment_id = exp._id)}}" target="_blank">Click here for textual explanation</a></td>
                                         <td>N/A</td>
                                         {% endfor %}
                                     </tr>
@@ -82,7 +82,7 @@
                                         <td><a href="{{ url_for('experiments.get_experiment_page', experiment_id = exp._id) }}" target="_blank">{{ exp.display_title }}</a><br/></td>
                                         <td>{{ genre }}</td>
                                         <td>N/A</td>
-                                        <td><a href="{{ url_for('data_sources.explain_features_for_experiment', article_text = tab_data['article_text'], article_num = tab_data['article_number'], genre=genre, experiment_id = exp._id)}}" target="_blank">Click here for feature explanation</a></td>
+                                        <td><a href="{{ url_for('data_sources.explain_features_for_experiment', article_id = tab_data['article_id'], article_num = tab_data['article_number'], genre=genre, experiment_id = exp._id)}}" target="_blank">Click here for feature explanation</a></td>
                                         {% endfor %}
                                     </tr>
                                     {% endfor %}

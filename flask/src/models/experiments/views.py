@@ -418,6 +418,8 @@ def hypotheses_testing():
 
         data = {}
         articles = hypotheses_data_source.get_test_instances()
+        count1985 = 0
+        count1965 = 0
         import pandas as pd
         for article in articles:
             #year extraction
@@ -429,12 +431,20 @@ def hypotheses_testing():
             if prediction not in data[date_from_db].keys():
                 data[date_from_db][prediction] = 0
             data[date_from_db][prediction] += 1
+            if date_from_db == "1985":
+                count1985 += 1
+            elif date_from_db == "1965":
+                count1965 += 1
 
         normalised_data = {}
         for date in data:
             normalised_data[date] = {}
             for genre in data[date]:
-                normalised_data[date][genre] = (round( data[date][genre] * 100 / len(articles), 2))
+                # normalised_data[date][genre] = (round( data[date][genre] * 100 / len(articles), 2))
+                if date == "1985":
+                    normalised_data[date][genre] = (round( data[date][genre] * 100 / count1985, 2))
+                else:
+                    normalised_data[date][genre] = (round( data[date][genre] * 100 / count1965, 2))
 
         df = pd.DataFrame(normalised_data, columns=data.keys())
         df.fillna(0, inplace=True)

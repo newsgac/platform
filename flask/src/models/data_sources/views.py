@@ -77,10 +77,11 @@ def show_article_summary(article_id):
 
     return render_template('data_sources/article_summary.html', article_summary=art)
 
-@data_source_blueprint.route('/explain/<string:article_text>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
+@data_source_blueprint.route('/explain/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
 @user_decorators.requires_login
-def explain_article_for_experiment(article_text, article_num, genre, experiment_id):
-    art = DataSource.get_processed_article_by_raw_text(article_text)
+def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
+    # art = DataSource.get_processed_article_by_raw_text(article_text)
+    art = DataSource.get_processed_article_by_id(article_id)
     exp = Experiment.get_by_id(experiment_id)
 
     # LIME explanations
@@ -89,10 +90,11 @@ def explain_article_for_experiment(article_text, article_num, genre, experiment_
 
     return render_template('data_sources/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
 
-@data_source_blueprint.route('/explain_features/<string:article_text>/<string:article_num>/<string:genre>/<string:experiment_id>/', methods=['GET'])
+@data_source_blueprint.route('/explain_features/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>/', methods=['GET'])
 @user_decorators.requires_login
-def explain_features_for_experiment(article_text, article_num, genre, experiment_id):
-    art = DataSource.get_processed_article_by_raw_text(article_text)
+def explain_features_for_experiment(article_id, article_num, genre, experiment_id):
+    # art = DataSource.get_processed_article_by_raw_text(article_text)
+    art = DataSource.get_processed_article_by_id(article_id)
     exp = Experiment.get_by_id(experiment_id)
 
     # LIME explanations

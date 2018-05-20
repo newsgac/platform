@@ -14,6 +14,20 @@ from sklearn.externals.joblib import delayed
 import src.data_engineering.feature_extraction as FE
 import src.data_engineering.utils as DataUtils
 
+import os
+language_filename = os.path.join(os.path.dirname(__file__), '../../dutch_stopwords_mod.txt')
+stop_words = []
+try:
+    with open(language_filename, 'rb') as language_file:
+        stop_words = [line.decode('utf-8').strip()
+                      for line in language_file.readlines()]
+except:
+    raise IOError(
+        '{0}" file is unreadable, check your installation.'.format(
+            language_filename
+        )
+    )
+
 
 class Preprocessor():
 
@@ -103,9 +117,12 @@ def process_raw_text_for_config(preprocessor, raw_text, id=None):
     return processed_text, valid_dict, id
 
 def remove_stop_words(text):
-    stopwords = get_stop_words('nl')
-    pattern = re.compile(r'\b(' + r'|'.join(stopwords) + r')\b\s*')
+    # stopwords = get_stop_words('nl')
+    pattern = re.compile(r'\b(' + r'|'.join(stop_words) + r')\b\s*')
     reg_text = pattern.sub('', text)
+    # print text
+    # print "After"
+    # print reg_text
 
     return reg_text
 

@@ -39,7 +39,8 @@
                 <a class="btn btn-default" href="{{ url_for('experiments.hypotheses_testing') }}" target="_blank">
                     <span class="glyphicon glyphicon-stats"></span> Hypotheses Testing</a>
                 <a class="btn btn-danger" data-toggle="confirmation" data-popout="true"
-                   data-title="This action cannot be undone. Continue?" href="{{ url_for('experiments.delete_all') }}">
+                   data-actions-box="top" data-btn-ok-label="Yes, delete" data-btn-cancel-label="No, cancel"
+                   data-title="This action cannot be undone. Are you sure?" href="{{ url_for('experiments.delete_all') }}">
                     <span class="glyphicon glyphicon-trash"></span> Delete All</a>
             {% endif %}
         </div>

@@ -161,7 +161,6 @@ class Experiment(object):
     def get_classifier(self):
         pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
         classifier = dill.loads(pickled_model)
-
         return classifier
 
 

@@ -12,7 +12,7 @@ from lime.lime_text import LimeTextExplainer
 from lime.lime_tabular import LimeTabularExplainer
 from sklearn.pipeline import make_pipeline
 import src.data_engineering.feature_extraction as FE
-from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config
+from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, remove_stop_words, apply_lemmatization
 
 # np.random.seed(42)
 
@@ -75,22 +75,27 @@ class Explanation():
 
     def explain_using_text(self):
         class_names =  [l[0] for l in sorted(DataUtils.genres_labels.items(), key=lambda x: x[1]) if l[0]!='Unlabelled']
-        print class_names
         ds = DataSource.get_by_id(self.experiment.data_source_id)
         explainer = LimeTextExplainer(class_names=class_names)
 
-        text_instance = self.article['article_raw_text']
+        text_instance = self.article['article_raw_text'].lower()
+        clean_ocr = get_clean_ocr(text_instance)
 
-        if 'nltk' not in ds.pre_processing_config.values():
-            preprocessor = Preprocessor(config=ds.pre_processing_config)
-            c = make_pipeline(FE.ArticleTransformer(text=text_instance, preprocessor=preprocessor), self.experiment.get_classifier())
-        else:
-            vectorizer = dill.loads(DATABASE.getGridFS().get(ds.vectorizer_handler).read())
-            c = make_pipeline(vectorizer, self.experiment.get_classifier())
+        if 'sw_removal' in ds.pre_processing_config.keys():
+            clean_ocr = remove_stop_words(clean_ocr)
+        if 'lemmatization' in ds.pre_processing_config.keys():
+            clean_ocr = apply_lemmatization(clean_ocr)
+
+        # if 'nltk' not in ds.pre_processing_config.values():
+        #     preprocessor = Preprocessor(config=ds.pre_processing_config)
+        #     c = make_pipeline(FE.ArticleTransformer(text=text_instance, preprocessor=preprocessor), self.experiment.get_classifier())
+        # else:
+        vectorizer = dill.loads(DATABASE.getGridFS().get(ds.vectorizer_handler).read())
+        c = make_pipeline(vectorizer, self.experiment.get_classifier())
 
         lbls = [(DataUtils.genres_labels[k] - 1) for k in class_names]
-        print lbls
-        exp = explainer.explain_instance(text_instance=text_instance, classifier_fn=c.predict_proba,
+
+        exp = explainer.explain_instance(text_instance=clean_ocr, classifier_fn=c.predict_proba,
                                          num_features=10, labels=lbls, num_samples=5000)
         print('Article: %s' % self.article['article_raw_text'] )
         print "Predictions: ", self.experiment.predict(text_instance, ds)
@@ -106,28 +111,28 @@ class Explanation():
     def explain_using_features(self):
         class_names = [l[0] for l in sorted(DataUtils.genres_labels.items(), key=lambda x: x[1]) if
                        l[0] != 'Unlabelled']
-        print class_names
         ds = DataSource.get_by_id(self.experiment.data_source_id)
         training_data = np.array(dill.loads(DATABASE.getGridFS().get(ds.X_train_handler).read()))
+
+        if 'scaling' in ds.pre_processing_config.keys():
+            # revert the data back to original
+            scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
+            training_data = scaler.inverse_transform(training_data)
+            c = make_pipeline(scaler, self.experiment.get_classifier())
+        else:
+            c = make_pipeline(self.experiment.get_classifier())
+
         sorted_keys = sorted(self.experiment.features.keys())
-        print sorted_keys
         f_names = [f for f in sorted_keys if f not in DataSourceConstants.NON_FEATURE_COLUMNS]
-        explainer = LimeTabularExplainer(training_data=training_data, feature_names=f_names,class_names=class_names)
+        explainer = LimeTabularExplainer(training_data=training_data, feature_names=f_names, class_names=class_names)
 
         preprocessor = Preprocessor(config=ds.pre_processing_config)
         processed_text, features, id = process_raw_text_for_config(preprocessor, self.article['article_raw_text'])
-        # c = make_pipeline(ArticleTransformer(text=self.article['article_raw_text'], preprocessor=preprocessor),
-        #                   self.experiment.get_classifier())
-
-
+        ordered_feature_values = [features[f] for f in sorted_keys if
+                                  f not in DataSourceConstants.NON_FEATURE_COLUMNS]
         lbls = [(DataUtils.genres_labels[k] - 1) for k in class_names]
-        print lbls
-        print np.array(features.values())
 
-        # print DataUtils.genres_labels
-        # exp = explainer.explain_instance(text_instance=text_instance, classifier_fn=c.predict_proba,
-        #                                  num_features=5, labels=[DataUtils.genres_labels[self.predicted_genre]])
-        exp = explainer.explain_instance(data_row=np.array(features.values()), predict_fn=self.experiment.get_classifier().predict_proba,
+        exp = explainer.explain_instance(data_row=np.array(ordered_feature_values), predict_fn=c.predict_proba,
                                          num_features=10, labels=lbls, num_samples=5000)
 
         print('Article: %s' % self.article['article_raw_text'])
@@ -137,8 +142,5 @@ class Explanation():
         for k in class_names:
             print ('Explanation for class %s' % k)
             print ('\n'.join(map(str, exp.as_list(label=DataUtils.genres_labels[k] - 1))))
-            # fig = exp.as_pyplot_figure(label=(val-1))
-            # import matplotlib.pyplot as plt
-            # plt.show(fig)
 
         return exp.as_html(labels=lbls)
