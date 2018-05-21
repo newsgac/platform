@@ -1,0 +1,9 @@
+If you're using Ubuntu/ Linux, run the following commands. First, mongodump on the origin server:
+
+mongodump  --db newsgacdev
+
+Copy the generated dump/DataBaseName folder to the new machine. Then, import using mongorestore:
+
+mongorestore --db newsgacdev /path/to/DataBaseName 
+
+Note that /path/to/DataBaseName should be a directory filled with .json and .bson representations of your data
