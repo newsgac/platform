@@ -27,6 +27,7 @@ from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
 from src.data_engineering.postprocessing import Result
 from src.run import DATABASE
@@ -49,13 +50,16 @@ class CLF():
             self.clf = RandomForestClassifier(n_estimators=experiment.n_estimators, max_features=experiment.max_features,
                                               random_state=experiment.random_state)
 
+        elif experiment.type == "NB":
+            self.clf = MultinomialNB(alpha=0.1)
+
         data_source = DataSource.get_by_id(experiment.data_source_id)
         ds_X_train = dill.loads(DATABASE.getGridFS().get(data_source.X_train_handler).read())
         ds_X_test = dill.loads(DATABASE.getGridFS().get(data_source.X_test_handler).read())
         ds_y_train_with_ids = dill.loads(DATABASE.getGridFS().get(data_source.y_train_with_ids_handler).read())
         ds_y_test_with_ids = dill.loads(DATABASE.getGridFS().get(data_source.y_test_with_ids_handler).read())
 
-        if "nltk" not in data_source.pre_processing_config.values():
+        if "tf-idf" not in data_source.pre_processing_config.values():
             # apply feature selection TODO:test this bit
 
             if experiment.auto_feat:

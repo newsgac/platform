@@ -2,7 +2,7 @@
 {% block content %}
 
     <div class="page-header">
-        <h1>Random Forest Experiment:
+        <h1>Naive Bayes Experiment:
             <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">
                 <small> {{ experiment.display_title }} </small>
             </a>
@@ -55,7 +55,7 @@
 
                         <li role="presentation">
                             <a href="#step2" data-toggle="tab" aria-controls="step2" role="tab"
-                               title="Step 2: RF Configuration">
+                               title="Step 2: NB Configuration">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-pencil"></i>
                             </span>
@@ -73,7 +73,7 @@
                     </ul>
                 </div>
 
-                <form role="form" id="experiment_rf" method="post">
+                <form role="form" id="experiment_nb" method="post">
                     <div class="tab-content">
 
                         <div class="tab-pane active" role="tabpanel" id="step1">
@@ -140,15 +140,15 @@
 
                             </div>
                             <ul class="list-inline pull-right">
-                            <li>
-                                <button type="button" class="btn btn-primary next-step">Next</button>
-                            </li>
-                        </ul>
+                                <li>
+                                    <button type="button" class="btn btn-primary next-step">Next</button>
+                                </li>
+                            </ul>
                         </div>
 
                         <div class="tab-pane" role="tabpanel" id="step2">
                             <div class="step33">
-                                <h5><strong>Configure random forest algorithmic hyperparameters</strong></h5>
+                                <h5><strong>Configure naive bayes algorithmic hyperparameters</strong></h5>
                                 <hr>
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
@@ -177,41 +177,15 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Number of estimators</strong>
-                                                <span class="help-block"><i>The number of decision trees in the forest.</i></span>
+                                                <strong>Alpha</strong>
+                                                <span class="help-block"><i>Additive (Laplace/Lidstone) smoothing parameter (0 for no smoothing).</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.n_estimators }}" disabled>
+                                            <input type="text" class="form-control" value="{{ experiment.alpha }}" disabled>
                                         </div>
                                     </div>
 
-                                    <div class="row mar_ned"></div>
-                                    <div class="row mar_ned">
-                                        <div class="col-md-6">
-                                            <p align="right" class="center-align-pad">
-                                                <strong>Maximum number of features</strong>
-                                                <span class="help-block"><i>The number of features to be considered when looking for the best split.<br/>
-                                                If float, then the value is taken as percentage.</i></span>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.max_features }}" disabled>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mar_ned"></div>
-                                    <div class="row mar_ned">
-                                        <div class="col-md-6">
-                                            <p align="right" class="center-align-pad">
-                                                <strong>Random state</strong>
-                                                <span class="help-block"><i>Enter an integer for a random seed.</i></span>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.random_state }}" disabled>
-                                        </div>
-                                    </div>
                                 </div>
 
                             </div>

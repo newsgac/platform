@@ -140,8 +140,8 @@ class DataSource(object):
             X_test, y_train_with_ids, y_test_with_ids = processed_X, [], []
         else:
 
-            if 'nltk' in self.pre_processing_config.values():
-                self.display_title = self.display_title + " (NLTK)"
+            if 'tf-idf' in self.pre_processing_config.values():
+                self.display_title = self.display_title + " (TF-IDF)"
                 if 'sw_removal' in self.pre_processing_config.keys():
                     self.display_title = self.display_title + " (SWR)"
                 if 'lemmatization' in self.pre_processing_config.keys():
@@ -217,7 +217,7 @@ class DataSource(object):
         DATABASE.getGridFS().delete(self.y_test_with_ids_handler)
 
         if self.pre_processing_config != None:
-            if 'nltk' in self.pre_processing_config.values():
+            if 'tf-idf' in self.pre_processing_config.values():
                 DATABASE.getGridFS().delete(self.vectorizer_handler)
                 DATABASE.getGridFS().delete(self.train_vectors_handler)
             if 'scaling' in self.pre_processing_config.keys():
@@ -347,7 +347,7 @@ class DataSource(object):
 
         preprocessor = Preprocessor(self.pre_processing_config)
 
-        if 'nltk' not in self.pre_processing_config.values():
+        if 'tf-idf' not in self.pre_processing_config.values():
             article_ids, processed_text_list, feature_list = preprocessor.do_parallel_processing(articles_from_db)
 
             for art_id, processed_text, features in zip(article_ids, processed_text_list, feature_list):
@@ -376,7 +376,7 @@ class DataSource(object):
                 dataset.append(row)
                 labels.append([row['genre'], str(row['_id'])])
         else:
-            if 'nltk' not in self.pre_processing_config.values():
+            if 'tf-idf' not in self.pre_processing_config.values():
                 # Add features and label for each article
                 for i, row in enumerate(articles):
                     sorted_keys = sorted(row['features'].keys())
@@ -430,6 +430,7 @@ class DataSource(object):
         from sklearn import svm
         from sklearn.linear_model import LogisticRegression
         from sklearn.linear_model import SGDClassifier
+        from sklearn.naive_bayes import MultinomialNB
         from sklearn.preprocessing import StandardScaler
         from sklearn.decomposition import PCA
         from sklearn.feature_selection import SelectKBest, chi2
@@ -454,7 +455,7 @@ class DataSource(object):
         y_train = np.asarray([row[0] for row in y_train_with_ids])
         y_test = np.asarray([row[0] for row in y_test_with_ids])
 
-        if 'nltk' in self.pre_processing_config.values():
+        if 'tf-idf' in self.pre_processing_config.values():
             pickled_model = DATABASE.getGridFS().get(self.vectorizer_handler).read()
             vectorizer = dill.loads(pickled_model)
             X_train = vectorizer.transform(X_train)
@@ -469,10 +470,10 @@ class DataSource(object):
 
         # Create space of candidate learning algorithms and their hyperparameters
         # N_FEATURES_OPTIONS = [5, 10, 20, 30, 38]
-        KERNEL_OPTIONS = ['linear', 'rbf', 'sigmoid']
+        KERNEL_OPTIONS = ['linear', 'rbf']
         C_OPTIONS = [1, 2, 3, 5, 10]
         # C_OPTIONS = scipy.stats.expon(scale=100)
-        GAMMA_OPTIONS = [1e-1, 1e-2, 1e-3, 1e-4]
+        GAMMA_OPTIONS = [1e-1, 1e-2, 1e-3]
         param_grid = [
             # {
             # 'reduce_dim': [PCA()],
@@ -489,16 +490,16 @@ class DataSource(object):
                 'classify__C': C_OPTIONS,
                 'classify__gamma': GAMMA_OPTIONS,
             },
-            # {
-            #     # 'scale': [StandardScaler()],
-            #     'classify': [SGDClassifier()],
-            #     'classify__loss': ['hinge', 'log'],
-            #     'classify__penalty': ['l2'] ,
-            # },
+            {
+                # 'scale': [StandardScaler()],
+                'classify': [MultinomialNB()],
+                'classify__alpha': [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0],
+                # 'classify__penalty': ['l2'] ,
+            },
             {
                 'classify': [RandomForestClassifier()],
                 'classify__criterion':['gini'],
-                'classify__n_estimators': [10, 50, 100, 1000],
+                'classify__n_estimators': [50, 100, 1000],
                 'classify__max_features': [1, 2, 3, 4, 5, 6],
                 # 'classify__max_depth': [1, 5, 10, 15, 20, 25, 30],
                 # 'classify__min_samples_leaf': [1, 2, 4, 6, 8, 10],
@@ -506,7 +507,7 @@ class DataSource(object):
         ]
         # reducer_labels = ['PCA', 'NMF', 'KBest(chi2)']
 
-        scores = ['accuracy', 'recall_weighted', 'precision_weighted', 'f1_weighted']
+        scores = ['accuracy', 'recall_micro', 'precision_micro', 'f1_micro']
         data_table_recommendation = {}
         for score in scores:
             print("# Tuning hyper-parameters for %s" % score)
@@ -555,7 +556,7 @@ class DataSource(object):
             print(grid.best_estimator_.get_params()['classify'])
 
         feature_reduction_data = {}
-        if 'nltk' not in self.pre_processing_config.values():
+        if 'tf-idf' not in self.pre_processing_config.values():
             rfecv = RFECV(estimator=LogisticRegression(), step=1, cv=StratifiedKFold(10),
                           scoring='accuracy')
             rfecv.fit(X_train, y_train)

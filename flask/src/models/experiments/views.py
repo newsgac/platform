@@ -10,7 +10,8 @@ from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
 from src.run import DATABASE
 from src.models.configurations.configuration_rf import ConfigurationRF
-from src.models.experiments.experiment import Experiment, ExperimentRF, ExperimentSVC
+from src.models.configurations.configuration_nb import ConfigurationNB
+from src.models.experiments.experiment import Experiment, ExperimentRF, ExperimentSVC, ExperimentNB
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
@@ -44,6 +45,47 @@ def index():
 def user_experiments():
     return render_template("experiments/experiments.html", experiments = Experiment.get_by_user_email(session['email']))
 
+
+@experiment_blueprint.route('/new_nb', methods=['GET', 'POST'])
+@user_decorators.requires_login
+@back.anchor
+def create_experiment_nb():
+    # get the list of processed data sources of the user
+    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True)
+    manual_feature_dict = DataIO.get_feature_names_with_descriptions()
+
+    if not existing_data_source_titles:
+        flash("There are no processed data sources for training, redirecting to data sources page.", 'warning')
+        return redirect((url_for('data_sources.user_data_sources')))
+
+    if request.method == 'POST':
+        if request.form["data_source"]:
+            configuration = ConfigurationNB(user_email= session['email'], form = request.form)
+            try:
+                if ConfigurationNB.is_config_unique(configuration):
+                    configuration.save_to_db()
+                    display_title = request.form['experiment_display_title']
+                    public_flag = 'public_flag' in request.form
+                    experiment = ExperimentNB(user_email=session['email'],
+                                               display_title=display_title+" ("+configuration.data_source_title+")",
+                                               public_flag=public_flag,
+                                            **dict(configuration=configuration))
+                    experiment.save_to_db()
+                    return redirect(url_for('.user_experiments'))
+            except ConfigurationErrors.ConfigAlreadyExistsError as e:
+                    error = e.message
+                    flash(error, 'error')
+                    return render_template('experiments/new_experiment_nb.html', request=request.form,
+                                           ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+        else:
+            flash('Please choose a data source!', 'error')
+            return render_template('experiments/new_experiment_nb.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+
+
+    return render_template('experiments/new_experiment_nb.html', ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict, request={})
 
 @experiment_blueprint.route('/new_rf', methods=['GET', 'POST'])
 @user_decorators.requires_login
@@ -151,7 +193,9 @@ def create_experiment_dl():
 def get_experiment_page(experiment_id):
     # return the experiment page with the type code
     experiment = Experiment.get_by_id(experiment_id)
-    if experiment.type == "SVC":
+    if experiment.type == "NB":
+        return render_template('experiments/experiment_nb.html', experiment=experiment)
+    elif experiment.type == "SVC":
         return render_template('experiments/experiment_svc.html', experiment=experiment)
     elif experiment.type == "RF":
         return render_template('experiments/experiment_rf.html', experiment=experiment)
@@ -170,7 +214,9 @@ def run_experiment(experiment_id):
     else:
         # without celery
         exp = Experiment.get_by_id(experiment_id)
-        if exp.type == "SVC":
+        if exp.type == "NB":
+            ExperimentNB.get_by_id(experiment_id).run_nb()
+        elif exp.type == "SVC":
             ExperimentSVC.get_by_id(experiment_id).run_svc()
         elif exp.type == "RF":
             ExperimentRF.get_by_id(experiment_id).run_rf()
@@ -230,10 +276,12 @@ def visualise_features(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
     if experiment.type == "SVC":
         f_weights = ExperimentSVC.get_by_id(experiment_id).get_features_weights()
+    elif experiment.type == "NB":
+        f_weights = ExperimentNB.get_by_id(experiment_id).get_features_weights()
 
     if f_weights is not None:
         ds = DataSource.get_by_id(experiment.data_source_id)
-        if 'nltk' in ds.pre_processing_config.values():
+        if 'tf-idf' in ds.pre_processing_config.values():
             pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
             vectorizer = dill.loads(pickled_model)
             p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights, vectorizer=vectorizer)
@@ -285,7 +333,7 @@ def user_experiments_overview():
 
     for ds_id in used_data_source_ids_by_user:
         exp_list = Experiment.get_finished_user_experiments_using_data_id(user_email=session['email'], ds_id=ds_id)
-        if 'nltk' in DataSource.get_by_id(id=ds_id).pre_processing_config.values():
+        if 'tf-idf' in DataSource.get_by_id(id=ds_id).pre_processing_config.values():
             for exp in exp_list:
                 text_explanation_experiments.append(exp.display_title)
         experiment_ds_dict[ds_id] = exp_list
@@ -323,7 +371,7 @@ def user_experiments_analyse_compare_explain():
 
     for ds_id in used_data_source_ids_by_user:
         exp_list = Experiment.get_finished_user_experiments_using_data_id(user_email=session['email'], ds_id=ds_id)
-        if 'nltk' in DataSource.get_by_id(id=ds_id).pre_processing_config.values():
+        if 'tf-idf' in DataSource.get_by_id(id=ds_id).pre_processing_config.values():
             for exp in exp_list:
                 text_explanation_experiments.append(exp.display_title)
         experiment_ds_dict[ds_id] = exp_list
@@ -472,7 +520,9 @@ def delete_experiment(experiment_id):
     else:
         # without celery
         exp = Experiment.get_by_id(experiment_id)
-        if exp.type == "SVC":
+        if exp.type == "NB":
+            ExperimentNB.get_by_id(experiment_id).delete()
+        elif exp.type == "SVC":
             ExperimentSVC.get_by_id(experiment_id).delete()
         elif exp.type == "RF":
             ExperimentRF.get_by_id(experiment_id).delete()
@@ -490,7 +540,9 @@ def delete_all():
             task = del_exp.delay(exp._id)
         else:
             # without celery
-            if exp.type == "SVC":
+            if exp.type == "NB":
+                ExperimentNB.get_by_id(exp._id).delete()
+            elif exp.type == "SVC":
                 ExperimentSVC.get_by_id(exp._id).delete()
             elif exp.type == "RF":
                 ExperimentRF.get_by_id(exp._id).delete()

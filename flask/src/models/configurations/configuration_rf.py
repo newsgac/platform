@@ -46,7 +46,7 @@ class ConfigurationRF():
             ds = DataSource.get_by_user_email_and_display_title(self.user_email, form["data_source"])
             self.data_source_id = ds._id
             self.data_source_title = ds.display_title
-            if 'nltk' in ds.pre_processing_config.values():
+            if 'tf-idf' in ds.pre_processing_config.values():
                 self.auto_feat = True
             else:
                 # pre-processing and feature selection

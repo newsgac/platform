@@ -86,7 +86,7 @@ class Explanation():
         if 'lemmatization' in ds.pre_processing_config.keys():
             clean_ocr = apply_lemmatization(clean_ocr)
 
-        # if 'nltk' not in ds.pre_processing_config.values():
+        # if 'tf-idf' not in ds.pre_processing_config.values():
         #     preprocessor = Preprocessor(config=ds.pre_processing_config)
         #     c = make_pipeline(FE.ArticleTransformer(text=text_instance, preprocessor=preprocessor), self.experiment.get_classifier())
         # else:

@@ -69,6 +69,7 @@ $(document).ready(function()
 
 
 $(document).ready(function() {
+    $('#experiment_nb').bootstrapValidator();
     $('#experiment_svc').bootstrapValidator();
     $('#experiment_rf').bootstrapValidator();
 });
@@ -102,10 +103,10 @@ $(function()
 });
 
 $(document).ready(function() {
-    console.log("here")
+//    console.log("here")
     $('.features_div').hide();
     $('#data_source').change(function(){
-        if($('#data_source').val().toLowerCase().indexOf("nltk") < 0) {
+        if($('#data_source').val().toLowerCase().indexOf("tf-idf") < 0) {
             $('.features_div').fadeIn();
         } else {
             $('.features_div').fadeOut();
