@@ -1,6 +1,6 @@
 import uuid
 
-from run import DATABASE
+from src.run import DATABASE
 from src.common.utils import Utils
 import src.models.users.errors as UserErrors
 import src.models.users.constants as UserConstants

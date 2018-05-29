@@ -9,11 +9,11 @@ from src.data_engineering.preprocessing import Preprocessor, remove_stop_words, 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import dill
 import numpy as np
-from src.run import DATABASE
 import src.common.utils as Utilities
 import re
 from bson import ObjectId
 import src.data_engineering.utils as DataUtils
+from src.run import DATABASE
 
 UT = Utilities.Utils()
 ALLOWED_EXTENSIONS = {'txt', 'csv'}
@@ -395,12 +395,6 @@ class DataSource(object):
         instances = []
 
         if not self.training_purpose:
-            # For test datasets, the raw text is stored in the X_train variable
-            # test_articles = dill.loads(DATABASE.getGridFS().get(self.X_train_handler).read())
-            #
-            # for art_raw_text in test_articles:
-            #     art = DataSource.get_processed_article_by_raw_text(art_raw_text)
-            #     instances.append(art)
             instances = DataSource.get_all_by_data_source_id(data_source_id=self._id)
 
         else:
@@ -430,7 +424,7 @@ class DataSource(object):
         from sklearn import svm
         from sklearn.linear_model import LogisticRegression
         from sklearn.linear_model import SGDClassifier
-        from sklearn.naive_bayes import MultinomialNB
+        from sklearn.naive_bayes import MultinomialNB, GaussianNB
         from sklearn.preprocessing import StandardScaler
         from sklearn.decomposition import PCA
         from sklearn.feature_selection import SelectKBest, chi2
@@ -490,12 +484,12 @@ class DataSource(object):
                 'classify__C': C_OPTIONS,
                 'classify__gamma': GAMMA_OPTIONS,
             },
-            {
-                # 'scale': [StandardScaler()],
-                'classify': [MultinomialNB()],
-                'classify__alpha': [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0],
-                # 'classify__penalty': ['l2'] ,
-            },
+            # {
+            #     # 'scale': [StandardScaler()],
+            #     'classify': [MultinomialNB()],
+            #     'classify__alpha': [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0],
+            #     # 'classify__penalty': ['l2'] ,
+            # },
             {
                 'classify': [RandomForestClassifier()],
                 'classify__criterion':['gini'],

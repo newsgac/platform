@@ -96,7 +96,9 @@ class Explanation():
         lbls = [(DataUtils.genres_labels[k] - 1) for k in class_names]
 
         exp = explainer.explain_instance(text_instance=clean_ocr, classifier_fn=c.predict_proba,
-                                         num_features=10, labels=lbls, num_samples=5000)
+                                         num_features=8, labels=lbls, num_samples=7000)
+        # exp = explainer.explain_instance(text_instance=clean_ocr, classifier_fn=c.predict_proba,
+        #                                  num_features=6, labels=(DataUtils.genres_labels[self.predicted_genre]-1,), num_samples=7000)
         print('Article: %s' % self.article['article_raw_text'] )
         print "Predictions: ", self.experiment.predict(text_instance, ds)
         print('Predicted class from GUI =', self.predicted_genre)
@@ -105,7 +107,8 @@ class Explanation():
             print ('Explanation for class %s' % k)
             print ('\n'.join(map(str, exp.as_list(label=DataUtils.genres_labels[k]-1))))
 
-        return exp.as_html(labels=lbls)
+        # return exp.as_html(labels=lbls)
+        return exp.as_html(labels=(DataUtils.genres_labels[self.predicted_genre]-1,))
 
 
     def explain_using_features(self):
@@ -133,7 +136,7 @@ class Explanation():
         lbls = [(DataUtils.genres_labels[k] - 1) for k in class_names]
 
         exp = explainer.explain_instance(data_row=np.array(ordered_feature_values), predict_fn=c.predict_proba,
-                                         num_features=10, labels=lbls, num_samples=5000)
+                                         num_features=8, labels=lbls, num_samples=7000)
 
         print('Article: %s' % self.article['article_raw_text'])
         print "Predictions: ", self.experiment.predict(self.article['article_raw_text'], ds)
@@ -143,4 +146,5 @@ class Explanation():
             print ('Explanation for class %s' % k)
             print ('\n'.join(map(str, exp.as_list(label=DataUtils.genres_labels[k] - 1))))
 
-        return exp.as_html(labels=lbls)
+        # return exp.as_html(labels=lbls)
+        return exp.as_html(labels=(DataUtils.genres_labels[self.predicted_genre] - 1,))

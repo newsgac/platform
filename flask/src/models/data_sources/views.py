@@ -4,7 +4,7 @@ import time
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
 from src.app import app
-from src.celery_tasks.tasks import process_data, del_data
+from src.celery_tasks.tasks import process_data, del_data, grid_ds
 from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.errors as DataSourceErrors
 from src.common.back import back
@@ -19,7 +19,7 @@ __author__ = 'abilgin'
 
 data_source_blueprint = Blueprint('data_sources', __name__)
 
-@data_source_blueprint.route('/')
+@data_source_blueprint.route('/user')
 @user_decorators.requires_login
 @back.anchor
 def user_data_sources():
@@ -182,16 +182,16 @@ def visualise_stats(data_source_id):
 @user_decorators.requires_login
 def apply_grid_search(data_source_id):
     ds = DataSource.get_by_id(data_source_id)
-    report_per_score, feature_reduction = ds.apply_grid_search()
 
-    # results = ds.get_stats()
-    # plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
-    #
-    # return render_template('experiments/results.html',
-    #                        experiment=experiment,
-    #                        results=results,
-    #                        plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
-    #                        mimetype='text/html')
+    if app.DOCKER_RUN:
+        task = grid_ds.delay(data_source_id)
+        task.wait()
+
+        if len(task.result) > 1:
+            report_per_score = task.result[0][0]
+            feature_reduction = task.result[0][1]
+    else:
+        report_per_score, feature_reduction = ds.apply_grid_search()
 
     return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
                            feature_reduction=feature_reduction)

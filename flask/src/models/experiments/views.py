@@ -15,7 +15,7 @@ from src.models.experiments.experiment import Experiment, ExperimentRF, Experime
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
-from src.celery_tasks.tasks import run_exp, del_exp
+from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, ace_exp, hyp_exp
 import time
 import dill
 from bokeh.resources import INLINE
@@ -39,7 +39,7 @@ def index():
     return render_template('experiments/public.html', experiments = Experiment.get_public_experiments())
 
 
-@experiment_blueprint.route('/')
+@experiment_blueprint.route('/user')
 @user_decorators.requires_login
 @back.anchor
 def user_experiments():
@@ -253,12 +253,24 @@ def visualise_results(experiment_id):
 def predict(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
     data_source = DataSource.get_by_id(experiment.data_source_id)
+    script = None
+    div = None
 
     if request.method == 'POST':
-        sorted_prediction_results = experiment.predict(request.form['raw_text'], data_source)
         try:
-            plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results,
-                                                                                                        experiment.display_title)
+            if app.DOCKER_RUN:
+                task = predict_exp.delay(experiment_id, request.form['raw_text'], data_source)
+                task.wait()
+
+                if len(task.result) > 1:
+                    plot = task.result[0][0]
+                    script = task.result[0][1]
+                    div = task.result[0][2]
+            else:
+                sorted_prediction_results = experiment.predict(request.form['raw_text'], data_source)
+
+                plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results,
+                                                                                                                experiment.display_title)
             return render_template('experiments/prediction.html',
                            experiment=experiment, request = request.form,
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
@@ -276,8 +288,8 @@ def visualise_features(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
     if experiment.type == "SVC":
         f_weights = ExperimentSVC.get_by_id(experiment_id).get_features_weights()
-    elif experiment.type == "NB":
-        f_weights = ExperimentNB.get_by_id(experiment_id).get_features_weights()
+    # elif experiment.type == "NB":
+    #     f_weights = ExperimentNB.get_by_id(experiment_id).get_features_weights()
 
     if f_weights is not None:
         ds = DataSource.get_by_id(experiment.data_source_id)
@@ -302,12 +314,23 @@ def visualise_features(experiment_id):
 @back.anchor
 def user_experiments_overview_for_prediction():
     # call overview method with the finished experiments that belong to the user
-    finished_experiments = Experiment.get_finished_user_experiments(session['email'])
-    comparator = ExperimentComparator(finished_experiments)
+    script = None
+    div = None
 
     if request.method == 'POST':
         try:
-            script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+            if app.DOCKER_RUN:
+                task = predict_overview.delay(session['email'], request.form['raw_text'])
+                task.wait()
+
+                if len(task.result) > 1:
+                    script = task.result[0][0]
+                    div = task.result[0][1]
+            else:
+                finished_experiments = Experiment.get_finished_user_experiments(session['email'])
+                comparator = ExperimentComparator(finished_experiments)
+                script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+
             return render_template('experiments/prediction_overview.html',
                            request = request.form,
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
@@ -377,15 +400,25 @@ def user_experiments_analyse_compare_explain():
         experiment_ds_dict[ds_id] = exp_list
 
     if request.method == 'POST':
-        finished_experiments = []
-        for exp_id in request.form.getlist('compared_experiments'):
-            finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
 
-        comparator = ExperimentComparator(finished_experiments)
+        if app.DOCKER_RUN:
+            task = ace_exp.delay(request.form.getlist('compared_experiments'))
+            task.wait()
 
-        # get the test articles
-        test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText(processed_data_source_list)
-        tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
+            if len(task.result) > 1:
+                tabular_data_dict = task.result[0][0]
+                combinations = task.result[0][1]
+        else:
+            finished_experiments = []
+            for exp_id in request.form.getlist('compared_experiments'):
+                finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
+
+            comparator = ExperimentComparator(finished_experiments)
+
+            # get the test articles
+            test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText(
+                processed_data_source_list)
+            tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
 
         return render_template('experiments/analyse_compare_explain.html',
                        js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
@@ -464,42 +497,18 @@ def hypotheses_testing():
         exp_data_source = DataSource.get_by_id(experiment.data_source_id)
         hypotheses_data_source = DataSource.get_by_id(request.form['hypotheses_data_source'])
 
-        data = {}
-        articles = hypotheses_data_source.get_test_instances()
-        count1985 = 0
-        count1965 = 0
-        import pandas as pd
-        for article in articles:
-            #year extraction
-            date_from_db = article['date'].split("-")[2]
-            if date_from_db not in data.keys():
-                data[date_from_db] = {}
+        if app.DOCKER_RUN:
+            task = hyp_exp.delay(request.form['hypotheses_experiment'], request.form['hypotheses_data_source'])
+            task.wait()
 
-            prediction = (experiment.predict(article['article_raw_text'], exp_data_source)).keys()[0]
-            if prediction not in data[date_from_db].keys():
-                data[date_from_db][prediction] = 0
-            data[date_from_db][prediction] += 1
-            if date_from_db == "1985":
-                count1985 += 1
-            elif date_from_db == "1965":
-                count1965 += 1
+            if len(task.result) > 1:
+                df = task.result[0][0]
+        else:
+            df = experiment.populate_hypothesis_df(exp_data_source, hypotheses_data_source)
 
-        normalised_data = {}
-        for date in data:
-            normalised_data[date] = {}
-            for genre in data[date]:
-                # normalised_data[date][genre] = (round( data[date][genre] * 100 / len(articles), 2))
-                if date == "1985":
-                    normalised_data[date][genre] = (round( data[date][genre] * 100 / count1985, 2))
-                else:
-                    normalised_data[date][genre] = (round( data[date][genre] * 100 / count1965, 2))
-
-        df = pd.DataFrame(normalised_data, columns=data.keys())
-        df.fillna(0, inplace=True)
         try:
             script, div = ExperimentComparator.visualize_hypotheses_using_DF(df, hypotheses_data_source.display_title, experiment.display_title)
-            print data
-            print normalised_data
+
             return render_template('experiments/hypotheses.html',  experiments=finished_experiments, test_data_sources=test_data_sources,
                            request = request.form,
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),

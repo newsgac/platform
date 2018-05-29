@@ -1,4 +1,4 @@
-from data_engineering.postprocessing import Result
+from src.data_engineering.postprocessing import Result
 from bokeh.models import (
     ColumnDataSource,
     LabelSet,
@@ -29,6 +29,7 @@ class ResultVisualiser(object):
         confusion_matrix = result.get_confusion_matrix()
         cm_normalised = Result.normalise_confusion_matrix(confusion_matrix)
         genre_names = result.genre_names
+        # print confusion_matrix
 
         if normalisation_flag:
             mapper = LinearColorMapper(palette=colorcet.blues, low=0, high=1)
