@@ -40,8 +40,7 @@ import frog
 frog_nl = frog.Frog(frog.FrogOptions(parser=False))
 # FROG_URL = 'http://www.kbresearch.nl/frogger/?'
 # from pynlpl.clients.frogclient import FrogClient
-#
-# port = 8020
+# port = 12345
 # frogclient = FrogClient('localhost',port)
 
 
@@ -511,6 +510,8 @@ class Article(object):
                 try:
                     # data = urllib.urlopen(FROG_URL + query_string).read()
                     data = frog_nl.process_raw(batch)
+
+                    # data = frogclient.process(batch)
                     # data_pro = frog.process(batch)
                     # print("PARSED OUTPUT=", data_pro)
                     # print("RAW OUTPUT=", data)
