@@ -145,12 +145,7 @@ class ResultVisualiser(object):
         else:
             names = vectorizer.get_feature_names()
 
-        if len(names) < 15:
-            top_features = 5
-        elif len(names) < 30:
-            top_features = int(len(names) / 3)
-        else:
-            top_features = 10
+        top_features = 10
 
         i = 1
         j = i + 1

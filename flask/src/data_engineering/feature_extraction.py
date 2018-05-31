@@ -39,9 +39,9 @@ import spacy
 import frog
 frog_nl = frog.Frog(frog.FrogOptions(parser=False))
 # FROG_URL = 'http://www.kbresearch.nl/frogger/?'
-# from pynlpl.clients.frogclient import FrogClient
-# port = 12345
-# frogclient = FrogClient('localhost',port)
+from pynlpl.clients.frogclient import FrogClient
+port = 8080
+frogclient = FrogClient('localhost',port)
 
 
 class ArticleTransformer(BaseEstimator, TransformerMixin):
@@ -512,6 +512,9 @@ class Article(object):
                     data = frog_nl.process_raw(batch)
 
                     # data = frogclient.process(batch)
+                    #
+                    # if data == data_old:
+                    #     print "way to go"
                     # data_pro = frog.process(batch)
                     # print("PARSED OUTPUT=", data_pro)
                     # print("RAW OUTPUT=", data)

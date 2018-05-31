@@ -152,7 +152,12 @@ class Experiment(object):
                     # revert the data back to original
                     training_data = np.array(dill.loads(DATABASE.getGridFS().get(ds.X_train_handler).read()))
                     original_training_data = scaler.inverse_transform(training_data)
-                    selected_training_data = original_training_data[:, [1, 9]]
+                    indexes = []
+                    for i, f in enumerate(sorted(feats.keys()), 0):
+                        if f in sorted_keys:
+                            indexes.append(i)
+
+                    selected_training_data = original_training_data[:, sorted(indexes)]
                     scaler = RobustScaler().fit(selected_training_data)
 
                 feature_set = scaler.transform([ordered_feature_values])
