@@ -136,13 +136,21 @@ class ResultVisualiser(object):
         return p, script, div
 
     @staticmethod
-    def retrievePlotForFeatureWeights(coefficients, vectorizer=None):
+    def retrievePlotForFeatureWeights(coefficients, experiment=None, vectorizer=None):
 
         if vectorizer == None:
-            names = DataIO.get_feature_names()
+            # names = DataIO.get_feature_names()
+            names = [f for f in sorted(experiment.features.keys())]
+
         else:
             names = vectorizer.get_feature_names()
-        top_features = 10
+
+        if len(names) < 15:
+            top_features = 5
+        elif len(names) < 30:
+            top_features = int(len(names) / 3)
+        else:
+            top_features = 10
 
         i = 1
         j = i + 1
@@ -160,14 +168,18 @@ class ResultVisualiser(object):
             pos_features_names = []
             pos_features_weights = []
             for index in top_coeff_pos:
-                pos_features_weights.append(format(classifier[index], '.3f'))
-                pos_features_names.append(names[index])
+                if classifier[index] > 0:
+                    print classifier[index]
+                    pos_features_weights.append(format(classifier[index], '.3f'))
+                    pos_features_names.append(names[index])
 
             neg_features_names = []
             neg_features_weights = []
             for index in top_coeff_neg:
-                neg_features_weights.append(format(classifier[index], '.3f'))
-                neg_features_names.append(names[index])
+                if classifier[index] < 0:
+                    print classifier[index]
+                    neg_features_weights.append(format(classifier[index], '.3f'))
+                    neg_features_names.append(names[index])
 
 
             if j == len(DataUtils.genres)-1:

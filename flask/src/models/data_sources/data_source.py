@@ -67,6 +67,12 @@ class DataSource(object):
                 DATABASE.find(DataSourceConstants.COLLECTION, {"user_email": user_email, "training_purpose": False})]
 
     @classmethod
+    def get_tfidf_training_by_user_email(cls, user_email):
+        return [cls(**elem) for elem in
+                DATABASE.find(DataSourceConstants.COLLECTION, {"user_email": user_email, "training_purpose": True,
+                                                               "train_vectors_handler":{"$exists": True}})]
+
+    @classmethod
     def get_processed_datasets(cls):
         return [cls(**elem) for elem in DATABASE.find(DataSourceConstants.COLLECTION, {"processing_completed": {"$ne": None}})]
 
@@ -81,8 +87,11 @@ class DataSource(object):
                                                                         "display_title": display_title}))
 
     @staticmethod
-    def get_training_titles_by_user_email(user_email, processed=False):
-        ds_list = DataSource.get_training_by_user_email(user_email=user_email)
+    def get_training_titles_by_user_email(user_email, processed=False, tfidf=False):
+        if tfidf:
+            ds_list = DataSource.get_tfidf_training_by_user_email(user_email=user_email)
+        else:
+            ds_list = DataSource.get_training_by_user_email(user_email=user_email)
         titles = []
         for ds in ds_list:
             if processed and ds.processing_started is not None and ds.processing_completed is not None:

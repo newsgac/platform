@@ -2,6 +2,8 @@ import datetime
 from collections import OrderedDict
 
 import dill
+from sklearn.preprocessing import RobustScaler
+
 from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
     remove_stop_words, apply_lemmatization
 from src.models.data_sources.data_source import DataSource
@@ -15,7 +17,7 @@ import src.models.data_sources.constants as DataSourceConstants
 import src.common.utils as Utilities
 import src.data_engineering.utils as DataUtilities
 from src.models.users.user import User
-import sklearn
+import numpy as np
 
 
 UT = Utilities.Utils()
@@ -138,12 +140,21 @@ class Experiment(object):
             tfidf_vectors = vectorizer.transform([clean_ocr])
             proba = CLF.predict(classifier, tfidf_vectors)
         else:
-            processed_text, features, id = process_raw_text_for_config(preprocessor, raw_text)
-            sorted_keys = sorted(features.keys())
-            ordered_feature_values = [features[f] for f in sorted_keys if
+            processed_text, feats, id = process_raw_text_for_config(preprocessor, raw_text)
+            sorted_keys = sorted(self.features.keys())
+            ordered_feature_values = [feats[f] for f in sorted_keys if
                                       f not in DataSourceConstants.NON_FEATURE_COLUMNS]
             if 'scaling' in ds.pre_processing_config.keys():
                 scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
+                if  not self.auto_feat:
+                    # ugly solution but will refactor later
+                    # descale and scale again
+                    # revert the data back to original
+                    training_data = np.array(dill.loads(DATABASE.getGridFS().get(ds.X_train_handler).read()))
+                    original_training_data = scaler.inverse_transform(training_data)
+                    selected_training_data = original_training_data[:, [1, 9]]
+                    scaler = RobustScaler().fit(selected_training_data)
+
                 feature_set = scaler.transform([ordered_feature_values])
             else:
                 feature_set = [ordered_feature_values]

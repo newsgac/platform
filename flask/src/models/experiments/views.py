@@ -50,8 +50,8 @@ def user_experiments():
 @user_decorators.requires_login
 @back.anchor
 def create_experiment_nb():
-    # get the list of processed data sources of the user
-    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True)
+    # get the list of processed data sources of the user for only TF-IDF representation
+    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True, tfidf=True)
     manual_feature_dict = DataIO.get_feature_names_with_descriptions()
 
     if not existing_data_source_titles:
@@ -298,7 +298,7 @@ def visualise_features(experiment_id):
             vectorizer = dill.loads(pickled_model)
             p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights, vectorizer=vectorizer)
         else:
-            p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights)
+            p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights, experiment=experiment)
 
         return render_template('experiments/features.html',
                                experiment=experiment,

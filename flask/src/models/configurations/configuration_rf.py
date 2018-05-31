@@ -59,7 +59,8 @@ class ConfigurationRF():
                         self.features[feature] = True
                 else:
                     for feature in sorted(manual_feature_dict.keys()):
-                        self.features[feature] = feature in form
+                        if feature in form:
+                            self.features[feature] = feature in form
         else:
             self.data_source_id = None
             self.data_source_title = None
