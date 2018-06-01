@@ -36,13 +36,11 @@ from lxml import etree
 from nltk.tokenize import sent_tokenize
 from sklearn.base import BaseEstimator, TransformerMixin
 import spacy
-import frog
-frog_nl = frog.Frog(frog.FrogOptions(parser=False))
-# FROG_URL = 'http://www.kbresearch.nl/frogger/?'
+# import frog
+# frog_nl = frog.Frog(frog.FrogOptions(parser=False))
 from pynlpl.clients.frogclient import FrogClient
-port = 8080
-frogclient = FrogClient('localhost',port)
-
+port = 12345
+frogclient = FrogClient('localhost',port, returnall=True)
 
 class ArticleTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, url=None, text=None, preprocessor=None):
@@ -235,7 +233,7 @@ class Article(object):
             if pronoun_count > 0 else 0)
 
         # Named entities
-        named_entities = [t for t in tokens if t[6].startswith('B')]
+        named_entities = [t for t in tokens if t[5].startswith('B')]
 
         # NE count
         features['named_entities'] = len(named_entities)
@@ -497,51 +495,34 @@ class Article(object):
         '''
         Analyze text with Frog NLP suite.
         '''
-        tokens = []
+        # tokens = []
+        tokens_new = []
         to_frog = sentences
         while len(to_frog):
             batch_size = 10 if len(to_frog) >= 10 else len(to_frog)
             batch = ' '.join(to_frog[:batch_size]).encode('utf-8')
-            # query_string = urllib.urlencode({'text': batch})
 
-            data = ''
+            # data = ''
+            data_new = []
             i = 0
-            while not data:
-                try:
-                    # data = urllib.urlopen(FROG_URL + query_string).read()
-                    data = frog_nl.process_raw(batch)
+            while not data_new:
+                # data = frog_nl.process_raw(batch)
 
-                    # data = frogclient.process(batch)
-                    #
-                    # if data == data_old:
-                    #     print "way to go"
-                    # data_pro = frog.process(batch)
-                    # print("PARSED OUTPUT=", data_pro)
-                    # print("RAW OUTPUT=", data)
-                    # data = data.decode('utf-8')
-                except IOError:
-                    if i < 3:
-                        print('Frog data_sources not found, retrying ...')
-                        self.frog_log('Frog data_sources not found, retrying ...')
-                        time.sleep(5)
-                        i += 1
-                    else:
-                        print('Frog data_sources not found, skipping!')
-                        self.frog_log('Frog data_sources not found, skipping!')
-                        raise
+                data_new = frogclient.process(batch)
 
-            lines = [l.split('\t') for l in data.split('\n') if l]
-            msg = 'Frog data_sources invalid: ' + ' '.join(data.split())
-            try:
-                assert len(lines[0]) == 10, msg
-            except AssertionError as e:
-                self.frog_log(msg)
-                print e.message
+                # data = data.decode('utf-8')
 
-            tokens += [l for l in lines if len(l) == 10]
+            # usage with frog_nl
+            # lines = [l.split('\t') for l in data.split('\n') if l]
+            # tokens += [l for l in lines if len(l) == 10]
+            for d in data_new:
+                if None not in d:
+                    d = ('',) + d       # tackle with the index change diff between local FROG to FROG server in docker
+                    tokens_new.append(d)
+
             to_frog = to_frog[batch_size:]
 
-        return tokens
+        return tokens_new
 
     def frog_log(self, message):
         '''
@@ -550,47 +531,3 @@ class Article(object):
         with open('frog_log.txt', 'a') as f:
             # f.write(self.url + ' | ' + message + '\n')
             f.write(message + '\n')
-
-#
-if __name__=='__main__':
-    text = "Churchill, die jarenlang de eerste plaats innam onder de meest bewonderde mannen, doch deze het vorige jaar moest afstaan aan dr Drees, heeft kans gezien de eerste plaats weer te halen met een stijging in populariteit van vijf procent, terwijl dr Drees met een daling van vier procent weer op de tweede plaats kwam te staan. Dit is een van de resultaten van het onderzoek van het Nederlands Instituut voor de Publieke Opinie, dat onlangs alleen aan mannen over het gehele land verspreid en uit alle lagen van de bevolking de vraag stelde: Welke van alle nu levende mannen, leden van de koninklijke familie niet meegerekend, bewondert U het meest? Churchill kreeg vijftien procent van de stemmen, dr Drees 13, Eisenhower 6, Jan van Zutfen 6, Albert Schweitzer 3, Paus Pius XII 2, Adenauer 2, oud-rninifter Lieftinck 2, Einstein 1 en Abe Lenstra tenslotte ook 1 procent. Jan van Zutfen, Adenauer en Einstein komen dit jaar voor het eerst op de lijst van de meest bewonderde mannen voor. (ANP)"
-    text = text.decode('utf-8')
-    art = Article(text=text)
-    # print "\nFROG\n"
-    for item_f, item_s in zip(art.get_features_frog().items(), art.get_features_spacy().items()):
-        if item_f[1] != item_s[1]:
-            print item_f[0], "-", item_s[0], " => frog: ", item_f[1], " spacy: ", item_s[1]
-    # print "\nSPACY\n"
-    # for feat, val in art.get_features_spacy().items():
-    #     print feat, " : ", val
-
-
-    # output = frog.process_raw("Dit is een test")
-    # print("RAW OUTPUT=", output)
-    # output = frog.process("Dit is nog een test.")
-    # print("PARSED OUTPUT=", output)
-
-    # for data in frogclient.process("Een voorbeeldbericht om te froggen"):
-    #     word, lemma, morph, pos = data[:4]
-    #     print data
-
-    # example = [art.features[f] for f in Utilities.features]
-    # print example
-#
-#     # experiment = Experiment.get_by_id("312a051d991e4b16ae7042ed27428ecb")
-#     experiment = Experiment.get_by_id("6e5220a1e1f942c884ebe0cf82817182")
-#
-#     proba = experiment.predict([example])
-#     probabilities = proba[0].tolist()
-#
-#     resp = {}
-#     for i, p in enumerate(probabilities):
-#         # resp[Utilities.genres[i + 1][0].split('/')[0]] = str(proba[i])[:6]
-#         # resp[Utilities.genres[i + 1][0]] = p
-#         resp[Utilities.genres[i + 1][0].split('/')[0]] = p
-#
-#     sorted_resp = OrderedDict(sorted(resp.items(), key=lambda t: t[1], reverse=True))
-#
-#     print resp
-#     print sorted_resp
-#     print len(sorted_resp)
