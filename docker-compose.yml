@@ -36,6 +36,8 @@ services:
             - frog
         depends_on:
             - rabbit
+            - database
+            - frog
         networks:
             - newsgac-net
         restart: on-failure
