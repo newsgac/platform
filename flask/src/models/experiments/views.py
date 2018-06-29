@@ -15,7 +15,7 @@ from src.models.experiments.experiment import Experiment, ExperimentRF, Experime
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
-from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, ace_exp, hyp_exp
+from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public, ace_exp, hyp_exp
 import time
 import dill
 from bokeh.resources import INLINE
@@ -434,16 +434,28 @@ def user_experiments_analyse_compare_explain():
 @back.anchor
 def public_experiments_overview_for_prediction():
     # call overview method with the finished public experiments
-    experiments = Experiment.get_public_experiments()
-    comparator = ExperimentComparator(experiments)
+    script = None
+    div = None
 
     if request.method == 'POST':
         try:
-            script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+            if app.DOCKER_RUN:
+                task = predict_overview_public.delay(request.form['raw_text'])
+                task.wait()
+
+                if len(task.result) > 1:
+                    script = task.result[0][0]
+                    div = task.result[0][1]
+            else:
+                finished_experiments = Experiment.get_public_experiments()
+                comparator = ExperimentComparator(finished_experiments)
+                script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+
             return render_template('experiments/prediction_overview.html',
-                           request = request.form,
-                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
-                           mimetype='text/html')
+                                   request=request.form,
+                                   plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
+                                   css_resources=INLINE.render_css(),
+                                   mimetype='text/html')
         except Exception as e:
             print e.message
             return render_template('experiments/prediction_overview.html', request=request.form)
@@ -455,35 +467,35 @@ def public_experiments_overview_for_prediction():
 @back.anchor
 def public_overview():
     processed_data_source_list = DataSource.get_processed_datasets()
+    experiment_ds_dict = {}
+    text_explanation_experiments = []
+    used_data_source_ids = Experiment.get_used_data_sources_for_public()
+
+    for ds_id in used_data_source_ids:
+        exp_list = Experiment.get_public_experiments_using_data_id(ds_id=ds_id)
+        if 'tf-idf' in DataSource.get_by_id(id=ds_id).pre_processing_config.values():
+            for exp in exp_list:
+                text_explanation_experiments.append(exp.display_title)
+        experiment_ds_dict[ds_id] = exp_list
 
     if request.method == 'POST':
-        try:
+        finished_experiments = []
+        for exp_id in request.form.getlist('compared_experiments'):
+            finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
 
-            if request.form['data_source'] == "ALL":
-                # call overview method with the finished experiments that belong to the user
-                experiments = Experiment.get_public_experiments()
-            elif request.form['data_source'] == "":
-                experiments = Experiment.get_public_experiments_using_data_id(ds_id=None)
-            else:
-                experiments = Experiment.get_public_experiments_using_data_id(ds_id=request.form['data_source'])
-            # call overview method with the public experiments
+        comparator = ExperimentComparator(finished_experiments)
 
-            comparator = ExperimentComparator(experiments)
-            script, div = comparator.performComparison()
-            script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
-            script.append(script_cm)
-            div.append(div_cm)
+        script, div = comparator.performComparison()
+        script_cm, div_cm = comparator.combineHeatMapPlotsForAllExperiments()
+        script.append(script_cm)
+        div.append(div_cm)
 
-            return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
-                                   js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
-                                   css_resources=INLINE.render_css(), mimetype='text/html')
+        return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
+                               js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
+                               experiment_ds_dict=experiment_ds_dict,
+                               css_resources=INLINE.render_css(), mimetype='text/html')
 
-        except Exception as e:
-            flash(e.message, 'error')
-            return render_template('experiments/overview.html', data_sources_db=processed_data_source_list,
-                                   request=request.form)
-
-    return render_template('experiments/overview.html', data_sources_db=processed_data_source_list)
+    return render_template('experiments/overview.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
 @experiment_blueprint.route('/hypotheses_testing', methods=['GET', 'POST'])
 @user_decorators.requires_login

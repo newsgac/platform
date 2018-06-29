@@ -85,6 +85,10 @@ class Experiment(object):
     def get_used_data_sources_for_user(user_email):
         return DATABASE.find(ExperimentConstants.COLLECTION, {"user_email": user_email}).distinct("data_source_id")
 
+    @staticmethod
+    def get_used_data_sources_for_public():
+        return DATABASE.find(ExperimentConstants.COLLECTION, {"public_flag": True}).distinct("data_source_id")
+
     def get_public_username(self):
         return User.get_by_email(self.user_email).username
 

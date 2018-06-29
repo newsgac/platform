@@ -55,6 +55,13 @@ def predict_overview(self, user_email, raw_text):
     return comparator.visualise_prediction_comparison(raw_text)
 
 @celery_app.task(bind=True, trail=True)
+def predict_overview_public(self, raw_text):
+    finished_experiments = Experiment.get_public_experiments()
+    comparator = ExperimentComparator(finished_experiments)
+    self.update_state(state='PREDICTING')
+    return comparator.visualise_prediction_comparison(raw_text)
+
+@celery_app.task(bind=True, trail=True)
 def ace_exp(self, finished_exp_ids):
     processed_data_source_list = DataSource.get_processed_datasets()
     finished_experiments = []
