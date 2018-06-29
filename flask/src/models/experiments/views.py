@@ -346,8 +346,6 @@ def user_experiments_overview_for_prediction():
 @user_decorators.requires_login
 @back.anchor
 def user_experiments_overview():
-    if not session['email']:
-        return redirect(url_for("experiments.public_overview"))
 
     processed_data_source_list = DataSource.get_processed_datasets()
     used_data_source_ids_by_user = Experiment.get_used_data_sources_for_user(user_email=session['email'])
@@ -384,8 +382,6 @@ def user_experiments_overview():
 @user_decorators.requires_login
 @back.anchor
 def user_experiments_analyse_compare_explain():
-    if not session['email']:
-        return redirect(url_for("experiments.public_overview"))
 
     processed_data_source_list = DataSource.get_processed_datasets()
     used_data_source_ids_by_user = Experiment.get_used_data_sources_for_user(user_email=session['email'])
@@ -430,7 +426,6 @@ def user_experiments_analyse_compare_explain():
     return render_template('experiments/analyse_compare_explain.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
 @experiment_blueprint.route('/public_prediction_overview', methods=['GET', 'POST'])
-@user_decorators.requires_login
 @back.anchor
 def public_experiments_overview_for_prediction():
     # call overview method with the finished public experiments
@@ -451,21 +446,21 @@ def public_experiments_overview_for_prediction():
                 comparator = ExperimentComparator(finished_experiments)
                 script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
 
-            return render_template('experiments/prediction_overview.html',
+            return render_template('experiments/public_prediction_overview.html',
                                    request=request.form,
                                    plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
                                    css_resources=INLINE.render_css(),
                                    mimetype='text/html')
         except Exception as e:
             print e.message
-            return render_template('experiments/prediction_overview.html', request=request.form)
+            return render_template('experiments/public_prediction_overview.html', request=request.form)
 
-    return render_template('experiments/prediction_overview.html')
+    return render_template('experiments/public_prediction_overview.html')
 
 
 @experiment_blueprint.route('/public_overview', methods=['GET', 'POST'])
 @back.anchor
-def public_overview():
+def public_experiments_overview():
     processed_data_source_list = DataSource.get_processed_datasets()
     experiment_ds_dict = {}
     text_explanation_experiments = []
@@ -490,12 +485,12 @@ def public_overview():
         script.append(script_cm)
         div.append(div_cm)
 
-        return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
+        return render_template('experiments/public_overview.html', plot_scripts=script, plot_divs=div,
                                js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
                                experiment_ds_dict=experiment_ds_dict,
                                css_resources=INLINE.render_css(), mimetype='text/html')
 
-    return render_template('experiments/overview.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
+    return render_template('experiments/public_overview.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
 @experiment_blueprint.route('/hypotheses_testing', methods=['GET', 'POST'])
 @user_decorators.requires_login

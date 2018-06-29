@@ -73,6 +73,6 @@ def register_user():
 def logout_user():
     session['email'] = None
     flash('You were successfully logged out.', 'success')
-    return redirect(url_for('home'))
+    return render_template('home.html')
 
 

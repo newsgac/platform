@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Experiments Overview</h1>
+    </div>
+
+    <form role="form" action="{{ url_for('experiments.public_experiments_overview') }}" method="post" id="form_overview">
+        <div>
+            <div class="row">
+
+                <div class="col-md-4 control-group">
+                    <label>Select experiments to be included in comparison</label>
+                </div>
+                <div class="col-md-7" id="datasource_div">
+                    <select multiple name="compared_experiments" id="compared_experiments"
+                            class="selectpicker show-tick" data-width="85%" data-actions-box="true">
+                        {% for data_source in data_sources_db %}
+                        {% if data_source._id in experiment_ds_dict.keys() %}
+                            <optgroup label="{{ data_source.display_title }}" >
+                                {% for exp in experiment_ds_dict[data_source._id] %}
+                                    <option value="{{ exp._id }}">{{ exp.display_title }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+
+                </div>
+
+                <div class="col-md-1 control-group">
+                    <button type="submit" form="form_overview" class="btn btn-success">Let's go!</button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <br/><br/>
+
+    {% if plot_divs is defined %}
+        {% for plot_div in plot_divs %}
+            <div class="row">
+                {{ plot_div|safe }}
+                <br/><br/>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+{% endblock %}

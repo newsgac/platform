@@ -4,9 +4,9 @@
     <div class="page-header">
         <h1>Public Experiments <small>showing experiments created publicly</small></h1>
         {% if experiments|length > 0 %}
-            <a class="btn btn-info" href="{{ url_for('experiments.public_overview') }}">
+            <a class="btn btn-info" href="{{ url_for('experiments.public_experiments_overview') }}" target="_blank">
                 <span class="glyphicon glyphicon-eye-open "></span> Overview</a>
-            <a class="btn btn-primary" href="{{ url_for('experiments.public_experiments_overview_for_prediction') }}">
+            <a class="btn btn-primary" href="{{ url_for('experiments.public_experiments_overview_for_prediction') }}" target="_blank">
                 <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
         {% endif %}
     </div>

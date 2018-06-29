@@ -283,6 +283,7 @@ class ExperimentComparator:
         for experiment in self.experiments:
             data_source = DataSource.get_by_id(experiment.data_source_id)
             prediction_results = experiment.predict(raw_text, data_source)
+            print prediction_results
             plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(prediction_results, experiment.display_title, ds_param)
             plots.append(plot)
 
