@@ -1,4 +1,4 @@
-FROM newsgacdockerdev_worker:latest
+FROM newsgac_docker_dev_worker:latest
 
 MAINTAINER abilgin
 
