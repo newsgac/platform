@@ -1,4 +1,3 @@
 FROM proycon/lamachine
 
-RUN ["frog", "-S", "12345"]
-
+CMD ["frog", "-S", "12345"]
