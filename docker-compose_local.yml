@@ -12,7 +12,7 @@ services:
             - RABBITMQ_DEFAULT_USER=newsgac
             - RABBITMQ_DEFAULT_PASS=1234
         ports:
-            - "5672:5672"
+            - "5673:5672"
         restart: on-failure
         networks:
             - newsgac-net
@@ -34,9 +34,9 @@ services:
         hostname: mongo
         image: mongo:latest
         volumes:
-            - /export/scratch2/home/aysenur/newsgac_db/:/data/db
+            - /var/lib/mongodb:/data/db
         ports:
-            - "27017:27017"
+            - "27018:27017"
         networks:
             - newsgac-net
     
@@ -45,7 +45,7 @@ services:
             context: ./flask
             dockerfile: Dockerfile_flask
         ports:
-            - "5000:5000"
+            - "5050:5000"
         links:
             - worker
             - rabbit

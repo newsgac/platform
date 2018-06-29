@@ -2,7 +2,7 @@
 {% block content %}
 
     <div class="page-header">
-        <h1>Analyse - Compare - Explain Experiments</h1>
+        <h1>Analyse - Compare - Explain Pipelines</h1>
     </div>
 
     <form role="form" action="{{ url_for('experiments.user_experiments_analyse_compare_explain') }}" method="post" id="form_ace">
@@ -10,7 +10,7 @@
             <div class="row">
 
                 <div class="col-md-4 control-group">
-                    <label>Select experiments to be included in comparison</label>
+                    <label>Select pipelines to be included in comparison</label>
                 </div>
                 <div class="col-md-7" id="datasource_div">
                     <select multiple name="compared_experiments" id="compared_experiments"
@@ -46,7 +46,7 @@
             <thead>
                 <tr>
                     <th>Article #</th>
-                    <th>Experiment</th>
+                    <th>Pipeline</th>
                     <th>Predicted Genre</th>
                     <th>Text Explanation</th>
                     <th>Feature Explanation</th>
@@ -96,7 +96,7 @@
             <tfoot>
                 <tr>
                     <th>Article #</th>
-                    <th>Experiment</th>
+                    <th>Pipeline</th>
                     <th>Predicted Genre</th>
                     <th>Text Explanation</th>
                     <th>Feature Explanation</th>
@@ -115,7 +115,7 @@
             <!--<caption class="text-center">DataTables</caption>-->
             <thead>
                 <tr>
-                    <th>Mutually Agreeing Experiments</th>
+                    <th>Mutually Agreeing Pipelines</th>
                     <th>Predicted Genre</th>
                     <th>Number of Articles</th>
                     <th>Articles</th>
@@ -168,7 +168,7 @@
 
             <tfoot>
                 <tr>
-                    <th>Mutually Agreeing Experiments</th>
+                    <th>Mutually Agreeing Pipelines</th>
                     <th>Predicted Genre</th>
                     <th>Number of Articles</th>
                     <th>Articles</th>
@@ -189,7 +189,7 @@
                 <tr>
                     <th>Article #</th>
                     <th>Article text</th>
-                    <th>Mutually Agreeing <br/>Experiments</th>
+                    <th>Mutually Agreeing <br/>Pipelines</th>
                     <th>Prevailing Genre <br/>(prediction)</th>
                     <th>True Genre</th>
                 </tr>
@@ -210,6 +210,16 @@
                     </tr>
                 {% endfor %}
             </tbody>
+
+            <tfoot>
+                <tr>
+                    <th>Article #</th>
+                    <th>Article text</th>
+                    <th>Mutually Agreeing <br/>Pipelines</th>
+                    <th>Prevailing Genre <br/>(prediction)</th>
+                    <th>True Genre</th>
+                </tr>
+            </tfoot>
 
             </table>
         </div>

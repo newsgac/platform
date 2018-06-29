@@ -29,6 +29,7 @@ class ResultVisualiser(object):
         confusion_matrix = result.get_confusion_matrix()
         cm_normalised = Result.normalise_confusion_matrix(confusion_matrix)
         genre_names = result.genre_names
+        # print title
         # print confusion_matrix
 
         if normalisation_flag:
