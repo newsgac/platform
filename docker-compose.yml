@@ -5,6 +5,15 @@ networks:
         driver: bridge
 
 services:
+    frog:
+        hostname: proycon/lamachine
+        image: proycon/lamachine:latest
+        ports:
+            - "12345:12345"
+        command: bash -c "frog -S 12345"
+        networks:
+            - newsgac-net
+
     rabbit:
         hostname: rabbit
         image: rabbitmq:latest
@@ -24,6 +33,7 @@ services:
         links:
             - rabbit
             - database
+            - frog
         depends_on:
             - rabbit
         networks:
@@ -50,9 +60,11 @@ services:
             - worker
             - rabbit
             - database
+            - frog
         depends_on:
             - database
             - worker
+            - frog
         networks:
             - newsgac-net
         restart: on-failure
