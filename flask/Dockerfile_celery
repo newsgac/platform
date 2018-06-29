@@ -12,6 +12,7 @@ RUN ["mkdir", "flask/datasets"]
 # ADD src/run.py flask/src/run.py
 COPY ./src/ /flask/src/
 COPY ./datasets/ /flask/datasets/
+COPY dutch_stopwords_mod.txt /flask/dutch_stopwords_mod.txt
 COPY requirements.txt /flask/requirements.txt
 
 RUN ["pip", "install", "-r", "flask/requirements.txt"]
