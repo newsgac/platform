@@ -252,14 +252,13 @@ def visualise_results(experiment_id):
 @user_decorators.requires_login
 def predict(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
-    data_source = DataSource.get_by_id(experiment.data_source_id)
     script = None
     div = None
 
     if request.method == 'POST':
         try:
             if app.DOCKER_RUN:
-                task = predict_exp.delay(experiment_id, request.form['raw_text'], data_source)
+                task = predict_exp.delay(experiment_id, request.form['raw_text'])
                 task.wait()
 
                 if len(task.result) > 1:
@@ -267,6 +266,7 @@ def predict(experiment_id):
                     script = task.result[0][1]
                     div = task.result[0][2]
             else:
+                data_source = DataSource.get_by_id(experiment.data_source_id)
                 sorted_prediction_results = experiment.predict(request.form['raw_text'], data_source)
 
                 plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results,
