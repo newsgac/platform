@@ -276,7 +276,7 @@ def predict(experiment_id):
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
         except Exception as e:
-            flash("Something went wrong: " + e.message, 'error')
+            flash("Something went wrong: " + str(e.message), 'error')
             return render_template('experiments/prediction.html', experiment=experiment, request = request.form)
 
     return render_template('experiments/prediction.html', experiment=experiment)

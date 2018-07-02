@@ -165,7 +165,7 @@ class ResultVisualiser(object):
             pos_features_weights = []
             for index in top_coeff_pos:
                 if classifier[index] > 0:
-                    print classifier[index]
+                    # print classifier[index]
                     pos_features_weights.append(format(classifier[index], '.3f'))
                     pos_features_names.append(names[index])
 
@@ -173,7 +173,7 @@ class ResultVisualiser(object):
             neg_features_weights = []
             for index in top_coeff_neg:
                 if classifier[index] < 0:
-                    print classifier[index]
+                    # print classifier[index]
                     neg_features_weights.append(format(classifier[index], '.3f'))
                     neg_features_names.append(names[index])
 
