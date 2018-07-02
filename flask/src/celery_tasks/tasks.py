@@ -77,7 +77,7 @@ def ace_exp(self, finished_exp_ids):
     test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText(
         processed_data_source_list)
     self.update_state(state='ANALYSING')
-    return comparator.generateAgreementOverview(test_articles_genres)
+    return test_articles_genres, comparator.generateAgreementOverview(test_articles_genres)
 
 @celery_app.task(bind=True)
 def hyp_exp(self, experiment_id, hypotheses_data_source_id):

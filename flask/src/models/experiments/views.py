@@ -261,9 +261,9 @@ def predict(experiment_id):
                 task = predict_exp.delay(experiment_id, request.form['raw_text'])
                 task.wait()
 
-                if len(task.result) > 1:
-                    script = task.result[0][0]
-                    div = task.result[0][1]
+                if task.status == 'SUCCESS':
+                    script = task.result[0]
+                    div = task.result[1]
             else:
                 data_source = DataSource.get_by_id(experiment.data_source_id)
                 sorted_prediction_results = experiment.predict(request.form['raw_text'], data_source)
@@ -322,9 +322,9 @@ def user_experiments_overview_for_prediction():
                 task = predict_overview.delay(session['email'], request.form['raw_text'])
                 task.wait()
 
-                if len(task.result) > 1:
-                    script = task.result[0][0]
-                    div = task.result[0][1]
+                if task.status == 'SUCCESS':
+                    script = task.result[0]
+                    div = task.result[1]
             else:
                 finished_experiments = Experiment.get_finished_user_experiments(session['email'])
                 comparator = ExperimentComparator(finished_experiments)
@@ -400,9 +400,11 @@ def user_experiments_analyse_compare_explain():
             task = ace_exp.delay(request.form.getlist('compared_experiments'))
             task.wait()
 
-            if len(task.result) > 1:
-                tabular_data_dict = task.result[0][0]
-                combinations = task.result[0][1]
+            if task.status == 'SUCCESS':
+                test_articles_genres = task.result[0]
+                tabular_data_dict = task.result[1]
+                combinations = task.result[2]
+
         else:
             finished_experiments = []
             for exp_id in request.form.getlist('compared_experiments'):
@@ -437,9 +439,9 @@ def public_experiments_overview_for_prediction():
                 task = predict_overview_public.delay(request.form['raw_text'])
                 task.wait()
 
-                if len(task.result) > 1:
-                    script = task.result[0][0]
-                    div = task.result[0][1]
+                if task.status == 'SUCCESS':
+                    script = task.result[0]
+                    div = task.result[1]
             else:
                 finished_experiments = Experiment.get_public_experiments()
                 comparator = ExperimentComparator(finished_experiments)
@@ -507,8 +509,8 @@ def hypotheses_testing():
             task = hyp_exp.delay(request.form['hypotheses_experiment'], request.form['hypotheses_data_source'])
             task.wait()
 
-            if len(task.result) > 1:
-                df = task.result[0][0]
+            if task.status == 'SUCCESS':
+                df = task.result[0]
         else:
             df = experiment.populate_hypothesis_df(exp_data_source, hypotheses_data_source)
 

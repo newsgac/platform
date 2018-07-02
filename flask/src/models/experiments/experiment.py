@@ -19,7 +19,6 @@ import src.data_engineering.utils as DataUtilities
 from src.models.users.user import User
 import numpy as np
 
-
 UT = Utilities.Utils()
 
 __author__ = 'abilgin'
