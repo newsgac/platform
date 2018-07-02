@@ -46,7 +46,7 @@ while not connected:
     try:
         frogclient = FrogClient('frog',port, returnall=True)        # use this when dockerized
         connected = True
-    except e:
+    except:
         connected = False
 
 class ArticleTransformer(BaseEstimator, TransformerMixin):
