@@ -41,7 +41,13 @@ import spacy
 from pynlpl.clients.frogclient import FrogClient
 port = 12345
 # frogclient = FrogClient('localhost',port, returnall=True)
-frogclient = FrogClient('frog',port, returnall=True)        # use this when dockerized
+connected = False
+while not connected:
+    try:
+        frogclient = FrogClient('frog',port, returnall=True)        # use this when dockerized
+        connected = True
+    except e:
+        connected = False
 
 class ArticleTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, url=None, text=None, preprocessor=None):
