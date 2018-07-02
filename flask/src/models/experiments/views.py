@@ -262,9 +262,8 @@ def predict(experiment_id):
                 task.wait()
 
                 if len(task.result) > 1:
-                    plot = task.result[0][0]
-                    script = task.result[0][1]
-                    div = task.result[0][2]
+                    script = task.result[0][0]
+                    div = task.result[0][1]
             else:
                 data_source = DataSource.get_by_id(experiment.data_source_id)
                 sorted_prediction_results = experiment.predict(request.form['raw_text'], data_source)
