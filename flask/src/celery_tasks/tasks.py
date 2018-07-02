@@ -3,6 +3,7 @@ from src.celery_tasks.celery_app import celery_app
 from src.models.data_sources.data_source import DataSource
 from src.models.experiments.experiment import Experiment, ExperimentSVC, ExperimentRF, ExperimentNB
 from src.visualisation.comparison import ExperimentComparator
+from src.visualisation.resultvisualiser import ResultVisualiser
 
 
 @celery_app.task(bind=True)
@@ -46,7 +47,9 @@ def predict_exp(self, exp_id, raw_text):
     exp = Experiment.get_by_id(exp_id)
     data_source = DataSource.get_by_id(exp.data_source_id)
     self.update_state(state='PREDICTING', meta={'experiment_id':exp_id})
-    return exp.predict(raw_text, data_source)
+    return ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(
+        exp.predict(raw_text, data_source),
+        exp.display_title)
 
 @celery_app.task(bind=True, trail=True)
 def predict_overview(self, user_email, raw_text):
