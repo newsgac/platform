@@ -66,7 +66,7 @@ def get_data_source_page(data_source_id):
 def get_article_page(article_id):
     # display the processed data source instance which is an article
     art = DataSource.get_processed_article_by_id(article_id)
-
+    ## TODO: bug on adding articles to processed_data
     return render_template('data_sources/article.html', article=art, descriptions=DataUtils.feature_descriptions)
 
 @data_source_blueprint.route('/article/show/<string:article_id>', methods=['GET'])

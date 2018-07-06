@@ -60,7 +60,7 @@ services:
             - "5000:5000"
         links:
             - worker
-            - rabbit
+            - rabbitf
             - database
             - frog
         depends_on:
