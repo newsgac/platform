@@ -325,7 +325,8 @@ class ExperimentComparator:
 
         return scripts, divs
 
-    def retrieveUniqueTestArticleGenreTuplesBasedOnRawText(self, processed_data_source_list):
+    def retrieveUniqueTestArticleGenreTuplesBasedOnRawText(self):
+        processed_data_source_list = DataSource.get_processed_datasets()
         test_articles_genres = []
         used_raw_text = []
         for ds in processed_data_source_list:

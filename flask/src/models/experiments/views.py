@@ -413,8 +413,7 @@ def user_experiments_analyse_compare_explain():
             comparator = ExperimentComparator(finished_experiments)
 
             # get the test articles
-            test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText(
-                processed_data_source_list)
+            test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
             tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
 
         return render_template('experiments/analyse_compare_explain.html',
