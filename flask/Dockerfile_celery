@@ -21,7 +21,7 @@ RUN ["pip", "install", "fasttext==0.8.3"]
 WORKDIR flask/src/celery_tasks/
 
 # Usage: ENTRYPOINT application "argument", "argument", ..
-ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker1@%h"]
-ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker2@%h"]
-ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker3@%h"]
+ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker@%%h"]
+#ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker2@%h"]
+#ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker3@%h"]
 
