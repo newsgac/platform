@@ -68,16 +68,15 @@ def predict_overview_public(self, raw_text):
 
 @celery_app.task(bind=True, trail=True)
 def ace_exp(self, finished_exp_ids):
-    processed_data_source_list = DataSource.get_processed_datasets()
     finished_experiments = []
     for exp_id in finished_exp_ids:
         finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
     comparator = ExperimentComparator(finished_experiments)
     # get the test articles
-    test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText(
-        processed_data_source_list)
+    test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
     self.update_state(state='ANALYSING')
-    return test_articles_genres, comparator.generateAgreementOverview(test_articles_genres)
+    tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
+    return test_articles_genres, tabular_data_dict, combinations
 
 @celery_app.task(bind=True)
 def hyp_exp(self, experiment_id, hypotheses_data_source_id):
