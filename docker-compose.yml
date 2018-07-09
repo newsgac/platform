@@ -57,7 +57,7 @@ services:
             context: ./flask
             dockerfile: Dockerfile_flask
         ports:
-            - "5000:5000"
+            - "5050:5000"
         links:
             - worker
             - rabbitf
