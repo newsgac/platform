@@ -15,7 +15,7 @@ from src.models.experiments.experiment import Experiment, ExperimentRF, Experime
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
-from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public, ace_exp, hyp_exp
+from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public, hyp_exp
 import time
 import dill
 from bokeh.resources import INLINE
@@ -396,25 +396,25 @@ def user_experiments_analyse_compare_explain():
 
     if request.method == 'POST':
 
-        if app.DOCKER_RUN:
-            task = ace_exp.delay(request.form.getlist('compared_experiments'))
-            task.wait()
+        # if app.DOCKER_RUN:
+        #     task = ace_exp.delay(request.form.getlist('compared_experiments'))
+        #     task.wait()
+        #
+        #     if task.status == 'SUCCESS':
+        #         test_articles_genres = task.result[0]
+        #         tabular_data_dict = task.result[1]
+        #         combinations = task.result[2]
+        #
+        # else:
+        finished_experiments = []
+        for exp_id in request.form.getlist('compared_experiments'):
+            finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
 
-            if task.status == 'SUCCESS':
-                test_articles_genres = task.result[0]
-                tabular_data_dict = task.result[1]
-                combinations = task.result[2]
+        comparator = ExperimentComparator(finished_experiments)
 
-        else:
-            finished_experiments = []
-            for exp_id in request.form.getlist('compared_experiments'):
-                finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
-
-            comparator = ExperimentComparator(finished_experiments)
-
-            # get the test articles
-            test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
-            tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
+        # get the test articles
+        test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
+        tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
 
         return render_template('experiments/analyse_compare_explain.html',
                        js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,

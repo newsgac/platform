@@ -66,17 +66,20 @@ def predict_overview_public(self, raw_text):
     self.update_state(state='PREDICTING')
     return comparator.visualise_prediction_comparison(raw_text)
 
-@celery_app.task(bind=True, trail=True)
-def ace_exp(self, finished_exp_ids):
-    finished_experiments = []
-    for exp_id in finished_exp_ids:
-        finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
-    comparator = ExperimentComparator(finished_experiments)
-    # get the test articles
-    test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
-    self.update_state(state='ANALYSING')
-    tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
-    return test_articles_genres, tabular_data_dict, combinations
+# @celery_app.task(bind=True, trail=True)
+# def ace_exp(self, finished_exp_ids):
+#     finished_experiments = []
+#     for exp_id in finished_exp_ids:
+#         finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
+#     comparator = ExperimentComparator(finished_experiments)
+#     # get the test articles
+#     test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
+#     print (test_articles_genres[0])
+#     self.update_state(state='ANALYSING')
+#     tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
+#     print(tabular_data_dict[0])
+#     print(combinations)
+#     return test_articles_genres, tabular_data_dict, combinations
 
 @celery_app.task(bind=True)
 def hyp_exp(self, experiment_id, hypotheses_data_source_id):
