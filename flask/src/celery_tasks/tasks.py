@@ -69,7 +69,6 @@ def predict_overview_public(self, raw_text):
 @celery_app.task(bind=True, trail=True)
 def ace_exp(self, finished_exp_ids):
     finished_experiments = []
-    print (finished_exp_ids)
     for exp_id in finished_exp_ids:
         finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
     comparator = ExperimentComparator(finished_experiments)
