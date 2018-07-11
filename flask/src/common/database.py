@@ -15,6 +15,8 @@ class Database(object):
         self.db = self.client["newsgacdev"]
         self.fs = gridfs.GridFS(self.db)
 
+        self.db['predictions'].create_index([("article_text","text")])
+
     def insert(self, collection, data):
         self.db[collection].insert(data)
 

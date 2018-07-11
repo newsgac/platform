@@ -356,11 +356,11 @@ class ExperimentComparator:
 
             # get prediction from each experiment
             predictions_dict = {}
-
+            existing_pred = self.get_existing_article_predictions(article_text=article_text)
             for exp in self.experiments:
                 # predictions_dict[exp] = (exp.predict_from_db(article)).keys()[0]
                 ds = DataSource.get_by_id(exp.data_source_id)
-                existing_pred = self.get_existing_article_predictions(article_text=article_text)
+
                 if existing_pred is None:
                     self.save_article_comparison(id=uuid.uuid4().hex, article_text=article_text)
                     predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
@@ -381,9 +381,6 @@ class ExperimentComparator:
             for genre in predictions_dict.values():
                 genre_counts[genre] += 1
 
-            # print "Genre counts"
-            # print genre_counts
-
             # get the prevailing genre
             prevailing_genre = max(genre_counts, key=lambda key: genre_counts[key])
 
@@ -392,12 +389,9 @@ class ExperimentComparator:
             for k, v in predictions_dict.iteritems():
                 agreement_dict.setdefault(v, []).append(k)
 
-            # print "Agreement dictionary"
-            # print agreement_dict
             dicts_to_merge[count] = agreement_dict
 
             tabular_data_row["mutual_agreement_exp"] = agreement_dict[prevailing_genre]
-            tabular_data_row["gold_agreement_exp"] = []
             tabular_data_row["agreed_genre_prediction"] = prevailing_genre
             tabular_data_row["true_genre"] = article_genre if (article_genre is not None or article_genre is not "UNL") else "N/A"
             # TODO:Test for unlabelled data here
@@ -405,30 +399,18 @@ class ExperimentComparator:
             count += 1
             tabular_data_all.append(tabular_data_row)
 
-        # quantity_genre = defaultdict(set)
-        # for d in dicts_to_merge:
-        #     for k, v in d.iteritems():
-        #         quantity_genre[k].add(v)
 
         combinations = {}
-        # create combinations of the experiments
-        # set based overview - venn diagram information
-        for i, combo in enumerate(UT.powerset(iterable=self.experiments), 1):
-            if i != 1:
-                combinations[combo] = {}
 
         # for each article find the combination that agrees on the prediction
+        # TODO: optimize this triple loop: fix applied down to double loop
         for art_num, d in dicts_to_merge.items():
             for pred, exp_list in d.items():
-                for key in combinations.keys():
-                    if set(key) == set(exp_list):
-                        if pred not in combinations[key].keys():
-                            combinations[key][pred] = []
-                        # combinations[key][pred].append(DataSource.get_processed_article_by_id(art_id))
-                        combinations[key][pred].append(art_num)
-                        break
-
-
+                key = tuple((sorted(exp_list)))
+                try:
+                    combinations[key].setdefault(pred, []).append(art_num)
+                except KeyError:
+                    combinations[key] = {pred: [art_num]}
 
         return tabular_data_all, combinations
 
