@@ -55,3 +55,4 @@ Werkzeug==0.14.1
 cython==0.27.3
 kombu==4.1.0
 billiard==3.5.0.2
+pandas==0.22.0
