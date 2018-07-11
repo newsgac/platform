@@ -15,7 +15,7 @@ from src.models.experiments.experiment import Experiment, ExperimentRF, Experime
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
-from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public, hyp_exp
+from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public
 import time
 import dill
 from bokeh.resources import INLINE
@@ -484,8 +484,8 @@ def public_experiments_overview():
 @experiment_blueprint.route('/hypotheses_testing', methods=['GET', 'POST'])
 @user_decorators.requires_login
 def hypotheses_testing():
-    # test_data_sources = DataSource.get_testing_by_user_email(user_email=session['email'])
-    test_data_sources = DataSource.get_by_user_email(user_email=session['email'])
+    test_data_sources = DataSource.get_testing_by_user_email(user_email=session['email'])
+    # test_data_sources = DataSource.get_by_user_email(user_email=session['email'])
     finished_experiments = Experiment.get_finished_user_experiments(user_email=session['email'])
 
     if request.method == 'POST':
@@ -493,14 +493,7 @@ def hypotheses_testing():
         exp_data_source = DataSource.get_by_id(experiment.data_source_id)
         hypotheses_data_source = DataSource.get_by_id(request.form['hypotheses_data_source'])
 
-        if app.DOCKER_RUN:
-            task = hyp_exp.delay(request.form['hypotheses_experiment'], request.form['hypotheses_data_source'])
-            task.wait()
-
-            if task.status == 'SUCCESS':
-                df = task.result[0]
-        else:
-            df = experiment.populate_hypothesis_df(exp_data_source, hypotheses_data_source)
+        df = experiment.populate_hypothesis_df(exp_data_source, hypotheses_data_source)
 
         try:
             script, div = ExperimentComparator.visualize_hypotheses_using_DF(df, hypotheses_data_source.display_title, experiment.display_title)

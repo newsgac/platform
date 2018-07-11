@@ -81,12 +81,12 @@ def predict_overview_public(self, raw_text):
 #     print(combinations)
 #     return test_articles_genres, tabular_data_dict, combinations
 
-@celery_app.task(bind=True)
-def hyp_exp(self, experiment_id, hypotheses_data_source_id):
-    experiment = Experiment.get_by_id(experiment_id)
-    exp_data_source = DataSource.get_by_id(experiment.data_source_id)
-    hypotheses_data_source = DataSource.get_by_id(hypotheses_data_source_id)
-    self.update_state(state='TESTING')
-    return experiment.populate_hypothesis_df(exp_data_source, hypotheses_data_source)
+# @celery_app.task(bind=True)
+# def hyp_exp(self, experiment_id, hypotheses_data_source_id):
+#     experiment = Experiment.get_by_id(experiment_id)
+#     exp_data_source = DataSource.get_by_id(experiment.data_source_id)
+#     hypotheses_data_source = DataSource.get_by_id(hypotheses_data_source_id)
+#     self.update_state(state='TESTING')
+#     return experiment.populate_hypothesis_df(exp_data_source, hypotheses_data_source)
 
 

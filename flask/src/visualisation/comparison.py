@@ -67,13 +67,16 @@ class ExperimentComparator:
             self.other['cross_validation_accuracies'].append(results.accuracy)
             self.other['kappas'].append(results.cohens_kappa)
 
-    def get_existing_article_predictions(self, article_text):
+    @staticmethod
+    def get_existing_article_predictions(article_text):
         return DATABASE.find_one('predictions', {"article_text": article_text})
 
-    def save_article_comparison(self, id, article_text):
+    @staticmethod
+    def save_article_comparison(id, article_text):
         DATABASE.insert('predictions', {"_id":id, "article_text":article_text, "exp_predictions":{}})
 
-    def update_article_comparison_by_experiment(self, article_text, exp_id, prediction):
+    @staticmethod
+    def update_article_comparison_by_experiment(article_text, exp_id, prediction):
         DATABASE.update('predictions', {"article_text": article_text},
                         {"$set": {"exp_predictions." +exp_id: prediction}})
 
@@ -356,19 +359,18 @@ class ExperimentComparator:
 
             # get prediction from each experiment
             predictions_dict = {}
-            existing_pred = self.get_existing_article_predictions(article_text=article_text)
+            existing_pred = ExperimentComparator.get_existing_article_predictions(article_text=article_text)
             for exp in self.experiments:
-                # predictions_dict[exp] = (exp.predict_from_db(article)).keys()[0]
                 ds = DataSource.get_by_id(exp.data_source_id)
 
                 if existing_pred is None:
-                    self.save_article_comparison(id=uuid.uuid4().hex, article_text=article_text)
+                    ExperimentComparator.save_article_comparison(id=uuid.uuid4().hex, article_text=article_text)
                     predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
-                    self.update_article_comparison_by_experiment(article_text=article_text,
+                    ExperimentComparator.update_article_comparison_by_experiment(article_text=article_text,
                                                                  exp_id=exp._id, prediction=predictions_dict[exp])
                 elif exp._id not in existing_pred["exp_predictions"].keys():
                     predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
-                    self.update_article_comparison_by_experiment(article_text=article_text,
+                    ExperimentComparator.update_article_comparison_by_experiment(article_text=article_text,
                                                                exp_id=exp._id, prediction=predictions_dict[exp])
                 else:
                     predictions_dict[exp] = existing_pred["exp_predictions"][exp._id]

@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from collections import OrderedDict
 
 import dill
@@ -18,6 +19,7 @@ import src.common.utils as Utilities
 import src.data_engineering.utils as DataUtilities
 from src.models.users.user import User
 import numpy as np
+import pandas as pd
 
 UT = Utilities.Utils()
 
@@ -184,20 +186,34 @@ class Experiment(object):
         return classifier
 
     def populate_hypothesis_df(self, exp_data_source, hypotheses_data_source):
+        from src.visualisation.comparison import ExperimentComparator
         data = {}
         articles = hypotheses_data_source.get_test_instances()
         count1985 = 0
         count1965 = 0
-        import pandas as pd
+
         for article in articles:
             # year extraction
-            if 'date' not in article.keys():
+            if 'date' not in article.keys() or article['date'] is None:
                 break
             date_from_db = article['date'].split("-")[2]
             if date_from_db not in data.keys():
                 data[date_from_db] = {}
 
-            prediction = (self.predict(article['article_raw_text'], exp_data_source)).keys()[0]
+            existing_pred = ExperimentComparator.get_existing_article_predictions(article_text=article['article_raw_text'])
+
+            if existing_pred is None:
+                ExperimentComparator.save_article_comparison(id=uuid.uuid4().hex, article_text=article['article_raw_text'])
+                prediction = (self.predict(article['article_raw_text'], exp_data_source)).keys()[0]
+                ExperimentComparator.update_article_comparison_by_experiment(article_text=article['article_raw_text'],
+                                                             exp_id=self._id, prediction=prediction)
+            elif self._id not in existing_pred["exp_predictions"].keys():
+                prediction = (self.predict(article['article_raw_text'], exp_data_source)).keys()[0]
+                ExperimentComparator.update_article_comparison_by_experiment(article_text=article['article_raw_text'],
+                                                             exp_id=self._id, prediction=prediction)
+            else:
+                prediction = existing_pred["exp_predictions"][self._id]
+
             if prediction not in data[date_from_db].keys():
                 data[date_from_db][prediction] = 0
             data[date_from_db][prediction] += 1
