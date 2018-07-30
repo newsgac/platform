@@ -284,6 +284,11 @@ class DataSource(object):
     def add_features_to_db(self, article_id, dict):
         DATABASE.update(DataSourceConstants.COLLECTION_PROCESSED, {'_id': article_id, 'data_source_id': self._id}, {'$set': dict})
 
+    def add_features_to_db_real_data(self, proc_ds_id, art_ids, feat_mat):
+        DATABASE.update(DataSourceConstants.COLLECTION_REAL_PROCESSED, {'_id': self._id}, {"$set": {"ds_features." + str(proc_ds_id): feat_mat,
+                                                                                                    "article_ids." + str(proc_ds_id): art_ids},
+                                                                                           })
+
     def is_article_processed(self, article_id):
         doc = DATABASE.find_one(DataSourceConstants.COLLECTION_PROCESSED, {'_id': article_id})
         if set(doc.keys()) == set(DataUtils.feature_descriptions.keys()):
@@ -298,7 +303,9 @@ class DataSource(object):
         raw_text_list = []
         date_list = []
         count = 0
+        oth_count = 0
         no_date = False
+
         for line in file.splitlines():
             line = line.rstrip()
 
@@ -316,10 +323,15 @@ class DataSource(object):
 
             groups = reg_res.groups()
             label = groups[0].rstrip()
+
+            if label not in DataUtils.genre_codebook_friendly.keys():
+                label = 'OTH'
+                oth_count += 1
             if no_date:
                 date = None
                 raw_text = groups[1].rstrip()
             else:
+                # TODO: correct the input mismatch documents - so far day and month are not used
                 date_str = groups[1].rstrip()
                 month = date_str.split("/")[0]
                 day = date_str.split("/")[1]
@@ -335,10 +347,11 @@ class DataSource(object):
                 raw_text = groups[2].rstrip()
                 raw_text = raw_text.decode('utf-8')
 
-
             label_list.append(label)
             raw_text_list.append(raw_text)
             date_list.append(date)
+
+        print "Found ", oth_count, " other genre in documents.."
 
         for raw_text, label, date in zip(raw_text_list, label_list, date_list):
             if not self.does_raw_text_exist(raw_text):
@@ -349,6 +362,7 @@ class DataSource(object):
             else:
                 count += 1
         print "Found ", count, " duplicate(s) in documents.."
+
 
 
     def apply_preprocessing_and_update_db(self, articles_from_db):

@@ -28,7 +28,8 @@ genres = {
     5: ['Opiniestuk/Hoofdredactioneel commentaar'],
     6: ['Recensie'],
     7: ['Achtergrond/Nieuwsanalyse'],
-    8: ['Column']
+    8: ['Column'],
+    9: ['Other']
 }
 
 genres_labels = {
@@ -40,7 +41,8 @@ genres_labels = {
     'Opiniestuk': 5,
     'Recensie': 6,
     'Achtergrond': 7,
-    'Column': 8
+    'Column': 8,
+    'Other' : 9
 }
 
 genre_codebook = {
@@ -54,7 +56,8 @@ genre_codebook = {
     'HOO' : 5,
     'REC' : 6,
     'ACH' : 7,
-    'COL' : 8
+    'COL' : 8,
+    'OTH' : 9
 }
 
 genre_codebook_friendly = {
@@ -68,7 +71,8 @@ genre_codebook_friendly = {
     'REC' : 'Recensie',
     'ACH' : 'Achtergrond',
     'COL' : 'Column',
-    'UNL' : 'Unlabelled'
+    'UNL' : 'Unlabelled',
+    'OTH' : 'Other'
 }
 
 features = [

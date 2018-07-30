@@ -8,6 +8,7 @@ stop-word removal, stemming, etc. using specified NLP methods.
 import src.models.data_sources.constants as DataSourceConstants
 from stop_words import get_stop_words
 import re
+import numpy as np
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.externals.joblib import Parallel
 from sklearn.externals.joblib import delayed
@@ -66,6 +67,24 @@ class Preprocessor():
                 feature_list.append(feature)
 
         return article_ids, processed_text_list, feature_list
+
+    def do_parallel_processing_matrix(self, documents):
+
+        feature_list = []
+        article_ids = []
+        if self.nlp_tool == 'frog':
+            # Frog does not work with parallelization
+            for processed_text, feature, id in Parallel(n_jobs=1)(
+                    delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
+                feature_list.append(feature)
+                article_ids.append(id)
+        elif self.nlp_tool == 'spacy':
+            for processed_text, feature, id in Parallel(n_jobs=50)(
+                    delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
+                feature_list.append(feature)
+                article_ids.append(id)
+
+        return article_ids, feature_list
 
 def get_clean_ocr(ocr):
 

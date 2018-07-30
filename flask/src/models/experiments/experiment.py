@@ -192,6 +192,11 @@ class Experiment(object):
         count1985 = 0
         count1965 = 0
 
+        # adding features to unlabelled data
+        preproc = Preprocessor(exp_data_source.pre_processing_config)
+        art_ids, feat_mat = preproc.do_parallel_processing_matrix(articles)
+        hypotheses_data_source.add_features_to_db_real_data(exp_data_source._id, art_ids, feat_mat)
+
         for article in articles:
             # year extraction
             if 'date' not in article.keys() or article['date'] is None:
