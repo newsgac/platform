@@ -8,5 +8,4 @@
 
 # project specific
 .idea
-README.md
 flask/src/test/*
