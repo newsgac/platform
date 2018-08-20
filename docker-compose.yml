@@ -46,7 +46,7 @@ services:
         hostname: mongo
         image: mongo:latest
         volumes:
-            - /export/scratch2/home/aysenur/newsgac_db/:/data/db
+            - ./../data:/data/db
         ports:
             - "27017:27017"
         networks:
