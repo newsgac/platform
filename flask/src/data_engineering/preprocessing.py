@@ -125,9 +125,9 @@ def process_raw_text_for_config(preprocessor, raw_text, id=None):
 
     art = FE.Article(text=processed_text)
     if preprocessor.nlp_tool == 'frog':
-        features = art.get_features_frog()
+        features = art.get_pruned_features_frog()
     elif preprocessor.nlp_tool == 'spacy':
-        features = art.get_features_spacy()
+        features = art.get_pruned_features_spacy()
 
     #eliminate features according to the feature list
     valid_feats = DataUtils.features

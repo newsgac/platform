@@ -8,8 +8,8 @@ class Database(object):
 
     def __init__(self):
         # docker
-        self.URI = "mongodb://database:27017"  # use this when dockerized
-        # self.URI = "mongodb://127.0.0.1:27017"
+        # self.URI = "mongodb://database:27017"  # use this when dockerized
+        self.URI = "mongodb://127.0.0.1:27017"
 
         self.client = pymongo.MongoClient(self.URI)
         self.db = self.client["newsgacdev"]
@@ -31,6 +31,9 @@ class Database(object):
 
     def update(self, collection, query, data):
         self.db[collection].update(query, data, upsert=True)
+
+    def updateManyForRemoval(self, collection, key):
+        self.db[collection].update_many({}, {'$unset': {key: 1}})
 
     def remove(self, collection, query):
         self.db[collection].remove(query)

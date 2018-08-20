@@ -72,6 +72,7 @@ $(document).ready(function() {
     $('#experiment_nb').bootstrapValidator();
     $('#experiment_svc').bootstrapValidator();
     $('#experiment_rf').bootstrapValidator();
+    $('#experiment_xgb').bootstrapValidator();
 });
 
 $(document).ready(function() {

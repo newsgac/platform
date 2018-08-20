@@ -13,7 +13,10 @@ from werkzeug.utils import secure_filename
 import src.data_engineering.utils as DataUtils
 from src.data_engineering.postprocessing import Explanation
 from src.models.experiments.experiment import Experiment
+from src.visualisation.resultvisualiser import ResultVisualiser
 from src.run import DATABASE
+import pandas as pd
+from bokeh.resources import INLINE
 
 __author__ = 'abilgin'
 
@@ -167,16 +170,19 @@ def process_data_source(data_source_id):
 @user_decorators.requires_login
 def visualise_stats(data_source_id):
     ds = DataSource.get_by_id(data_source_id)
-    # results = ds.get_stats()
-    # plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results, title="")
-    #
-    # return render_template('experiments/results.html',
-    #                        experiment=experiment,
-    #                        results=results,
-    #                        plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
-    #                        mimetype='text/html')
 
-    return render_template('underconstruction.html')
+    print (ds.stats_all)
+    stats_df = pd.DataFrame(ds.stats_all, columns=ds.stats_all.keys())
+    stats_df.fillna(0, inplace=True)
+
+    script, div = ResultVisualiser.visualize_df_stats(stats_df, ds.display_title)
+
+    return render_template('data_sources/data_source_stats.html',
+                           data_source=ds,
+                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
+                           css_resources=INLINE.render_css(),
+                           mimetype='text/html')
+
 
 @data_source_blueprint.route('/recommend/<string:data_source_id>')
 @user_decorators.requires_login

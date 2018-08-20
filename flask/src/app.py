@@ -5,7 +5,7 @@ __author__ = 'abilgin'
 
 app = Flask(__name__)
 app.secret_key = "newsgacdev123"
-app.__setattr__("DOCKER_RUN", True)
+app.__setattr__("DOCKER_RUN", False)
 
 @app.route('/')
 def home():

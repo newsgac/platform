@@ -9,6 +9,7 @@ from src.data_engineering.preprocessing import Preprocessor, remove_stop_words, 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import dill
 import numpy as np
+import pandas as pd
 import src.common.utils as Utilities
 import re
 from bson import ObjectId
@@ -34,6 +35,7 @@ class DataSource(object):
             self.file_handler_db = kwargs['new_handler']
             self.X_train_handler, self.X_test_handler, self.y_train_with_ids_handler, self.y_test_with_ids_handler = None, None, None, None
             self.pre_processing_config = None
+            self.stats_all = None
         else:
             # default constructor from the database
             self.__dict__.update(kwargs)
@@ -157,6 +159,7 @@ class DataSource(object):
                     self.display_title = self.display_title + " (LEM)"
 
                 X, y = self.get_data_with_labels_from_articles(articles_from_db)
+                y_df = pd.DataFrame(data=y, columns=['Label', 'ArticleId'])
 
                 processed_X = []
                 for x in X:
@@ -171,7 +174,8 @@ class DataSource(object):
                     processed_X.append(clean_ocr)
 
                 X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(processed_X, y, random_state=42,
-                                                                                      test_size=0.1, shuffle=True)
+                                                                                      test_size=0.1, shuffle=True,
+                                                                                      stratify=y_df['Label'])
 
                 # fit the vectorizer
                 # vectorizer = TfidfVectorizer(lowercase=False)
@@ -196,9 +200,11 @@ class DataSource(object):
                 self.apply_preprocessing_and_update_db(articles_from_db)
 
                 X, y = self.get_data_with_labels_from_articles(DataSource.get_articles_by_data_source(self._id))
+                y_df = pd.DataFrame(data=y, columns=['Label', 'ArticleId'])
 
                 X_train, X_test, y_train_with_ids, y_test_with_ids = train_test_split(X, y, random_state=42,
-                                                                                      test_size=0.1, shuffle=True)
+                                                                                      test_size=0.1, shuffle=True,
+                                                                                      stratify=y_df['Label'])
 
                 if 'scaling' in self.pre_processing_config.keys():
                     print ("Scaling the data..")
@@ -219,6 +225,8 @@ class DataSource(object):
     def delete(self):
         DATABASE.remove(DataSourceConstants.COLLECTION, {"_id": self._id})
         DATABASE.remove(DataSourceConstants.COLLECTION_PROCESSED, {"data_source_id": self._id})
+        DATABASE.remove('predictions', {"data_source_id": self._id})
+        DATABASE.updateManyForRemoval(DataSourceConstants.COLLECTION_REAL_PROCESSED, "ds_features."+self._id)
         DATABASE.getGridFS().delete(self.file_handler_db)
         DATABASE.getGridFS().delete(self.X_train_handler)
         DATABASE.getGridFS().delete(self.X_test_handler)
@@ -305,6 +313,7 @@ class DataSource(object):
         count = 0
         oth_count = 0
         no_date = False
+        self.stats_all = {}
 
         for line in file.splitlines():
             line = line.rstrip()
@@ -339,9 +348,15 @@ class DataSource(object):
 
                 if len(year) == 2:
                     # fix for conversion 20xx where xx < 69 although the data is from 1900s
-                    date_str_corr = day + "/" + month + "/19" + year
-                else:
-                    date_str_corr = day + "/" + month + "/" + year
+                    year = "19" + year
+
+                if year not in self.stats_all.keys():
+                    self.stats_all[year] = {}
+                if label not in self.stats_all[year].keys():
+                    self.stats_all[year][label] = 0
+                self.stats_all[year][label] += 1
+
+                date_str_corr = day + "/" + month + "/" + year
                 # print date_str_corr
                 date = datetime.datetime.strptime(date_str_corr, "%d/%m/%Y").strftime("%d-%m-%Y")
                 raw_text = groups[2].rstrip()
@@ -362,6 +377,7 @@ class DataSource(object):
             else:
                 count += 1
         print "Found ", count, " duplicate(s) in documents.."
+        print self.stats_all
 
 
 
@@ -446,6 +462,7 @@ class DataSource(object):
         from sklearn.pipeline import Pipeline
         from sklearn import svm
         from sklearn.linear_model import LogisticRegression
+        from xgboost import XGBClassifier
         from sklearn.linear_model import SGDClassifier
         from sklearn.naive_bayes import MultinomialNB, GaussianNB
         from sklearn.preprocessing import StandardScaler
@@ -482,7 +499,7 @@ class DataSource(object):
         pipe = Pipeline([
             # ('reduce_dim', PCA()),
             # ('scale', StandardScaler()),
-            ('classify', svm.SVC())
+            ('classify', svm.SVC(class_weight='balanced'))
         ])
 
         # Create space of candidate learning algorithms and their hyperparameters
@@ -516,10 +533,17 @@ class DataSource(object):
             {
                 'classify': [RandomForestClassifier()],
                 'classify__criterion':['gini'],
-                'classify__n_estimators': [50, 100, 1000],
+                'classify__n_estimators': [50, 100, 250, 500, 1000],
                 'classify__max_features': [1, 2, 3, 4, 5, 6],
                 # 'classify__max_depth': [1, 5, 10, 15, 20, 25, 30],
                 # 'classify__min_samples_leaf': [1, 2, 4, 6, 8, 10],
+            },
+
+            {
+                'classify': [XGBClassifier()],
+                'classify__n_estimators': [50, 100, 250, 500, 1000],
+                'classify__max_depth': [1, 2, 3, 4, 5, 10],
+                'classify__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2],
             },
         ]
         # reducer_labels = ['PCA', 'NMF', 'KBest(chi2)']

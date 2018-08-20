@@ -52,6 +52,7 @@ class Result(object):
         self.cohens_kappa = format(metrics.cohen_kappa_score(self.y_test, self.y_pred), '.2f')
 
         self.accuracy = 0
+        self.std = 0
 
         np.set_printoptions(precision=2)
 

@@ -6,7 +6,7 @@ from bokeh.models import (
     LinearColorMapper,
     PrintfTickFormatter,
     ColorBar,
-    FixedTicker)
+    FixedTicker, FactorRange)
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.layouts import gridplot
@@ -14,6 +14,8 @@ import colorcet
 import numpy as np
 import src.data_engineering.data_io as DataIO
 import src.data_engineering.utils as DataUtils
+from bokeh.transform import dodge, factor_cmap
+from bokeh.palettes import Category20
 
 
 __author__ = 'abilgin'
@@ -223,3 +225,58 @@ class ResultVisualiser(object):
         script, div = components(overview_layout)
 
         return plots, script, div
+
+    @staticmethod
+    def visualize_df_feature_importance(data_frame, title_suffix):
+
+        pred_source = ColumnDataSource(data=data_frame)
+
+        p = figure(y_range=data_frame['Feature'].tolist(), plot_height=1000, title='Feature Importance for '+ title_suffix,
+                   plot_width=800, x_range=[0, 0.4], toolbar_location='right',
+                   tools="save,pan,box_zoom,reset,wheel_zoom")
+
+        p.hbar(y=data_frame['Feature'].tolist(), height=0.5, left=0, right=data_frame['Importance'].tolist(), color='navy')
+
+        labels = LabelSet(x='Importance', y='Feature', text='Importance', level='glyph', text_font_size="8pt",
+                          x_offset=2, y_offset=-1, source=pred_source, render_mode='canvas')
+
+        p.y_range.range_padding = 0.4
+        p.axis.major_label_text_font_size = "10pt"
+        p.xgrid.grid_line_color = None
+        p.legend.location = "top_left"
+        p.legend.orientation = "horizontal"
+        p.xaxis.major_label_orientation = "horizontal"
+
+        p.add_layout(labels)
+
+        script, div = components(p)
+
+        return p, script, div
+
+    @staticmethod
+    def visualize_df_stats(df, title):
+        df = df.reset_index().rename(columns={'index': 'genre'})
+        data = df.to_dict(orient='list')
+        idx = df['genre'].tolist()
+
+        x = [(year, genre) for year in sorted(df.columns[1:]) for genre in idx]
+        counts = sum(zip(sum((data[year] for year in sorted(df.columns[1:])),[])), ())  # like an hstack
+
+        source = ColumnDataSource(data=dict(x=x, counts=counts))
+        p = figure(x_range=FactorRange(*x), plot_height=400, plot_width=1200, title="Distribution of genres over time in "+ title,
+                   toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
+
+        p.vbar(x='x', top='counts', width=1.0, source=source, line_color="white",
+               fill_color=factor_cmap('x', palette=Category20[10], factors=idx, start=1, end=2))
+
+        p.x_range.range_padding = 0.1
+        p.xgrid.grid_line_color = None
+        p.yaxis.axis_label = "Total number of instances"
+        p.yaxis.major_label_text_font_size = '10pt'
+        p.xaxis.major_label_text_font_size = '10pt'
+        p.xaxis.major_label_orientation = "vertical"
+        p.legend.location = "top_left"
+        p.legend.orientation = "horizontal"
+        script, div = components(p)
+
+        return script, div

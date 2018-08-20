@@ -2,7 +2,7 @@
 {% block content %}
 
     <div class="page-header">
-        <h1>Random Forest Experiment:
+        <h1>XGBoost Experiment:
             <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">
                 <small> {{ experiment.display_title }} </small>
             </a>
@@ -12,12 +12,12 @@
             <a class="btn btn-info "
                 href="{{ url_for('experiments.visualise_results', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-eye-open"></span> Result Analysis</a>
-            <a class="btn btn-warning "
-                href="{{ url_for('experiments.visualise_features', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-list-alt"></span> Feature Analysis</a>
             <a class="btn btn-primary "
                 href="{{ url_for('experiments.predict', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
+            <a class="btn btn-warning "
+                href="{{ url_for('experiments.visualise_features', experiment_id=experiment._id) }}">
+                <span class="glyphicon glyphicon-list-alt"></span> Feature Analysis</a>
             <a class="btn btn-danger"
                href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>
@@ -58,7 +58,7 @@
 
                         <li role="presentation">
                             <a href="#step2" data-toggle="tab" aria-controls="step2" role="tab"
-                               title="Step 2: RF Configuration">
+                               title="Step 2: XGB Configuration">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-pencil"></i>
                             </span>
@@ -151,7 +151,7 @@
 
                         <div class="tab-pane" role="tabpanel" id="step2">
                             <div class="step33">
-                                <h5><strong>Configure random forest algorithmic hyperparameters</strong></h5>
+                                <h5><strong>Configure xgboost algorithmic hyperparameters</strong></h5>
                                 <hr>
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
@@ -181,7 +181,7 @@
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
                                                 <strong>Number of estimators</strong>
-                                                <span class="help-block"><i>The number of decision trees in the forest.</i></span>
+                                                <span class="help-block"><i>The number of boosted trees to fit.</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
@@ -193,13 +193,12 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Maximum number of features</strong>
-                                                <span class="help-block"><i>The number of features to be considered when looking for the best split.<br/>
-                                                If float, then the value is taken as percentage.</i></span>
+                                                <strong>Maximum depth</strong>
+                                                <span class="help-block"><i>Maximum tree depth for base learners.</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.max_features }}" disabled>
+                                            <input type="text" class="form-control" value="{{ experiment.max_depth }}" disabled>
                                         </div>
                                     </div>
 

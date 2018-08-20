@@ -30,11 +30,11 @@
                 <span class="glyphicon glyphicon-trash"></span> Delete</a>
 
         {% else %}
-            <a class="btn btn-info disabled"
+            <a class="btn btn-info"
                 href="{{ url_for('data_sources.visualise_stats', data_source_id=data_source._id) }}">
                 <span class="glyphicon glyphicon-eye-open"></span> Data Analysis</a>
             {% if data_source.training_purpose %}
-                <a class="btn btn-warning "
+                <a class="btn btn-warning"
                 href="{{ url_for('data_sources.apply_grid_search', data_source_id=data_source._id) }}">
                 <span class="glyphicon glyphicon-search"></span> Recommend Algorithm </a>
             {% endif %}

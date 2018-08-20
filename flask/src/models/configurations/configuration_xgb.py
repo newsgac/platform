@@ -7,7 +7,7 @@ import src.data_engineering.data_io as DataIO
 
 __author__ = 'abilgin'
 
-class ConfigurationRF():
+class ConfigurationXGB():
 
     def __init__(self, user_email, **kwargs):
 
@@ -15,7 +15,7 @@ class ConfigurationRF():
             # creation from the web
             self.user_email = user_email
             self._id = uuid.uuid4().hex
-            self.type = "RF"
+            self.type = "XGB"
             self.features = {}
             self.render_form(kwargs['form'])
         elif 'configuration' in kwargs:
@@ -37,7 +37,7 @@ class ConfigurationRF():
             return False
 
         return self.features == other.features and self.n_estimators == other.n_estimators and \
-                self.max_features == other.max_features and self.random_state == other.random_state and \
+                self.max_depth == other.max_depth and self.random_state == other.random_state and \
                 self.data_source_id == other.data_source_id
 
     def render_form(self, form):
@@ -69,9 +69,9 @@ class ConfigurationRF():
         self.auto_alg = "auto_alg" in form
 
         if self.auto_alg:
-            self.n_estimators = ConfigurationConstants.RF_DEFAULT_N_ESTIMATORS
-            self.max_features = ConfigurationConstants.RF_DEFAULT_MAX_FEATURES
-            self.random_state = ConfigurationConstants.RF_DEFAULT_RANDOM_STATE
+            self.n_estimators = ConfigurationConstants.XGB_DEFAULT_N_ESTIMATORS
+            self.max_depth = ConfigurationConstants.XGB_DEFAULT_MAX_DEPTH
+            self.random_state = ConfigurationConstants.XGB_DEFAULT_RANDOM_STATE
         else:
 
             try:
@@ -83,31 +83,31 @@ class ConfigurationRF():
                     try:
                         val = str(form['n_estimators'])
                     except ValueError:
-                        val = ConfigurationConstants.RF_DEFAULT_N_ESTIMATORS
+                        val = ConfigurationConstants.XGB_DEFAULT_N_ESTIMATORS
 
             self.n_estimators = val
 
             try:
-                val = int(form['max_features'])
+                val = int(form['max_depth'])
             except ValueError:
-                val = ConfigurationConstants.RF_DEFAULT_MAX_FEATURES
+                val = ConfigurationConstants.XGB_DEFAULT_MAX_DEPTH
 
-            self.max_features = val
+            self.max_depth = val
 
             try:
                 val = int(form['random_state'])
             except ValueError:
-                val = ConfigurationConstants.RF_DEFAULT_RANDOM_STATE
+                val = ConfigurationConstants.XGB_DEFAULT_RANDOM_STATE
 
             self.random_state = int(val)
 
     @classmethod
     def get_by_user_email(cls, user_email):
-        return [cls(**elem) for elem in DATABASE.find(ConfigurationConstants.COLLECTION, {"user_email": user_email, "type":"RF"})]
+        return [cls(**elem) for elem in DATABASE.find(ConfigurationConstants.COLLECTION, {"user_email": user_email, "type":"XGB"})]
 
     @staticmethod
     def is_config_unique(new_config):
-        user_config_list = ConfigurationRF.get_by_user_email(new_config.user_email)
+        user_config_list = ConfigurationXGB.get_by_user_email(new_config.user_email)
 
         for config in user_config_list:
             if config == new_config:

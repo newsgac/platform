@@ -7,6 +7,7 @@
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_nb') }}"><span class="glyphicon glyphicon-plus "></span> Naive Bayes </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svc') }}"><span class="glyphicon glyphicon-plus "></span> Support Vector </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_rf') }}"><span class="glyphicon glyphicon-plus "></span> Random Forest </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_xgb') }}"><span class="glyphicon glyphicon-plus "></span> XGBoost </a>
             <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
             <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
         </div>
@@ -29,6 +30,7 @@
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_nb') }}"><span class="glyphicon glyphicon-plus "></span> Naive Bayes </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_svc') }}"><span class="glyphicon glyphicon-plus "></span> Support Vector </a>
             <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_rf') }}"><span class="glyphicon glyphicon-plus "></span> Random Forest </a>
+            <a class="btn btn-success" href="{{ url_for('experiments.create_experiment_xgb') }}"><span class="glyphicon glyphicon-plus "></span> XGBoost </a>
             <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_ft') }}"><span class="glyphicon glyphicon-plus "></span> FastText</a>
             <a class="btn btn-success disabled" href="{{ url_for('experiments.create_experiment_dl') }}"><span class="glyphicon glyphicon-plus "></span> Deep Learning </a>
             {% if finished_experiments|length > 0 %}

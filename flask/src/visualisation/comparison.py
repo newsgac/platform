@@ -72,8 +72,8 @@ class ExperimentComparator:
         return DATABASE.find_one('predictions', {"article_text": article_text})
 
     @staticmethod
-    def save_article_comparison(id, article_text):
-        DATABASE.insert('predictions', {"_id":id, "article_text":article_text, "exp_predictions":{}})
+    def save_article_comparison(id, article_text, ds_id):
+        DATABASE.insert('predictions', {"_id":id, "article_text":article_text, "data_source_id":ds_id, "exp_predictions":{}})
 
     @staticmethod
     def update_article_comparison_by_experiment(article_text, exp_id, prediction):
@@ -364,7 +364,7 @@ class ExperimentComparator:
                 ds = DataSource.get_by_id(exp.data_source_id)
 
                 if existing_pred is None:
-                    ExperimentComparator.save_article_comparison(id=uuid.uuid4().hex, article_text=article_text)
+                    ExperimentComparator.save_article_comparison(id=uuid.uuid4().hex, article_text=article_text, ds_id=ds._id)
                     predictions_dict[exp] = (exp.predict(article_text, ds)).keys()[0]
                     ExperimentComparator.update_article_comparison_by_experiment(article_text=article_text,
                                                                  exp_id=exp._id, prediction=predictions_dict[exp])

@@ -10,8 +10,9 @@ from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
 from src.run import DATABASE
 from src.models.configurations.configuration_rf import ConfigurationRF
+from src.models.configurations.configuration_xgb import ConfigurationXGB
 from src.models.configurations.configuration_nb import ConfigurationNB
-from src.models.experiments.experiment import Experiment, ExperimentRF, ExperimentSVC, ExperimentNB
+from src.models.experiments.experiment import Experiment, ExperimentRF, ExperimentSVC, ExperimentNB, ExperimentXGB
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
@@ -172,6 +173,47 @@ def create_experiment_svc():
                            feature_dict = manual_feature_dict, request={})
 
 
+@experiment_blueprint.route('/new_xgb', methods=['GET', 'POST'])
+@user_decorators.requires_login
+@back.anchor
+def create_experiment_xgb():
+    # get the list of processed data sources of the user
+    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True)
+    manual_feature_dict = DataIO.get_feature_names_with_descriptions()
+
+    if not existing_data_source_titles:
+        flash("There are no processed data sources for training, redirecting to data sources page.", 'warning')
+        return redirect((url_for('data_sources.user_data_sources')))
+
+    if request.method == 'POST':
+        if request.form["data_source"]:
+            configuration = ConfigurationXGB(user_email= session['email'], form = request.form)
+            try:
+                if ConfigurationXGB.is_config_unique(configuration):
+                    configuration.save_to_db()
+                    display_title = request.form['experiment_display_title']
+                    public_flag = 'public_flag' in request.form
+                    experiment = ExperimentXGB(user_email=session['email'],
+                                               display_title=display_title+" ("+configuration.data_source_title+")",
+                                               public_flag=public_flag,
+                                            **dict(configuration=configuration))
+                    experiment.save_to_db()
+                    return redirect(url_for('.user_experiments'))
+            except ConfigurationErrors.ConfigAlreadyExistsError as e:
+                    error = e.message
+                    flash(error, 'error')
+                    return render_template('experiments/new_experiment_xgb.html', request=request.form,
+                                           ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+        else:
+            flash('Please choose a data source!', 'error')
+            return render_template('experiments/new_experiment_xgb.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+
+
+    return render_template('experiments/new_experiment_xgb.html', ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict, request={})
+
 @experiment_blueprint.route('/new_ft', methods=['GET', 'POST'])
 @user_decorators.requires_login
 @back.anchor
@@ -199,6 +241,8 @@ def get_experiment_page(experiment_id):
         return render_template('experiments/experiment_svc.html', experiment=experiment)
     elif experiment.type == "RF":
         return render_template('experiments/experiment_rf.html', experiment=experiment)
+    elif experiment.type == "XGB":
+        return render_template('experiments/experiment_xgb.html', experiment=experiment)
     elif experiment.type == "DL":
         return render_template('experiments/experiment_dl.html', experiment=experiment)
     else:
@@ -220,6 +264,8 @@ def run_experiment(experiment_id):
             ExperimentSVC.get_by_id(experiment_id).run_svc()
         elif exp.type == "RF":
             ExperimentRF.get_by_id(experiment_id).run_rf()
+        elif exp.type == "XGB":
+            ExperimentXGB.get_by_id(experiment_id).run_xgb()
 
     time.sleep(0.5)
     return redirect(url_for('.get_experiment_page', experiment_id=experiment_id))
@@ -231,7 +277,7 @@ def visualise_results(experiment_id):
     experiment = Experiment.get_by_id(experiment_id)
     results_eval = experiment.get_results_eval()
     results_model = experiment.get_results_model()
-    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evalution", ds_param=0.7)
+    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
     p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
 
     plots = []
@@ -283,22 +329,26 @@ def predict(experiment_id):
 @experiment_blueprint.route('/features_visualisation/<string:experiment_id>')
 @user_decorators.requires_login
 def visualise_features(experiment_id):
-    f_weights = None
     experiment = Experiment.get_by_id(experiment_id)
     if experiment.type == "SVC":
         f_weights = ExperimentSVC.get_by_id(experiment_id).get_features_weights()
-    # elif experiment.type == "NB":
-    #     f_weights = ExperimentNB.get_by_id(experiment_id).get_features_weights()
-
-    if f_weights is not None:
         ds = DataSource.get_by_id(experiment.data_source_id)
         if 'tf-idf' in ds.pre_processing_config.values():
             pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
             vectorizer = dill.loads(pickled_model)
-            p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights, vectorizer=vectorizer)
+            p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
+                                                                            vectorizer=vectorizer)
         else:
-            p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights, experiment=experiment)
+            p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
+                                                                            experiment=experiment)
+    elif experiment.type == "RF":
+        f_weights_df = ExperimentRF.get_by_id(experiment_id).get_features_weights()
+        p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, experiment.display_title)
+    elif experiment.type == "XGB":
+        f_weights_df = ExperimentXGB.get_by_id(experiment_id).get_features_weights()
+        p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, experiment.display_title)
 
+    if script is not None:
         return render_template('experiments/features.html',
                                experiment=experiment,
                                plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
@@ -524,6 +574,8 @@ def delete_experiment(experiment_id):
             ExperimentSVC.get_by_id(experiment_id).delete()
         elif exp.type == "RF":
             ExperimentRF.get_by_id(experiment_id).delete()
+        elif exp.type == "XGB":
+            ExperimentXGB.get_by_id(experiment_id).delete()
 
     time.sleep(0.5)
     return back.redirect()
@@ -544,6 +596,8 @@ def delete_all():
                 ExperimentSVC.get_by_id(exp._id).delete()
             elif exp.type == "RF":
                 ExperimentRF.get_by_id(exp._id).delete()
+            elif exp.type == "XGB":
+                ExperimentXGB.get_by_id(exp._id).delete()
 
     time.sleep(0.5)
     return back.redirect()

@@ -81,11 +81,11 @@
 
     <div class="row">
         <div class="col-md-4">
-            <h4>10-fold Cross Validation Accuracy</h4>
+            <h4>10-fold Cross Validation Accuracy (+/- Standard Deviation)</h4>
             <span class="help-block"><i>Uses 10 consecutive folds to split the data.</i></span>
         </div>
         <div class="col-md-2">
-            <h4> {{ results_eval.accuracy|safe }} </h4>
+            <h4> {{ results_eval.accuracy|safe }} (+/- {{ results_eval.std|safe }}) </h4>
         </div>
     </div>
 

@@ -1,44 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-
     <div class="page-header">
-        <h1>Random Forest Experiment:
-            <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">
-                <small> {{ experiment.display_title }} </small>
-            </a>
-        </h1>
-
-        {% if experiment.run_started != None and experiment.run_finished != None %}
-            <a class="btn btn-info "
-                href="{{ url_for('experiments.visualise_results', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-eye-open"></span> Result Analysis</a>
-            <a class="btn btn-warning "
-                href="{{ url_for('experiments.visualise_features', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-list-alt"></span> Feature Analysis</a>
-            <a class="btn btn-primary "
-                href="{{ url_for('experiments.predict', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
-            <a class="btn btn-danger"
-               href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-trash"></span> Delete</a>
-
-        {% elif experiment.run_started != None and experiment.run_finished == None %}
-            <a class="btn btn-primary disabled">
-                <span class="glyphicon glyphicon-play"></span> Running</a>
-            <a class="btn btn-danger"
-               href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-trash"></span> Delete</a>
-
-        {% else %}
-            <a class="btn btn-primary"
-                href="{{ url_for('experiments.run_experiment', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-play"></span> Run</a>
-            <a class="btn btn-danger"
-               href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
-                <span class="glyphicon glyphicon-trash"></span> Delete</a>
-        {% endif %}
-
+        <h1>Create XGBoost Experiment </h1>
     </div>
+
+<!--You can change the '.connecting-line' width to 70% and the '.wizard .nav-tabs > li' width to 33% in the CSS.-->
 
     <div class="row">
         <section>
@@ -56,16 +22,16 @@
                             </a>
                         </li>
 
-                        <li role="presentation">
+                        <li role="presentation" class="disabled">
                             <a href="#step2" data-toggle="tab" aria-controls="step2" role="tab"
-                               title="Step 2: RF Configuration">
+                               title="Step 2: XGB Configuration">
                             <span class="round-tab">
                                 <i class="glyphicon glyphicon-pencil"></i>
                             </span>
                             </a>
                         </li>
 
-                        <li role="presentation">
+                        <li role="presentation" class="disabled">
                             <a href="#complete" data-toggle="tab" aria-controls="complete" role="tab"
                                title="Step 3: Display Configuration and Complete">
                             <span class="round-tab">
@@ -76,7 +42,7 @@
                     </ul>
                 </div>
 
-                <form role="form" id="experiment_rf" method="post">
+                <form role="form" id="experiment_xgb" method="post">
                     <div class="tab-content">
 
                         <div class="tab-pane active" role="tabpanel" id="step1">
@@ -90,11 +56,15 @@
                                             <span class="help-block"><i>The experiment will use the chosen dataset for training and testing.</i></span>
                                         </p>
                                     </div>
-                                    <div class="col-md-4" id="datasource_div">
-                                        <input type="text" class="form-control" value="{{ experiment.data_source_title }}" disabled>
+                                    <div class="col-md-4 form-group" id="datasource_div">
+                                        <select required name="data_source" id="data_source" class="data_source selectpicker show-tick form-control" title="Select a data source...">
+                                            {% for ds_title in ds_titles_from_db %}
+                                                <option id="{{ ds_title }}" value="{{ ds_title }}">{{ ds_title }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
-                                {% if experiment.auto_feat %}
+                                <div class="features_div" id="features_div">
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
                                     <div class="col-md-3">
@@ -105,18 +75,19 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="auto_feat" checked disabled>
+                                                <input type="checkbox" class="auto_feat" name="auto_feat" id="auto_feat" {% if 'auto_feat' in request.keys()%} checked {% endif%}">
                                                 <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="col-md-8">
-                                        <span class="help-block"><i>Automated choice with default settings.<br/></i></span>
+                                        <span class="help-block"><i>Automated choice. Ignores all options below.<br/></i></span>
                                     </div>
                                 </div>
-                            {% else %}
-                            {% if experiment.features|safe %}
-                                {% for feature, value in experiment.features|dictsort %}
+                                <div class="row mar_ned"></div>
+
+                                <div class="details_div_feat">
+                                    {% for feature, description in feature_dict|dictsort %}
                                     <div class="row mar_ned">
                                         <div class="col-md-3">
                                             <p align="right" class="center-align-pad">
@@ -126,7 +97,7 @@
                                         <div class="col-md-1">
                                             <div class="checkbox" id={{feature}}"_div">
                                                 <label>
-                                                    <input type="checkbox" name={{feature}} id="{{feature}}" {% if value== True%} checked {% endif%} disabled>
+                                                    <input type="checkbox" name={{feature}} id="{{feature}}" {% if feature in request.keys()%} checked {% endif%}>
                                                     <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                                 </label>
                                             </div>
@@ -136,22 +107,20 @@
                                         </div>
                                     </div>
                                     <div class="row mar_ned"></div>
-                                {% endfor %}
-                            {% endif %}
-                            {% endif %}
-                            <div class="row mar_ned"></div>
-
+                                    {% endfor %}
+                                </div>
+                                </div>
                             </div>
                             <ul class="list-inline pull-right">
-                            <li>
-                                <button type="button" class="btn btn-primary next-step">Next</button>
-                            </li>
-                        </ul>
+                                <li>
+                                    <button type="button" class="btn btn-primary next-step-tab">Save and continue</button>
+                                </li>
+                            </ul>
                         </div>
 
                         <div class="tab-pane" role="tabpanel" id="step2">
                             <div class="step33">
-                                <h5><strong>Configure random forest algorithmic hyperparameters</strong></h5>
+                                <h5><strong>Configure xgboost algorithmic hyperparameters</strong></h5>
                                 <hr>
                                 <div class="row mar_ned"></div>
                                 <div class="row mar_ned">
@@ -164,13 +133,8 @@
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                {% if experiment.auto_alg %}
-                                                    <input type="checkbox" name="auto_alg" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="auto_alg" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
+                                                <input type="checkbox" class="auto_alg" name="auto_alg" id="auto_alg" {% if 'auto_alg' in request.keys()%} checked {% endif%}>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
                                     </div>
@@ -181,11 +145,13 @@
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
                                                 <strong>Number of estimators</strong>
-                                                <span class="help-block"><i>The number of decision trees in the forest.</i></span>
+                                                <span class="help-block"><i>The number of boosted trees to fit.</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.n_estimators }}" disabled>
+                                            <div class="form-group" id="n_estimators_div">
+                                                <input class="form-control" type="text" name="n_estimators" id="n_estimators" value="{{request['n_estimators']}}" placeholder="100">
+                                            </div>
                                         </div>
                                     </div>
 
@@ -193,13 +159,14 @@
                                     <div class="row mar_ned">
                                         <div class="col-md-6">
                                             <p align="right" class="center-align-pad">
-                                                <strong>Maximum number of features</strong>
-                                                <span class="help-block"><i>The number of features to be considered when looking for the best split.<br/>
-                                                If float, then the value is taken as percentage.</i></span>
+                                                <strong>Maximum depth</strong>
+                                                <span class="help-block"><i>Maximum tree depth for base learners.</i></span>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.max_features }}" disabled>
+                                            <div class="form-group" id="max_depth_div">
+                                                <input class="form-control" type="text" name="max_depth" id="max_depth" value="{{request['max_depth']}}" placeholder="3">
+                                            </div>
                                         </div>
                                     </div>
 
@@ -212,7 +179,9 @@
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.random_state }}" disabled>
+                                            <div class="form-group" id="random_state_div">
+                                                <input class="form-control" type="text" name="random_state" id="random_state" value="{{request['random_state']}}" placeholder="42">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -223,7 +192,7 @@
                                     <button type="button" class="btn btn-default prev-step-tab">Previous</button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn btn-primary next-step">Next</button>
+                                    <button type="button" class="btn btn-primary next-step-tab">Save and continue</button>
                                 </li>
                             </ul>
                         </div>
@@ -241,7 +210,10 @@
                                         </p>
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="text" class="form-control" value="{{ experiment.display_title }}" disabled>
+                                        <div class="form-group">
+                                            <input required class="form-control" type="text" name="experiment_display_title" id="experiment_display_title"
+                                                   value="{{request['experiment_display_title']}}" placeholder="Experiment Display Title">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row mar_ned"></div>
@@ -251,17 +223,12 @@
                                             <strong>Public Visibility</strong>
                                             <span class="help-block"><i>Public experiments can be seen by all users.</i></span>
                                         </p>
-                                    </div>
+                                        </div>
                                     <div class="col-md-1">
                                         <div class="checkbox">
                                             <label>
-                                                {% if experiment.public_flag %}
-                                                    <input type="checkbox" name="public_flag" checked disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% else %}
-                                                    <input type="checkbox" name="public_flag" disabled>
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                {% endif %}
+                                                <input type="checkbox" name="public_flag" id="public_flag" {% if 'public_flag' in request.keys()%} checked {% endif%}>
+                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                             </label>
                                         </div>
                                     </div>
@@ -270,6 +237,9 @@
                             <ul class="list-inline pull-right">
                                 <li>
                                     <button type="button" class="btn btn-default prev-step-tab">Previous</button>
+                                </li>
+                                <li>
+                                    <button type="submit" class="btn btn-success">Create experiment</button>
                                 </li>
                             </ul>
                         </div>

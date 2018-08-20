@@ -28,6 +28,7 @@ import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
+from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
 from src.data_engineering.postprocessing import Result
 from src.run import DATABASE
@@ -44,6 +45,7 @@ class CLF():
             # self.class_weight = {1: 0.5, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0.9, 7: 0.65, 8: 1}
             self.clf = svm.SVC(kernel=str(experiment.kernel), C=experiment.penalty_parameter_c, decision_function_shape='ovr',
                           # class_weight=self.class_weight,
+                               class_weight='balanced',
                                probability=True, random_state=experiment.random_state, gamma=0.1)
 
         elif experiment.type == "RF":
@@ -52,6 +54,11 @@ class CLF():
 
         elif experiment.type == "NB":
             self.clf = MultinomialNB(alpha=0.1)
+
+        elif experiment.type == "XGB":
+            self.clf = XGBClassifier(max_depth=experiment.max_depth, n_estimators=experiment.n_estimators,
+                                     objective= 'multi:softprob', random_state=experiment.random_state,
+                                     learning_rate=0.15)
 
         data_source = DataSource.get_by_id(experiment.data_source_id)
         ds_X_train = dill.loads(DATABASE.getGridFS().get(data_source.X_train_handler).read())
@@ -141,6 +148,7 @@ class CLF():
         scores = cross_val_score(classifier, X_all, y_all, cv=cv)
         print("Eval Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
         results_eval.accuracy = format(scores.mean(), '.2f')
+        results_eval.std = format(scores.std() * 2, '.2f')
 
         # trained_model results
         y_pred_mod = classifier.predict(self.X_test)
