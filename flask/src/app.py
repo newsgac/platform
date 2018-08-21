@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from flask import Flask, render_template
+from src import config
 
 __author__ = 'abilgin'
 
 app = Flask(__name__)
-app.secret_key = "newsgacdev123"
-app.__setattr__("DOCKER_RUN", False)
+app.secret_key = config.secret_key
+# Todo: refactor DOCKER_RUN stuff
+app.__setattr__("DOCKER_RUN", config.environment != config.Env.local)
 
 @app.route('/')
 def home():

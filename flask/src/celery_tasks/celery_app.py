@@ -1,12 +1,13 @@
 from celery import Celery
-
 import sys
 import os.path
+from src import config
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 celery_app = Celery('src.celery_tasks',
-             broker='amqp://newsgac:1234@rabbit//',   # use it when dockerized
-             # broker='amqp://newsgac:1234@localhost/newsgac_vhost',
-             backend='rpc://',
-             include=['src.celery_tasks.tasks'])
+                    broker=config.rabbitmq_url,  # use it when dockerized
+                    backend='rpc://',
+                    include=['src.celery_tasks.tasks'],
+                    task_always_eager=config.celery_eager
+                    )
