@@ -33,8 +33,6 @@ import src.data_engineering.utils as Utilities
 from collections import OrderedDict
 from lxml import etree
 # from segtok import segmenter
-import nltk
-nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 from sklearn.base import BaseEstimator, TransformerMixin
 import spacy

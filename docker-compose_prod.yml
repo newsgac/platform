@@ -22,4 +22,6 @@ services:
             - .env.prod
         ports:
             - "5000:5000"
+        command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "30", "--bind", "0.0.0.0:5000", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+
 
