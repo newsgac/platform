@@ -4,11 +4,10 @@ from __future__ import division
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
 
-from src.app import app
 import src.data_engineering.data_io as DataIO
 from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.common.back import back
-from src.run import DATABASE
+from src.database import DATABASE
 from src.models.configurations.configuration_rf import ConfigurationRF
 from src.models.configurations.configuration_xgb import ConfigurationXGB
 from src.models.configurations.configuration_nb import ConfigurationNB
@@ -27,6 +26,9 @@ from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
 from decimal import *
+
+from src import config
+
 getcontext().prec = 2
 
 __author__ = 'abilgin'
@@ -252,7 +254,7 @@ def get_experiment_page(experiment_id):
 @experiment_blueprint.route('/train/<string:experiment_id>')
 @user_decorators.requires_login
 def run_experiment(experiment_id):
-    if app.DOCKER_RUN:
+    if config.DOCKER_RUN:
         # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
         task = run_exp.delay(experiment_id)
     else:
@@ -303,7 +305,7 @@ def predict(experiment_id):
 
     if request.method == 'POST':
         try:
-            if app.DOCKER_RUN:
+            if config.DOCKER_RUN:
                 task = predict_exp.delay(experiment_id, request.form['raw_text'])
                 task.wait()
 
@@ -368,7 +370,7 @@ def user_experiments_overview_for_prediction():
 
     if request.method == 'POST':
         try:
-            if app.DOCKER_RUN:
+            if config.DOCKER_RUN:
                 task = predict_overview.delay(session['email'], request.form['raw_text'])
                 task.wait()
 
@@ -473,7 +475,7 @@ def public_experiments_overview_for_prediction():
 
     if request.method == 'POST':
         try:
-            if app.DOCKER_RUN:
+            if config.DOCKER_RUN:
                 task = predict_overview_public.delay(request.form['raw_text'])
                 task.wait()
 
@@ -562,7 +564,7 @@ def hypotheses_testing():
 @experiment_blueprint.route('/delete/<string:experiment_id>')
 @user_decorators.requires_login
 def delete_experiment(experiment_id):
-    if app.DOCKER_RUN:
+    if config.DOCKER_RUN:
         # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
         task = del_exp.delay(experiment_id)
     else:
@@ -585,7 +587,7 @@ def delete_experiment(experiment_id):
 def delete_all():
     experiments = Experiment.get_by_user_email(session['email'])
     for exp in experiments:
-        if app.DOCKER_RUN:
+        if config.DOCKER_RUN:
             # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
             task = del_exp.delay(exp._id)
         else:

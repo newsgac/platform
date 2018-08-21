@@ -16,12 +16,14 @@ RUN ["pip", "install", "fasttext==0.8.3"]
 # ADD requirements.txt src/requirements.txt
 # ADD src/run.py flask/src/run.py
 
-COPY ./src/ /flask/src/
 COPY ./datasets/ /flask/datasets/
 COPY dutch_stopwords_mod.txt /flask/dutch_stopwords_mod.txt
 
 COPY ./entrypoint.sh /flask/entrypoint.sh
 RUN chmod a+x /flask/entrypoint.sh
+
+COPY ./install_nltk.py /flask/install_nltk.py
+RUN python /flask/install_nltk.py
 
 WORKDIR flask/src/celery_tasks/
 

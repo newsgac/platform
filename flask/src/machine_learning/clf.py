@@ -31,7 +31,7 @@ from sklearn.naive_bayes import MultinomialNB
 from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
 from src.data_engineering.postprocessing import Result
-from src.run import DATABASE
+from src.database import DATABASE
 import numpy as np
 import dill
 

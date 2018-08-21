@@ -10,7 +10,7 @@ import uuid
 
 from collections import defaultdict
 from src.common.utils import Utils
-from src.run import DATABASE
+from src.database import DATABASE
 from src.visualisation.resultvisualiser import ResultVisualiser
 from src.models.data_sources.data_source import DataSource
 

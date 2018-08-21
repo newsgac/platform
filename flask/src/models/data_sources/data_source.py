@@ -14,7 +14,7 @@ import src.common.utils as Utilities
 import re
 from bson import ObjectId
 import src.data_engineering.utils as DataUtils
-from src.run import DATABASE
+from src.database import DATABASE
 
 UT = Utilities.Utils()
 ALLOWED_EXTENSIONS = {'txt', 'csv'}

@@ -1,7 +1,7 @@
 import uuid
 import src.models.configurations.constants as ConfigurationConstants
 import src.models.configurations.errors as ConfigurationErrors
-from src.run import DATABASE
+from src.database import DATABASE
 from src.models.data_sources.data_source import DataSource
 import src.data_engineering.data_io as DataIO
 

@@ -1,15 +1,13 @@
 import gridfs
 import pymongo
-
+from src import config
 
 __author__ = 'abilgin'
 
 class Database(object):
 
     def __init__(self):
-        # docker
-        self.URI = "mongodb://database:27017"  # use this when dockerized
-        # self.URI = "mongodb://127.0.0.1:27017"
+        self.URI = config.mongo_url
 
         self.client = pymongo.MongoClient(self.URI)
         self.db = self.client["newsgacdev"]

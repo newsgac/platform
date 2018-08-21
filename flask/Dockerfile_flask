@@ -8,4 +8,4 @@ WORKDIR /flask/src
 EXPOSE 5000
 ENTRYPOINT ["/flask/entrypoint.sh"]
 
-CMD ["python", "run.py", "run", "--host=0.0.0.0"]
+CMD ["python", "app.py"]

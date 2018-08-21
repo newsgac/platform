@@ -2,7 +2,7 @@ from __future__ import division
 
 import numpy as np
 import dill
-from src.run import DATABASE
+from src.database import DATABASE
 from sklearn.metrics import confusion_matrix
 import src.data_engineering.utils as DataUtils
 from src.models.data_sources.data_source import DataSource

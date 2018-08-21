@@ -38,19 +38,12 @@ nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 from sklearn.base import BaseEstimator, TransformerMixin
 import spacy
+from src import config
+
 # import frog
 # frog_nl = frog.Frog(frog.FrogOptions(parser=False))
 from pynlpl.clients.frogclient import FrogClient
-port = 12345
-# frogclient = FrogClient('localhost',port, returnall=True)
-frogclient = FrogClient('frog', port, returnall=True)
-# connected = False
-# while not connected:
-#     try:
-#         frogclient = FrogClient('frog',port, returnall=True)        # use this when dockerized
-#         connected = True
-#     except:
-#         connected = False
+frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
 
 class ArticleTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, url=None, text=None, preprocessor=None):

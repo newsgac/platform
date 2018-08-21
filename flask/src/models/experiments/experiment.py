@@ -13,7 +13,7 @@ from src.models.configurations.configuration_svc import ConfigurationSVC
 from src.models.configurations.configuration_rf import ConfigurationRF
 from src.models.configurations.configuration_nb import ConfigurationNB
 from src.models.configurations.configuration_xgb import ConfigurationXGB
-from src.run import DATABASE
+from src.database import DATABASE
 import src.models.experiments.constants as ExperimentConstants
 import src.models.data_sources.constants as DataSourceConstants
 import src.common.utils as Utilities

@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import time
 from flask import Blueprint, render_template, request, session, url_for, flash
 from werkzeug.utils import redirect
-from src.app import app
 from src.celery_tasks.tasks import process_data, del_data, grid_ds
 from src.models.data_sources.data_source import DataSource
 import src.models.data_sources.errors as DataSourceErrors
@@ -14,9 +13,10 @@ import src.data_engineering.utils as DataUtils
 from src.data_engineering.postprocessing import Explanation
 from src.models.experiments.experiment import Experiment
 from src.visualisation.resultvisualiser import ResultVisualiser
-from src.run import DATABASE
+from src.database import DATABASE
 import pandas as pd
 from bokeh.resources import INLINE
+from src import config
 
 __author__ = 'abilgin'
 
@@ -111,7 +111,7 @@ def explain_features_for_experiment(article_id, article_num, genre, experiment_i
 @user_decorators.requires_login
 def process_data_source_unlabelled(data_source_id):
     data_source = DataSource.get_by_id(data_source_id)
-    if app.DOCKER_RUN:
+    if config.DOCKER_RUN:
         # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
         task = process_data.delay(data_source_id, None)
     else:
@@ -128,7 +128,7 @@ def process_data_source(data_source_id):
     data_source = DataSource.get_by_id(data_source_id)
     if request.method == 'POST':
         if data_source.pre_processing_config and not data_source.processing_started:
-            if app.DOCKER_RUN:
+            if config.DOCKER_RUN:
                 # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
                 task = process_data.delay(data_source_id, data_source.pre_processing_config)
             else:
@@ -149,7 +149,7 @@ def process_data_source(data_source_id):
                         config_dict[config] = value
 
             if data_source.is_preprocessing_config_unique(config_dict):
-                if app.DOCKER_RUN:
+                if config.DOCKER_RUN:
                     # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
                     task = process_data.delay(data_source_id, config_dict)
                 else:
@@ -189,7 +189,7 @@ def visualise_stats(data_source_id):
 def apply_grid_search(data_source_id):
     ds = DataSource.get_by_id(data_source_id)
 
-    if app.DOCKER_RUN:
+    if config.DOCKER_RUN:
         task = grid_ds.delay(data_source_id)
         task.wait()
 
@@ -219,7 +219,7 @@ def delete_data_source(data_source_id):
         flash(error, 'error')
         return redirect((url_for('experiments.user_experiments')))
 
-    if app.DOCKER_RUN:
+    if config.DOCKER_RUN:
         # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
         task = del_data.delay(data_source_id)
     else:
@@ -240,7 +240,7 @@ def delete_all():
     data_sources = DataSource.get_by_user_email(user_email=session['email'])
 
     for ds in data_sources:
-        if app.DOCKER_RUN:
+        if config.DOCKER_RUN:
             # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
             task = del_data.delay(ds._id)
         else:
