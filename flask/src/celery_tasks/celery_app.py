@@ -13,3 +13,4 @@ celery_app = Celery('src.celery_tasks',
                     include=['src.celery_tasks.tasks'],
                     task_always_eager=config.celery_eager
                     )
+

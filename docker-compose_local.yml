@@ -9,6 +9,9 @@ services:
 
     rabbit:
         ports:
+            - "4369:4369"
+            - "5671:5671"
+            - "5672:5672"
             - "5673:5673"
         env_file:
             - .env.localdocker

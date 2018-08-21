@@ -28,5 +28,4 @@ class back(object):
     def redirect(default=default_view, cookie=cookie):
         return redirect(back.url(default, cookie))
 
-
 back = back()

@@ -387,8 +387,9 @@ def user_experiments_overview_for_prediction():
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
         except Exception as e:
-            print e.message
-            return render_template('experiments/prediction_overview.html', request=request.form)
+            raise
+        #     print e.message
+        #     return render_template('experiments/prediction_overview.html', request=request.form)
 
     return render_template('experiments/prediction_overview.html')
 
