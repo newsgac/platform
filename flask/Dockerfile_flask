@@ -3,9 +3,10 @@ FROM newsgac_docker_dev_worker:latest
 MAINTAINER abilgin
 
 # The WORKDIR directive is used to set where the command defined with CMD is to be executed.
-WORKDIR ../
-# RUN pwd
-# RUN ls ../../flask/datasets
+WORKDIR /flask/src
 
 EXPOSE 5000
-ENTRYPOINT [ "python", "run.py", "run", "--host=0.0.0.0" ]
+
+ENTRYPOINT []
+
+CMD python run.py run --host=0.0.0.0
