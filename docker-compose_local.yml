@@ -1,73 +1,34 @@
 version: "3"
 
-networks:
-    newsgac-net:
-        driver: bridge
-
 services:
     frog:
-        hostname: proycon/lamachine
-        image: proycon/lamachine:latest
         ports:
             - "12345:12345"
-        command: bash -c "frog -S 12345"
-        networks:
-            - newsgac-net
+        env_file:
+            - .env.localdocker
 
     rabbit:
-        hostname: rabbit
-        image: rabbitmq:latest
-        environment:
-            - RABBITMQ_DEFAULT_USER=newsgac
-            - RABBITMQ_DEFAULT_PASS=1234
         ports:
-            - "5673:5672"
-        restart: on-failure
-        networks:
-            - newsgac-net
-    
-    worker:
-        build:
-            context: ./flask
-            dockerfile: Dockerfile_celery
-        links:
-            - rabbit
-            - database
-            - frog
-        depends_on:
-            - rabbit
-            - database
-            - frog
-        networks:
-            - newsgac-net
-        restart: on-failure
-    
+            - "5673:5673"
+        env_file:
+            - .env.localdocker
+
     database:
-        hostname: mongo
-        image: mongo:latest
+        ports:
+            - "27017:27017"
+        env_file:
+            - .env.localdocker
+
+    worker:
         volumes:
-            - /var/lib/mongodb:/data/db
-        ports:
-            - "27018:27017"
-        networks:
-            - newsgac-net
-    
+            - ./flask/src:/flask/src
+        env_file:
+            - .env.localdocker
+
     web:
-        build:
-            context: ./flask
-            dockerfile: Dockerfile_flask
+        volumes:
+            - ./flask/src:/flask/src
         ports:
-            - "5050:5000"
-        links:
-            - worker
-            - rabbit
-            - database
-            - frog
-        depends_on:
-            - database
-            - worker
-            - frog
-        networks:
-            - newsgac-net
-        restart: on-failure
-            
+            - "5000:5000"
+        env_file:
+            - .env.localdocker

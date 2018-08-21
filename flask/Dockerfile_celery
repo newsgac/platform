@@ -20,11 +20,14 @@ COPY ./src/ /flask/src/
 COPY ./datasets/ /flask/datasets/
 COPY dutch_stopwords_mod.txt /flask/dutch_stopwords_mod.txt
 
+COPY ./entrypoint.sh /flask/entrypoint.sh
+RUN chmod a+x /flask/entrypoint.sh
+
 WORKDIR flask/src/celery_tasks/
 
-ENTRYPOINT []
+ENTRYPOINT ["/flask/entrypoint.sh"]
 
-CMD celery -A celery_app worker -l info --concurrency 10 -n worker@%%h
+CMD ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10"]
 
 # Usage: ENTRYPOINT application "argument", "argument", ..
 #ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker@%%h"]

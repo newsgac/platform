@@ -8,6 +8,8 @@ services:
     frog:
         hostname: proycon/lamachine
         image: proycon/lamachine:latest
+        ports:
+            - "12345:12345"
         command: bash -c "frog -S 12345"
         networks:
             - newsgac-net
@@ -18,10 +20,12 @@ services:
         environment:
             - RABBITMQ_DEFAULT_USER=newsgac
             - RABBITMQ_DEFAULT_PASS=1234
+        ports:
+            - "5673:5672"
         restart: on-failure
         networks:
             - newsgac-net
-
+    
     worker:
         build:
             context: ./flask
@@ -34,22 +38,26 @@ services:
             - rabbit
             - database
             - frog
-        restart: on-failure
         networks:
             - newsgac-net
-
+        restart: on-failure
+    
     database:
         hostname: mongo
         image: mongo:latest
         volumes:
-            - ./../data:/data/db
+            - /var/lib/mongodb:/data/db
+        ports:
+            - "27018:27017"
         networks:
             - newsgac-net
-
+    
     web:
         build:
             context: ./flask
             dockerfile: Dockerfile_flask
+        ports:
+            - "5050:5000"
         links:
             - worker
             - rabbit
@@ -59,7 +67,7 @@ services:
             - database
             - worker
             - frog
-        restart: on-failure
         networks:
             - newsgac-net
+        restart: on-failure
             

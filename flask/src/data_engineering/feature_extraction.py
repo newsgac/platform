@@ -42,7 +42,8 @@ import spacy
 # frog_nl = frog.Frog(frog.FrogOptions(parser=False))
 from pynlpl.clients.frogclient import FrogClient
 port = 12345
-frogclient = FrogClient('localhost',port, returnall=True)
+# frogclient = FrogClient('localhost',port, returnall=True)
+frogclient = FrogClient('frog', port, returnall=True)
 # connected = False
 # while not connected:
 #     try:

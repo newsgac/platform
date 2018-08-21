@@ -6,7 +6,6 @@ MAINTAINER abilgin
 WORKDIR /flask/src
 
 EXPOSE 5000
+ENTRYPOINT ["/flask/entrypoint.sh"]
 
-ENTRYPOINT []
-
-CMD python run.py run --host=0.0.0.0
+CMD ["python", "run.py", "run", "--host=0.0.0.0"]
