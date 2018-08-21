@@ -18,6 +18,8 @@ services:
             - "27017:27017"
         env_file:
             - .env.localdocker
+        volumes:
+            - ./../data:/data/db
 
     worker:
         volumes:

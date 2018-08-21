@@ -12,6 +12,8 @@ services:
     database:
         env_file:
             - .env.prod
+        volumes:
+            - ./../data:/data/db
 
     worker:
         env_file:

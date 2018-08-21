@@ -41,8 +41,6 @@ services:
     database:
         hostname: mongo
         image: mongo:latest
-        volumes:
-            - ./../data:/data/db
         networks:
             - newsgac-net
 
