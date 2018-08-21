@@ -37,11 +37,12 @@ from nltk.tokenize import sent_tokenize
 from sklearn.base import BaseEstimator, TransformerMixin
 import spacy
 from src import config
+from pynlpl.clients.frogclient import FrogClient
+
 
 # import frog
 # frog_nl = frog.Frog(frog.FrogOptions(parser=False))
-from pynlpl.clients.frogclient import FrogClient
-frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
+
 
 class ArticleTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, url=None, text=None, preprocessor=None):
@@ -751,7 +752,7 @@ class Article(object):
             i = 0
             while not data_new:
                 # data = frog_nl.process_raw(batch)
-
+                frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
                 data_new = frogclient.process(batch)
 
                 # data = data.decode('utf-8')
