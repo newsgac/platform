@@ -111,12 +111,7 @@ def explain_features_for_experiment(article_id, article_num, genre, experiment_i
 @user_decorators.requires_login
 def process_data_source_unlabelled(data_source_id):
     data_source = DataSource.get_by_id(data_source_id)
-    if config.DOCKER_RUN:
-        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-        task = process_data.delay(data_source_id, None)
-    else:
-        # without celery
-        data_source.process_data_source(config=None)
+    task = process_data.delay(data_source_id, None)
 
     time.sleep(0.5)
     return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
@@ -128,12 +123,7 @@ def process_data_source(data_source_id):
     data_source = DataSource.get_by_id(data_source_id)
     if request.method == 'POST':
         if data_source.pre_processing_config and not data_source.processing_started:
-            if config.DOCKER_RUN:
-                # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-                task = process_data.delay(data_source_id, data_source.pre_processing_config)
-            else:
-                # without celery
-                data_source.process_data_source(config=data_source.pre_processing_config)
+            task = process_data.delay(data_source_id, data_source.pre_processing_config)
             time.sleep(0.5)
             return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
 
@@ -149,15 +139,10 @@ def process_data_source(data_source_id):
                         config_dict[config] = value
 
             if data_source.is_preprocessing_config_unique(config_dict):
-                if config.DOCKER_RUN:
-                    # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-                    task = process_data.delay(data_source_id, config_dict)
-                else:
-                    # without celery
-                    data_source.process_data_source(config=config_dict)
-
+                task = process_data.delay(data_source_id, config_dict)
                 time.sleep(0.5)
                 return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
+
         except DataSourceErrors.ProcessingConfigAlreadyExists as e:
             error = e.message
             flash(error, 'error')
@@ -189,15 +174,12 @@ def visualise_stats(data_source_id):
 def apply_grid_search(data_source_id):
     ds = DataSource.get_by_id(data_source_id)
 
-    if config.DOCKER_RUN:
-        task = grid_ds.delay(data_source_id)
-        task.wait()
+    task = grid_ds.delay(data_source_id)
+    task.wait()
 
-        if len(task.result) > 1:
-            report_per_score = task.result[0][0]
-            feature_reduction = task.result[0][1]
-    else:
-        report_per_score, feature_reduction = ds.apply_grid_search()
+    if len(task.result) > 1:
+        report_per_score = task.result[0][0]
+        feature_reduction = task.result[0][1]
 
     return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
                            feature_reduction=feature_reduction)
@@ -219,13 +201,7 @@ def delete_data_source(data_source_id):
         flash(error, 'error')
         return redirect((url_for('experiments.user_experiments')))
 
-    if config.DOCKER_RUN:
-        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-        task = del_data.delay(data_source_id)
-    else:
-        # without celery
-        DataSource.get_by_id(data_source_id).delete()
-
+    task = del_data.delay(data_source_id)
     time.sleep(0.5)
     return back.redirect()
 
@@ -240,12 +216,7 @@ def delete_all():
     data_sources = DataSource.get_by_user_email(user_email=session['email'])
 
     for ds in data_sources:
-        if config.DOCKER_RUN:
-            # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-            task = del_data.delay(ds._id)
-        else:
-            # without celery
-            DataSource.get_by_id(ds._id).delete()
+        task = del_data.delay(ds._id)
 
     time.sleep(0.5)
     return back.redirect()

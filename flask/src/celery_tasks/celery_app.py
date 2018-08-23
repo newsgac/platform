@@ -11,6 +11,6 @@ celery_app = Celery('src.celery_tasks',
                     broker=config.rabbitmq_url,  # use it when dockerized
                     backend='rpc://',
                     include=['src.celery_tasks.tasks'],
-                    task_always_eager=config.celery_eager
                     )
 
+celery_app.conf.task_always_eager = config.celery_eager and False

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from src.celery_tasks.celery_app import celery_app
 from src.models.data_sources.data_source import DataSource
-from src.models.experiments.experiment import Experiment, ExperimentSVC, ExperimentRF, ExperimentNB
+from src.models.experiments.experiment import Experiment, ExperimentSVC, ExperimentRF, ExperimentNB, ExperimentXGB
 from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
@@ -16,7 +16,8 @@ def run_exp(self, exp_id):
         ExperimentRF.get_by_id(exp_id).run_rf()
     elif exp.type == "NB":
         ExperimentNB.get_by_id(exp_id).run_nb()
-
+    elif exp.type == "XGB":
+        ExperimentXGB.get_by_id(exp_id).run_xgb()
 
 @celery_app.task(bind=True)
 def del_exp(self, exp_id):
@@ -27,6 +28,8 @@ def del_exp(self, exp_id):
         ExperimentRF.get_by_id(exp_id).delete()
     elif exp.type == "NB":
         ExperimentNB.get_by_id(exp_id).delete()
+    elif exp.type == "XGB":
+        ExperimentXGB.get_by_id(exp_id).delete()
 
 @celery_app.task(bind=True)
 def process_data(self, data_source_id, config):

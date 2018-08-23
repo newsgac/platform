@@ -9,8 +9,6 @@ __author__ = 'abilgin'
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
-# Todo: refactor DOCKER_RUN stuff
-app.__setattr__("DOCKER_RUN", config.environment != config.Env.local)
 
 @app.route('/')
 def home():

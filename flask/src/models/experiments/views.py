@@ -254,21 +254,7 @@ def get_experiment_page(experiment_id):
 @experiment_blueprint.route('/train/<string:experiment_id>')
 @user_decorators.requires_login
 def run_experiment(experiment_id):
-    if config.DOCKER_RUN:
-        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-        task = run_exp.delay(experiment_id)
-    else:
-        # without celery
-        exp = Experiment.get_by_id(experiment_id)
-        if exp.type == "NB":
-            ExperimentNB.get_by_id(experiment_id).run_nb()
-        elif exp.type == "SVC":
-            ExperimentSVC.get_by_id(experiment_id).run_svc()
-        elif exp.type == "RF":
-            ExperimentRF.get_by_id(experiment_id).run_rf()
-        elif exp.type == "XGB":
-            ExperimentXGB.get_by_id(experiment_id).run_xgb()
-
+    task = run_exp.delay(experiment_id)
     time.sleep(0.5)
     return redirect(url_for('.get_experiment_page', experiment_id=experiment_id))
 
@@ -305,23 +291,18 @@ def predict(experiment_id):
 
     if request.method == 'POST':
         try:
-            if config.DOCKER_RUN:
-                task = predict_exp.delay(experiment_id, request.form['raw_text'])
-                task.wait()
+            task = predict_exp.delay(experiment_id, request.form['raw_text'])
+            task.wait()
 
-                if task.status == 'SUCCESS':
-                    script = task.result[0]
-                    div = task.result[1]
-            else:
-                data_source = DataSource.get_by_id(experiment.data_source_id)
-                sorted_prediction_results = experiment.predict(request.form['raw_text'], data_source)
+            if task.status == 'SUCCESS':
+                script = task.result[0]
+                div = task.result[1]
 
-                plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(sorted_prediction_results,
-                                                                                                                experiment.display_title)
             return render_template('experiments/prediction.html',
                            experiment=experiment, request = request.form,
                            plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
+
         except Exception as e:
             flash("Something went wrong: " + str(e.message), 'error')
             return render_template('experiments/prediction.html', experiment=experiment, request = request.form)
@@ -370,17 +351,12 @@ def user_experiments_overview_for_prediction():
 
     if request.method == 'POST':
         try:
-            if config.DOCKER_RUN:
-                task = predict_overview.delay(session['email'], request.form['raw_text'])
-                task.wait()
+            task = predict_overview.delay(session['email'], request.form['raw_text'])
+            task.wait()
 
-                if task.status == 'SUCCESS':
-                    script = task.result[0]
-                    div = task.result[1]
-            else:
-                finished_experiments = Experiment.get_finished_user_experiments(session['email'])
-                comparator = ExperimentComparator(finished_experiments)
-                script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+            if task.status == 'SUCCESS':
+                script = task.result[0]
+                div = task.result[1]
 
             return render_template('experiments/prediction_overview.html',
                            request = request.form,
@@ -476,17 +452,12 @@ def public_experiments_overview_for_prediction():
 
     if request.method == 'POST':
         try:
-            if config.DOCKER_RUN:
-                task = predict_overview_public.delay(request.form['raw_text'])
-                task.wait()
+            task = predict_overview_public.delay(request.form['raw_text'])
+            task.wait()
 
-                if task.status == 'SUCCESS':
-                    script = task.result[0]
-                    div = task.result[1]
-            else:
-                finished_experiments = Experiment.get_public_experiments()
-                comparator = ExperimentComparator(finished_experiments)
-                script, div = comparator.visualise_prediction_comparison(request.form['raw_text'])
+            if task.status == 'SUCCESS':
+                script = task.result[0]
+                div = task.result[1]
 
             return render_template('experiments/public_prediction_overview.html',
                                    request=request.form,
@@ -565,21 +536,7 @@ def hypotheses_testing():
 @experiment_blueprint.route('/delete/<string:experiment_id>')
 @user_decorators.requires_login
 def delete_experiment(experiment_id):
-    if config.DOCKER_RUN:
-        # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-        task = del_exp.delay(experiment_id)
-    else:
-        # without celery
-        exp = Experiment.get_by_id(experiment_id)
-        if exp.type == "NB":
-            ExperimentNB.get_by_id(experiment_id).delete()
-        elif exp.type == "SVC":
-            ExperimentSVC.get_by_id(experiment_id).delete()
-        elif exp.type == "RF":
-            ExperimentRF.get_by_id(experiment_id).delete()
-        elif exp.type == "XGB":
-            ExperimentXGB.get_by_id(experiment_id).delete()
-
+    task = del_exp.delay(experiment_id)
     time.sleep(0.5)
     return back.redirect()
 
@@ -588,19 +545,7 @@ def delete_experiment(experiment_id):
 def delete_all():
     experiments = Experiment.get_by_user_email(session['email'])
     for exp in experiments:
-        if config.DOCKER_RUN:
-            # with celery (run on bash : celery -A src.celery_tasks.celery_app worker -l info )
-            task = del_exp.delay(exp._id)
-        else:
-            # without celery
-            if exp.type == "NB":
-                ExperimentNB.get_by_id(exp._id).delete()
-            elif exp.type == "SVC":
-                ExperimentSVC.get_by_id(exp._id).delete()
-            elif exp.type == "RF":
-                ExperimentRF.get_by_id(exp._id).delete()
-            elif exp.type == "XGB":
-                ExperimentXGB.get_by_id(exp._id).delete()
+        task = del_exp.delay(exp._id)
 
     time.sleep(0.5)
     return back.redirect()
