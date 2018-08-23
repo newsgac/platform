@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from src.celery_tasks.celery_app import celery_app
 from src.models.data_sources.data_source import DataSource
-from src.models.experiments.experiment import Experiment, ExperimentSVC, ExperimentRF, ExperimentNB, ExperimentXGB
+from src.models.experiments.experiment import Experiment
 from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
@@ -10,26 +10,12 @@ from src.visualisation.resultvisualiser import ResultVisualiser
 def run_exp(self, exp_id):
     exp = Experiment.get_by_id(exp_id)
     self.update_state(state='RUNNING', meta={'experiment_id': exp_id})
-    if exp.type == "SVC":
-        ExperimentSVC.get_by_id(exp_id).run_svc()
-    elif exp.type == "RF":
-        ExperimentRF.get_by_id(exp_id).run_rf()
-    elif exp.type == "NB":
-        ExperimentNB.get_by_id(exp_id).run_nb()
-    elif exp.type == "XGB":
-        ExperimentXGB.get_by_id(exp_id).run_xgb()
+    exp.run()
 
 @celery_app.task(bind=True)
 def del_exp(self, exp_id):
     exp = Experiment.get_by_id(exp_id)
-    if exp.type == "SVC":
-        ExperimentSVC.get_by_id(exp_id).delete()
-    elif exp.type == "RF":
-        ExperimentRF.get_by_id(exp_id).delete()
-    elif exp.type == "NB":
-        ExperimentNB.get_by_id(exp_id).delete()
-    elif exp.type == "XGB":
-        ExperimentXGB.get_by_id(exp_id).delete()
+    exp.delete()
 
 @celery_app.task(bind=True)
 def process_data(self, data_source_id, config):

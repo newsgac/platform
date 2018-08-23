@@ -26,6 +26,7 @@ UT = Utilities.Utils()
 
 __author__ = 'abilgin'
 
+
 class Experiment(object):
 
     def __init__(self, user_email, display_title, public_flag, **kwargs):
@@ -46,9 +47,14 @@ class Experiment(object):
         self.display_title = display_title
         self.public_flag = public_flag
 
-    @classmethod
-    def get_by_id(cls, id):
-        return cls(**DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id}))
+    @staticmethod
+    def get_by_id(id):
+        db_item = DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id})
+        for exp_class in experiment_classes:
+            if exp_class.type == db_item['type']:
+                return exp_class(**db_item)
+        raise TypeError("No such experiment class type: %s" % db_item['type'])
+
 
     @classmethod
     def get_by_title(cls, title):
@@ -247,17 +253,13 @@ class Experiment(object):
 
 
 class ExperimentSVC(Experiment, ConfigurationSVC):
-
+    type = 'SVC'
     def __init__(self, user_email, display_title, public_flag, **kwargs):
         ConfigurationSVC.__init__(self, user_email, **kwargs)
         Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
 
     def __repr__(self):
         return "<Experiment {}>".format(self.display_title)
-
-    @classmethod
-    def get_by_id(cls, id):
-        return cls(**DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id}))
 
     def save_to_db(self):
         DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
@@ -270,6 +272,9 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
         ConfigurationSVC.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
         DATABASE.updateManyForRemoval('predictions', "exp_predictions." + id)
+
+    def run(self):
+        self.run_svc()
 
     def run_svc(self):
 
@@ -311,17 +316,13 @@ class ExperimentSVC(Experiment, ConfigurationSVC):
 
 
 class ExperimentRF(Experiment, ConfigurationRF):
-
+    type = 'RF'
     def __init__(self, user_email, display_title, public_flag, **kwargs):
         ConfigurationRF.__init__(self, user_email, **kwargs)
         Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
 
     def __repr__(self):
         return "<Experiment {}>".format(self.display_title)
-
-    @classmethod
-    def get_by_id(cls, id):
-        return cls(**DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id}))
 
     def save_to_db(self):
         DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
@@ -333,6 +334,9 @@ class ExperimentRF(Experiment, ConfigurationRF):
         DATABASE.getGridFS().delete(self.results_model_handler)
         ConfigurationRF.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
+
+    def run(self):
+        self.run_rf()
 
     def run_rf(self):
 
@@ -384,17 +388,13 @@ class ExperimentRF(Experiment, ConfigurationRF):
 
 
 class ExperimentNB(Experiment, ConfigurationNB):
-
+    type = 'NB'
     def __init__(self, user_email, display_title, public_flag, **kwargs):
         ConfigurationNB.__init__(self, user_email, **kwargs)
         Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
 
     def __repr__(self):
         return "<Experiment {}>".format(self.display_title)
-
-    @classmethod
-    def get_by_id(cls, id):
-        return cls(**DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id}))
 
     def save_to_db(self):
         DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
@@ -406,6 +406,9 @@ class ExperimentNB(Experiment, ConfigurationNB):
         DATABASE.getGridFS().delete(self.results_model_handler)
         ConfigurationNB.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
+
+    def run(self):
+        self.run_nb()
 
     def run_nb(self):
 
@@ -440,17 +443,13 @@ class ExperimentNB(Experiment, ConfigurationNB):
         return classifier.coef_
 
 class ExperimentXGB(Experiment, ConfigurationXGB):
-
+    type = 'XGB'
     def __init__(self, user_email, display_title, public_flag, **kwargs):
         ConfigurationXGB.__init__(self, user_email, **kwargs)
         Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
 
     def __repr__(self):
         return "<Experiment {}>".format(self.display_title)
-
-    @classmethod
-    def get_by_id(cls, id):
-        return cls(**DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id}))
 
     def save_to_db(self):
         DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
@@ -462,6 +461,9 @@ class ExperimentXGB(Experiment, ConfigurationXGB):
         DATABASE.getGridFS().delete(self.results_model_handler)
         ConfigurationXGB.delete(self)
         DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
+
+    def run(self):
+        self.run_xgb()
 
     def run_xgb(self):
 
@@ -513,3 +515,6 @@ class ExperimentXGB(Experiment, ConfigurationXGB):
         feat_importances['Importance'] /= feat_importances['Importance'].sum()
         feat_importances = feat_importances.round(3)
         return feat_importances
+
+
+experiment_classes = [ExperimentNB, ExperimentRF, ExperimentSVC, ExperimentXGB]
