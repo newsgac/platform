@@ -4,8 +4,6 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-cmd="$@"
-
 function mongo_ready(){
 python << END
 import sys
@@ -71,4 +69,4 @@ wait ${rabbitmq_waiter_pid}
 
 >&2 echo "FROG & RabbitMQ & MongoDB are up - continuing..."
 
-exec ${cmd}
+exec "$@"
