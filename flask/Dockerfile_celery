@@ -25,11 +25,11 @@ RUN chmod a+x /flask/entrypoint.sh
 
 RUN python /flask/install_nltk.py
 
-WORKDIR flask/src/celery_tasks/
+WORKDIR flask/src
 
 ENTRYPOINT ["/flask/entrypoint.sh"]
 
-CMD ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10"]
+CMD ["celery", "-A", "celery_tasks.celery_app", "worker", "-l", "info", "--concurrency", "10"]
 
 # Usage: ENTRYPOINT application "argument", "argument", ..
 #ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker@%%h"]

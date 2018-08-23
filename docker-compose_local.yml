@@ -29,7 +29,7 @@ services:
             - ./flask/src:/flask/src
         env_file:
             - .env.localdocker
-        command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A celery_app worker -l info --concurrency 2"]
+        command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A celery_tasks.celery_app worker -l info --concurrency 2"]
 
     web:
         volumes:
