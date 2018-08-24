@@ -437,12 +437,25 @@ def user_experiments_analyse_compare_explain():
         test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
         tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
 
+        def group_by_attr(iterable, attr):
+            from operator import itemgetter
+            from itertools import groupby
+            return { k: list(v) for k,v in groupby(sorted(iterable, key=itemgetter(attr)), key=itemgetter(attr)) }
+
+        grouped_tabular_data = group_by_attr(tabular_data_dict, 'article_number')
+
         return render_template('experiments/analyse_compare_explain.html',
-                       js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
-                       experiment_ds_dict = experiment_ds_dict, text_explanation_experiments=text_explanation_experiments,
-                       articles=test_articles_genres, tabular_data_dict=tabular_data_dict,
+                       js_resources=INLINE.render_js(),
+                       data_sources_db=processed_data_source_list,
+                       experiment_ds_dict = experiment_ds_dict,
+                       text_explanation_experiments=text_explanation_experiments,
+                       articles=test_articles_genres,
+                       tabular_data_dict=tabular_data_dict,
                        combinations=combinations,
-                       css_resources=INLINE.render_css(), mimetype='text/html')
+                       css_resources=INLINE.render_css(),
+                       mimetype='text/html',
+                       grouped_tabular_data=grouped_tabular_data
+                               )
 
     return render_template('experiments/analyse_compare_explain.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 

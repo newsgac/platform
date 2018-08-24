@@ -21,6 +21,18 @@ app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(experiment_blueprint, url_prefix="/experiments")
 app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
 
+
+if config.environment in [config.Env.local, config.Env.localdocker]:
+    import time
+    last_time = time.time()
+
+    def time_measure():
+        global last_time
+        print time.time() - last_time
+        last_time = time.time()
+
+    app.jinja_env.globals.update(time_measure=time_measure)
+
 if __name__ == "__main__":
     app.run(
         host='0.0.0.0',
