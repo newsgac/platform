@@ -69,6 +69,7 @@ class ExperimentComparator:
 
     @staticmethod
     def get_existing_article_predictions(article_text):
+        # TODO: this seems relatively slow, perhaps a hash lookup or something will be faster
         return DATABASE.find_one('predictions', {"article_text": article_text})
 
     @staticmethod
@@ -352,6 +353,7 @@ class ExperimentComparator:
 
         dicts_to_merge = {}
         for article_id, article_text, article_genre in test_articles_genres:
+            print "%s / %s" % (count, len(test_articles_genres))
             tabular_data_row = {}
             tabular_data_row["article_number"] = count
             tabular_data_row["article_text"] = article_text

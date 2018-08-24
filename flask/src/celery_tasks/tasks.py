@@ -2,19 +2,20 @@ from __future__ import absolute_import
 from src.celery_tasks.celery_app import celery_app
 from src.models.data_sources.data_source import DataSource
 from src.models.experiments.experiment import Experiment
+from src.models.experiments.factory import get_experiment_by_id
 from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
 
 @celery_app.task(bind=True)
 def run_exp(self, exp_id):
-    exp = Experiment.get_by_id(exp_id)
+    exp = get_experiment_by_id(exp_id)
     self.update_state(state='RUNNING', meta={'experiment_id': exp_id})
     exp.run()
 
 @celery_app.task(bind=True)
 def del_exp(self, exp_id):
-    exp = Experiment.get_by_id(exp_id)
+    exp = get_experiment_by_id(exp_id)
     exp.delete()
 
 @celery_app.task(bind=True)
@@ -33,7 +34,7 @@ def grid_ds(self, data_source_id):
 
 @celery_app.task(bind=True, trail=True)
 def predict_exp(self, exp_id, raw_text):
-    exp = Experiment.get_by_id(exp_id)
+    exp = get_experiment_by_id(exp_id)
     data_source = DataSource.get_by_id(exp.data_source_id)
     self.update_state(state='PREDICTING', meta={'experiment_id':exp_id})
     plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(

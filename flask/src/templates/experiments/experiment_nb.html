@@ -10,10 +10,10 @@
 
         {% if experiment.run_started != None and experiment.run_finished != None %}
             <a class="btn btn-info "
-                href="{{ url_for('experiments.visualise_results', experiment_id=experiment._id) }}">
+               href="{{ url_for('experiments.visualise_results', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-eye-open"></span> Result Analysis</a>
             <a class="btn btn-primary "
-                href="{{ url_for('experiments.predict', experiment_id=experiment._id) }}">
+               href="{{ url_for('experiments.predict', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-equalizer"></span> Predict</a>
             <a class="btn btn-danger"
                href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
@@ -28,7 +28,7 @@
 
         {% else %}
             <a class="btn btn-primary"
-                href="{{ url_for('experiments.run_experiment', experiment_id=experiment._id) }}">
+               href="{{ url_for('experiments.run_experiment', experiment_id=experiment._id) }}">
                 <span class="glyphicon glyphicon-play"></span> Run</a>
             <a class="btn btn-danger"
                href="{{ url_for('experiments.delete_experiment', experiment_id=experiment._id) }}">
@@ -88,55 +88,57 @@
                                         </p>
                                     </div>
                                     <div class="col-md-4" id="datasource_div">
-                                        <input type="text" class="form-control" value="{{ experiment.data_source_title }}" disabled>
+                                        <input type="text" class="form-control"
+                                               value="{{ experiment.data_source_title }}" disabled>
                                     </div>
                                 </div>
                                 {% if experiment.auto_feat %}
-                                <div class="row mar_ned"></div>
-                                <div class="row mar_ned">
-                                    <div class="col-md-3">
-                                        <p align="right" class="center-align-pad">
-                                            <strong>Auto</strong>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="checkbox">
-                                            <label>
-                                                <input type="checkbox" name="auto_feat" checked disabled>
-                                                <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <span class="help-block"><i>Automated choice with default settings.<br/></i></span>
-                                    </div>
-                                </div>
-                            {% else %}
-                            {% if experiment.features|safe %}
-                                {% for feature, value in experiment.features|dictsort %}
+                                    <div class="row mar_ned"></div>
                                     <div class="row mar_ned">
                                         <div class="col-md-3">
                                             <p align="right" class="center-align-pad">
-                                                <strong>{{feature|capitalize}}</strong>
+                                                <strong>Auto</strong>
                                             </p>
                                         </div>
                                         <div class="col-md-1">
-                                            <div class="checkbox" id={{feature}}"_div">
+                                            <div class="checkbox">
                                                 <label>
-                                                    <input type="checkbox" name={{feature}} id="{{feature}}" {% if value== True%} checked {% endif%} disabled>
+                                                    <input type="checkbox" name="auto_feat" checked disabled>
                                                     <span class="cr"><i class="cr-icon fa fa-check"></i></span>
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="col-md-8">
-                                            <span class="help-block"><i>{{description}}<br/></i></span>
+                                            <span class="help-block"><i>Automated choice with default settings.<br/></i></span>
                                         </div>
                                     </div>
-                                    <div class="row mar_ned"></div>
-                                {% endfor %}
-                            {% endif %}
-                            {% endif %}
-                            <div class="row mar_ned"></div>
+                                {% else %}
+                                    {% if experiment.features|safe %}
+                                        {% for feature, value in experiment.features|dictsort %}
+                                            <div class="row mar_ned">
+                                                <div class="col-md-3">
+                                                    <p align="right" class="center-align-pad">
+                                                        <strong>{{ feature|capitalize }}</strong>
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="checkbox" id={{ feature }}"_div">
+                                                        <label>
+                                                            <input type="checkbox" name={{ feature }} id="{{ feature }}"
+                                                                    {% if value== True %} checked {% endif %} disabled>
+                                                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <span class="help-block"><i>{{ description }}<br/></i></span>
+                                                </div>
+                                            </div>
+                                            <div class="row mar_ned"></div>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endif %}
+                                <div class="row mar_ned"></div>
 
                             </div>
                             <ul class="list-inline pull-right">
@@ -182,7 +184,8 @@
                                             </p>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" class="form-control" value="{{ experiment.alpha }}" disabled>
+                                            <input type="text" class="form-control" value="{{ experiment.alpha }}"
+                                                   disabled>
                                         </div>
                                     </div>
 
@@ -212,7 +215,8 @@
                                         </p>
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="text" class="form-control" value="{{ experiment.display_title }}" disabled>
+                                        <input type="text" class="form-control" value="{{ experiment.display_title }}"
+                                               disabled>
                                     </div>
                                 </div>
                                 <div class="row mar_ned"></div>

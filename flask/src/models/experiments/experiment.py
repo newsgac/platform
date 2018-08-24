@@ -7,17 +7,13 @@ from sklearn.preprocessing import RobustScaler
 
 from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
     remove_stop_words, apply_lemmatization
-from src.models.data_sources.data_source import DataSource
 from src.machine_learning.clf import CLF
-from src.models.configurations.configuration_svc import ConfigurationSVC
-from src.models.configurations.configuration_rf import ConfigurationRF
-from src.models.configurations.configuration_nb import ConfigurationNB
-from src.models.configurations.configuration_xgb import ConfigurationXGB
 from src.database import DATABASE
 import src.models.experiments.constants as ExperimentConstants
 import src.models.data_sources.constants as DataSourceConstants
 import src.common.utils as Utilities
 import src.data_engineering.utils as DataUtilities
+
 from src.models.users.user import User
 import numpy as np
 import pandas as pd
@@ -46,15 +42,8 @@ class Experiment(object):
         self.user_email = user_email
         self.display_title = display_title
         self.public_flag = public_flag
-
-    @staticmethod
-    def get_by_id(id):
-        db_item = DATABASE.find_one(ExperimentConstants.COLLECTION, {"_id": id})
-        for exp_class in experiment_classes:
-            if exp_class.type == db_item['type']:
-                return exp_class(**db_item)
-        raise TypeError("No such experiment class type: %s" % db_item['type'])
-
+        self.classifier = None  # classifier cache
+        self.vectorizer = None  # vectorizer cache
 
     @classmethod
     def get_by_title(cls, title):
@@ -132,15 +121,19 @@ class Experiment(object):
 
     def predict(self, raw_text, ds):
         # TODO: test this bit
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
+        if not self.classifier:
+            pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
+            self.classifier = dill.loads(pickled_model)
+        classifier = self.classifier
         sorted_resp = {}
         preprocessor = Preprocessor(ds.pre_processing_config)
 
         if 'tf-idf' in ds.pre_processing_config.values():
             #NLTK case
-            pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
-            vectorizer = dill.loads(pickled_model)
+            if not self.vectorizer:
+                pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
+                self.vectorizer = dill.loads(pickled_model)
+            vectorizer = self.vectorizer
 
             clean_ocr = get_clean_ocr(raw_text.lower())
 
@@ -252,269 +245,3 @@ class Experiment(object):
         return df
 
 
-class ExperimentSVC(Experiment, ConfigurationSVC):
-    type = 'SVC'
-    def __init__(self, user_email, display_title, public_flag, **kwargs):
-        ConfigurationSVC.__init__(self, user_email, **kwargs)
-        Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
-
-    def __repr__(self):
-        return "<Experiment {}>".format(self.display_title)
-
-    def save_to_db(self):
-        DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
-
-    def delete(self):
-        id = self._id
-        DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_eval_handler)
-        DATABASE.getGridFS().delete(self.results_model_handler)
-        ConfigurationSVC.delete(self)
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
-        DATABASE.updateManyForRemoval('predictions', "exp_predictions." + id)
-
-    def run(self):
-        self.run_svc()
-
-    def run_svc(self):
-
-        # update the timestamp
-        self.run_started = datetime.datetime.utcnow()
-        self.save_to_db()
-
-        ds = DataSource.get_by_id(self.data_source_id)
-        # train
-        svc = CLF(self)
-
-        if "tf-idf" not in ds.pre_processing_config.values():
-            trained_model = svc.train()
-            # populate results
-            results_eval, results_model = svc.populate_results(trained_model)
-        else:
-            trained_model = svc.train_nltk(ds.train_vectors_handler)
-            # populate results
-            results_eval, results_model = svc.populate_results_nltk(trained_model, ds.vectorizer_handler)
-
-        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
-        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
-
-        # update the timestamp
-        self.run_finished = datetime.datetime.utcnow()
-        self.save_to_db()
-
-    def get_features_weights(self):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-        feature_weights = None
-
-        # check if kernel is linear
-        if self.kernel == 'linear':
-            feature_weights = classifier.coef_
-
-        return feature_weights
-
-
-class ExperimentRF(Experiment, ConfigurationRF):
-    type = 'RF'
-    def __init__(self, user_email, display_title, public_flag, **kwargs):
-        ConfigurationRF.__init__(self, user_email, **kwargs)
-        Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
-
-    def __repr__(self):
-        return "<Experiment {}>".format(self.display_title)
-
-    def save_to_db(self):
-        DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
-
-    def delete(self):
-        id = self._id
-        DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_eval_handler)
-        DATABASE.getGridFS().delete(self.results_model_handler)
-        ConfigurationRF.delete(self)
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
-
-    def run(self):
-        self.run_rf()
-
-    def run_rf(self):
-
-        # update the timestamp
-        self.run_started = datetime.datetime.utcnow()
-        self.save_to_db()
-
-        ds = DataSource.get_by_id(self.data_source_id)
-        # train
-        rf = CLF(self)
-
-        if "tf-idf" not in ds.pre_processing_config.values():
-            trained_model = rf.train()
-            # populate results
-            results_eval, results_model = rf.populate_results(trained_model)
-        else:
-            trained_model = rf.train_nltk(ds.train_vectors_handler)
-            # populate results
-            results_eval, results_model = rf.populate_results_nltk(trained_model, ds.vectorizer_handler)
-
-        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
-        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
-
-        # update the timestamp
-        self.run_finished = datetime.datetime.utcnow()
-        self.save_to_db()
-
-    def get_features_weights(self):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-
-        feature_weights = classifier.feature_importances_
-        sorted_keys = sorted(self.features.keys())
-
-        feat_importances = []
-        for (ft, key) in zip(feature_weights, sorted_keys):
-            feat_importances.append({'Feature': key, 'Importance': ft})
-        feat_importances = pd.DataFrame(feat_importances)
-        feat_importances = feat_importances.sort_values(
-            by='Importance', ascending=True).reset_index(drop=True)
-        # Divide the importances by the sum of all importances
-        # to get relative importances. By using relative importances
-        # the sum of all importances will equal to 1, i.e.,
-        # np.sum(feat_importances['importance']) == 1
-        feat_importances['Importance'] /= feat_importances['Importance'].sum()
-        feat_importances = feat_importances.round(3)
-        return feat_importances
-
-
-class ExperimentNB(Experiment, ConfigurationNB):
-    type = 'NB'
-    def __init__(self, user_email, display_title, public_flag, **kwargs):
-        ConfigurationNB.__init__(self, user_email, **kwargs)
-        Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
-
-    def __repr__(self):
-        return "<Experiment {}>".format(self.display_title)
-
-    def save_to_db(self):
-        DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
-
-    def delete(self):
-        id = self._id
-        DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_eval_handler)
-        DATABASE.getGridFS().delete(self.results_model_handler)
-        ConfigurationNB.delete(self)
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
-
-    def run(self):
-        self.run_nb()
-
-    def run_nb(self):
-
-        # update the timestamp
-        self.run_started = datetime.datetime.utcnow()
-        self.save_to_db()
-
-        ds = DataSource.get_by_id(self.data_source_id)
-        # train
-        nb = CLF(self)
-
-        if "tf-idf" not in ds.pre_processing_config.values():
-            trained_model = nb.train()
-            # populate results
-            results_eval, results_model = nb.populate_results(trained_model)
-        else:
-            trained_model = nb.train_nltk(ds.train_vectors_handler)
-            # populate results
-            results_eval, results_model = nb.populate_results_nltk(trained_model, ds.vectorizer_handler)
-
-        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
-        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
-
-        # update the timestamp
-        self.run_finished = datetime.datetime.utcnow()
-        self.save_to_db()
-
-    def get_features_weights(self):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-        return classifier.coef_
-
-class ExperimentXGB(Experiment, ConfigurationXGB):
-    type = 'XGB'
-    def __init__(self, user_email, display_title, public_flag, **kwargs):
-        ConfigurationXGB.__init__(self, user_email, **kwargs)
-        Experiment.__init__(self, user_email, display_title, public_flag, **kwargs)
-
-    def __repr__(self):
-        return "<Experiment {}>".format(self.display_title)
-
-    def save_to_db(self):
-        DATABASE.update(ExperimentConstants.COLLECTION, {"_id": self._id}, self.__dict__)
-
-    def delete(self):
-        id = self._id
-        DATABASE.getGridFS().delete(self.trained_model_handler)
-        DATABASE.getGridFS().delete(self.results_eval_handler)
-        DATABASE.getGridFS().delete(self.results_model_handler)
-        ConfigurationXGB.delete(self)
-        DATABASE.remove(ExperimentConstants.COLLECTION, {'_id': id})
-
-    def run(self):
-        self.run_xgb()
-
-    def run_xgb(self):
-
-        # update the timestamp
-        self.run_started = datetime.datetime.utcnow()
-        self.save_to_db()
-
-        ds = DataSource.get_by_id(self.data_source_id)
-        # train
-        xgb = CLF(self)
-
-        if "tf-idf" not in ds.pre_processing_config.values():
-            trained_model = xgb.train()
-            # populate results
-            results_eval, results_model = xgb.populate_results(trained_model)
-        else:
-            trained_model = xgb.train_nltk(ds.train_vectors_handler)
-            # populate results
-            results_eval, results_model = xgb.populate_results_nltk(trained_model, ds.vectorizer_handler)
-
-        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
-        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
-
-        # update the timestamp
-        self.run_finished = datetime.datetime.utcnow()
-        self.save_to_db()
-
-    def get_features_weights(self):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-
-        feature_weights = classifier.get_booster().get_fscore()
-        sorted_fw = OrderedDict(sorted(feature_weights.items(), key=lambda t: t[0]))
-        sorted_keys = sorted(self.features.keys())
-        print sorted_fw
-
-        feat_importances = []
-        for (ft, score) in sorted_fw.items():
-            index = int(ft.split("f")[1])
-            feat_importances.append({'Feature': sorted_keys[index], 'Importance': score})
-        feat_importances = pd.DataFrame(feat_importances)
-        feat_importances = feat_importances.sort_values(
-            by='Importance', ascending=True).reset_index(drop=True)
-        # Divide the importances by the sum of all importances
-        # to get relative importances. By using relative importances
-        # the sum of all importances will equal to 1, i.e.,
-        # np.sum(feat_importances['importance']) == 1
-        feat_importances['Importance'] /= feat_importances['Importance'].sum()
-        feat_importances = feat_importances.round(3)
-        return feat_importances
-
-
-experiment_classes = [ExperimentNB, ExperimentRF, ExperimentSVC, ExperimentXGB]

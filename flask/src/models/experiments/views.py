@@ -11,7 +11,11 @@ from src.database import DATABASE
 from src.models.configurations.configuration_rf import ConfigurationRF
 from src.models.configurations.configuration_xgb import ConfigurationXGB
 from src.models.configurations.configuration_nb import ConfigurationNB
-from src.models.experiments.experiment import Experiment, ExperimentRF, ExperimentSVC, ExperimentNB, ExperimentXGB
+from src.models.experiments.experiment import Experiment
+from src.models.experiments.experiment_xgb import ExperimentXGB
+from src.models.experiments.experiment_nb import ExperimentNB
+from src.models.experiments.experiment_rf import ExperimentRF
+from src.models.experiments.experiment_svc import ExperimentSVC
 import src.models.users.decorators as user_decorators
 import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
@@ -22,6 +26,7 @@ from bokeh.resources import INLINE
 from bokeh.embed import components
 from bokeh.layouts import gridplot
 
+from src.models.experiments.factory import get_experiment_by_id
 from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
@@ -236,19 +241,17 @@ def create_experiment_dl():
 @user_decorators.requires_login
 def get_experiment_page(experiment_id):
     # return the experiment page with the type code
-    experiment = Experiment.get_by_id(experiment_id)
-    if experiment.type == "NB":
-        return render_template('experiments/experiment_nb.html', experiment=experiment)
-    elif experiment.type == "SVC":
-        return render_template('experiments/experiment_svc.html', experiment=experiment)
-    elif experiment.type == "RF":
-        return render_template('experiments/experiment_rf.html', experiment=experiment)
-    elif experiment.type == "XGB":
-        return render_template('experiments/experiment_xgb.html', experiment=experiment)
-    elif experiment.type == "DL":
-        return render_template('experiments/experiment_dl.html', experiment=experiment)
-    else:
-        return render_template('experiments/experiment_ft.html', experiment=experiment)
+    experiment = get_experiment_by_id(experiment_id)
+    experiment_type_template_map = {
+        ExperimentNB.type:  'experiments/experiment_nb.html',
+        ExperimentSVC.type: 'experiments/experiment_svc.html',
+        ExperimentRF.type:  'experiments/experiment_rf.html',
+        ExperimentXGB.type: 'experiments/experiment_xgb.html',
+        'DL':               'experiments/experiment_dl.html',
+    }
+    template = experiment_type_template_map.get(experiment.type, 'experiments/experiment_ft.html')
+
+    return render_template(template, experiment=experiment)
 
 
 @experiment_blueprint.route('/train/<string:experiment_id>')
@@ -262,7 +265,7 @@ def run_experiment(experiment_id):
 @experiment_blueprint.route('/visualise/<string:experiment_id>')
 @user_decorators.requires_login
 def visualise_results(experiment_id):
-    experiment = Experiment.get_by_id(experiment_id)
+    experiment = get_experiment_by_id(experiment_id)
     results_eval = experiment.get_results_eval()
     results_model = experiment.get_results_model()
     p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
@@ -285,7 +288,7 @@ def visualise_results(experiment_id):
 @experiment_blueprint.route('/predict/<string:experiment_id>', methods=['GET', 'POST'])
 @user_decorators.requires_login
 def predict(experiment_id):
-    experiment = Experiment.get_by_id(experiment_id)
+    experiment = get_experiment_by_id(experiment_id)
     script = None
     div = None
 
@@ -312,9 +315,9 @@ def predict(experiment_id):
 @experiment_blueprint.route('/features_visualisation/<string:experiment_id>')
 @user_decorators.requires_login
 def visualise_features(experiment_id):
-    experiment = Experiment.get_by_id(experiment_id)
+    experiment = get_experiment_by_id(experiment_id)
     if experiment.type == "SVC":
-        f_weights = ExperimentSVC.get_by_id(experiment_id).get_features_weights()
+        f_weights = experiment.get_features_weights()
         ds = DataSource.get_by_id(experiment.data_source_id)
         if 'tf-idf' in ds.pre_processing_config.values():
             pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
@@ -325,10 +328,10 @@ def visualise_features(experiment_id):
             p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
                                                                             experiment=experiment)
     elif experiment.type == "RF":
-        f_weights_df = ExperimentRF.get_by_id(experiment_id).get_features_weights()
+        f_weights_df = experiment.get_features_weights()
         p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, experiment.display_title)
     elif experiment.type == "XGB":
-        f_weights_df = ExperimentXGB.get_by_id(experiment_id).get_features_weights()
+        f_weights_df = experiment.get_features_weights()
         p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, experiment.display_title)
 
     if script is not None:
@@ -390,7 +393,7 @@ def user_experiments_overview():
     if request.method == 'POST':
         finished_experiments = []
         for exp_id in request.form.getlist('compared_experiments'):
-            finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
+            finished_experiments.append(get_experiment_by_id(id=str(exp_id)))
 
         comparator = ExperimentComparator(finished_experiments)
 
@@ -427,7 +430,7 @@ def user_experiments_analyse_compare_explain():
 
         finished_experiments = []
         for exp_id in request.form.getlist('compared_experiments'):
-            finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
+            finished_experiments.append(get_experiment_by_id(str(exp_id)))
 
         comparator = ExperimentComparator(finished_experiments)
         # get the test articles
@@ -489,7 +492,7 @@ def public_experiments_overview():
     if request.method == 'POST':
         finished_experiments = []
         for exp_id in request.form.getlist('compared_experiments'):
-            finished_experiments.append(Experiment.get_by_id(id=str(exp_id)))
+            finished_experiments.append(get_experiment_by_id(str(exp_id)))
 
         comparator = ExperimentComparator(finished_experiments)
 
@@ -513,7 +516,7 @@ def hypotheses_testing():
     finished_experiments = Experiment.get_finished_user_experiments(user_email=session['email'])
 
     if request.method == 'POST':
-        experiment = Experiment.get_by_id(request.form['hypotheses_experiment'])
+        experiment = get_experiment_by_id(request.form['hypotheses_experiment'])
         exp_data_source = DataSource.get_by_id(experiment.data_source_id)
         hypotheses_data_source = DataSource.get_by_id(request.form['hypotheses_data_source'])
 

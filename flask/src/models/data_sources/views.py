@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 import src.data_engineering.utils as DataUtils
 from src.data_engineering.postprocessing import Explanation
 from src.models.experiments.experiment import Experiment
+from src.models.experiments.factory import get_experiment_by_id
 from src.visualisation.resultvisualiser import ResultVisualiser
 from src.database import DATABASE
 import pandas as pd
@@ -85,7 +86,7 @@ def show_article_summary(article_id):
 def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
     # art = DataSource.get_processed_article_by_raw_text(article_text)
     art = DataSource.get_processed_article_by_id(article_id)
-    exp = Experiment.get_by_id(experiment_id)
+    exp = get_experiment_by_id(experiment_id)
 
     # LIME explanations
     e = Explanation(experiment=exp, article=art, predicted_genre=genre)
@@ -98,7 +99,7 @@ def explain_article_for_experiment(article_id, article_num, genre, experiment_id
 def explain_features_for_experiment(article_id, article_num, genre, experiment_id):
     # art = DataSource.get_processed_article_by_raw_text(article_text)
     art = DataSource.get_processed_article_by_id(article_id)
-    exp = Experiment.get_by_id(experiment_id)
+    exp = get_experiment_by_id(experiment_id)
 
     # LIME explanations
     e = Explanation(experiment=exp, article=art, predicted_genre=genre)
