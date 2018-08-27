@@ -13,4 +13,4 @@ celery_app = Celery('src.celery_tasks',
                     include=['src.celery_tasks.tasks'],
                     )
 
-celery_app.conf.task_always_eager = config.celery_eager and False
+celery_app.conf.task_always_eager = config.celery_eager
