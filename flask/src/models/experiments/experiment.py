@@ -144,7 +144,7 @@ class Experiment(object):
                     # ugly solution but will refactor later
                     # descale and scale again
                     # revert the data back to original
-                    training_data = np.array(DATABASE.load_object(ds.X_train_handler).read())
+                    training_data = np.array(DATABASE.load_object(ds.X_train_handler))
                     original_training_data = scaler.inverse_transform(training_data)
                     indexes = []
                     for i, f in enumerate(sorted(feats.keys()), 0):
