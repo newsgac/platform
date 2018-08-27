@@ -1,7 +1,6 @@
 from __future__ import division
 
 import numpy as np
-import dill
 from src.database import DATABASE
 from sklearn.metrics import confusion_matrix
 import src.data_engineering.utils as DataUtils
@@ -91,7 +90,7 @@ class Explanation():
         #     preprocessor = Preprocessor(config=ds.pre_processing_config)
         #     c = make_pipeline(FE.ArticleTransformer(text=text_instance, preprocessor=preprocessor), self.experiment.get_classifier())
         # else:
-        vectorizer = dill.loads(DATABASE.getGridFS().get(ds.vectorizer_handler).read())
+        vectorizer = DATABASE.load_object(ds.vectorizer_handler)
         c = make_pipeline(vectorizer, self.experiment.get_classifier())
 
         lbls = [(DataUtils.genres_labels[k] - 1) for k in class_names]
@@ -116,11 +115,11 @@ class Explanation():
         class_names = [l[0] for l in sorted(DataUtils.genres_labels.items(), key=lambda x: x[1]) if
                        l[0] != 'Unlabelled']
         ds = DataSource.get_by_id(self.experiment.data_source_id)
-        training_data = np.array(dill.loads(DATABASE.getGridFS().get(ds.X_train_handler).read()))
+        training_data = np.array(DATABASE.load_object(ds.X_train_handler))
 
         if 'scaling' in ds.pre_processing_config.keys():
             # revert the data back to original
-            scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
+            scaler = DATABASE.load_object(ds.scaler_handler)
             training_data = scaler.inverse_transform(training_data)
             c = make_pipeline(scaler, self.experiment.get_classifier())
         else:

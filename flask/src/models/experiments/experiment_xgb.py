@@ -1,7 +1,6 @@
 import datetime
 from collections import OrderedDict
 
-import dill
 import pandas as pd
 
 from src.database import DATABASE
@@ -54,17 +53,16 @@ class ExperimentXGB(Experiment, ConfigurationXGB):
             # populate results
             results_eval, results_model = xgb.populate_results_nltk(trained_model, ds.vectorizer_handler)
 
-        self.trained_model_handler = DATABASE.getGridFS().put(dill.dumps(trained_model))
-        self.results_eval_handler = DATABASE.getGridFS().put(dill.dumps(results_eval))
-        self.results_model_handler = DATABASE.getGridFS().put(dill.dumps(results_model))
+        self.trained_model_handler = DATABASE.save_object(trained_model)
+        self.results_eval_handler = DATABASE.save_object(results_eval)
+        self.results_model_handler = DATABASE.save_object(results_model)
 
         # update the timestamp
         self.run_finished = datetime.datetime.utcnow()
         self.save_to_db()
 
     def get_features_weights(self):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
+        classifier = DATABASE.load_object(self.trained_model_handler)
 
         feature_weights = classifier.get_booster().get_fscore()
         sorted_fw = OrderedDict(sorted(feature_weights.items(), key=lambda t: t[0]))

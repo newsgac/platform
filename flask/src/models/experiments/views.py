@@ -21,7 +21,6 @@ import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
 from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public
 import time
-import dill
 from bokeh.resources import INLINE
 from bokeh.embed import components
 from bokeh.layouts import gridplot
@@ -320,8 +319,7 @@ def visualise_features(experiment_id):
         f_weights = experiment.get_features_weights()
         ds = DataSource.get_by_id(experiment.data_source_id)
         if 'tf-idf' in ds.pre_processing_config.values():
-            pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
-            vectorizer = dill.loads(pickled_model)
+            vectorizer = DATABASE.load_object(ds.vectorizer_handler)
             p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
                                                                             vectorizer=vectorizer)
         else:

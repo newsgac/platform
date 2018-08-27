@@ -7,7 +7,6 @@ import src.models.data_sources.constants as DataSourceConstants
 import src.models.data_sources.errors as DataSourceErrors
 from src.data_engineering.preprocessing import Preprocessor, remove_stop_words, apply_lemmatization, get_clean_ocr
 from sklearn.feature_extraction.text import TfidfVectorizer
-import dill
 import numpy as np
 import pandas as pd
 import src.common.utils as Utilities
@@ -181,8 +180,8 @@ class DataSource(object):
                 # vectorizer = TfidfVectorizer(lowercase=False)
                 vectorizer = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2', ngram_range=(1, 2))
                 train_vectors = vectorizer.fit_transform(X_train)
-                self.vectorizer_handler = DATABASE.getGridFS().put(dill.dumps(vectorizer))
-                self.train_vectors_handler = DATABASE.getGridFS().put(dill.dumps(train_vectors))
+                self.vectorizer_handler = DATABASE.save_object(vectorizer)
+                self.train_vectors_handler = DATABASE.save_object(train_vectors)
             else:
                 if 'nlp_tool' in self.pre_processing_config.keys():
                     if self.pre_processing_config['nlp_tool'] == 'frog':
@@ -213,12 +212,12 @@ class DataSource(object):
                     scaler = RobustScaler().fit(X_train)
                     X_train = scaler.transform(X_train)
                     X_test = scaler.transform(X_test)
-                    self.scaler_handler = DATABASE.getGridFS().put(dill.dumps(scaler))
+                    self.scaler_handler = DATABASE.save_object(scaler)
 
-        self.X_train_handler = DATABASE.getGridFS().put(dill.dumps(X_train))
-        self.X_test_handler = DATABASE.getGridFS().put(dill.dumps(X_test))
-        self.y_train_with_ids_handler = DATABASE.getGridFS().put(dill.dumps(y_train_with_ids))
-        self.y_test_with_ids_handler = DATABASE.getGridFS().put(dill.dumps(y_test_with_ids))
+        self.X_train_handler = DATABASE.save_object(X_train)
+        self.X_test_handler = DATABASE.save_object(X_test)
+        self.y_train_with_ids_handler = DATABASE.save_object(y_train_with_ids)
+        self.y_test_with_ids_handler = DATABASE.save_object(y_test_with_ids)
         self.processing_completed = datetime.datetime.utcnow()
         self.save_to_db()
 
@@ -437,7 +436,7 @@ class DataSource(object):
             instances = DataSource.get_all_by_data_source_id(data_source_id=self._id)
 
         else:
-            y_test_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_test_with_ids_handler).read())
+            y_test_with_ids = DATABASE.load_object(self.y_test_with_ids_handler)
             test_ids = np.asarray([row[1] for row in y_test_with_ids ])
 
             for test_id in test_ids:
@@ -446,7 +445,7 @@ class DataSource(object):
         return instances
 
     def get_train_instances(self):
-        y_train_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_train_with_ids_handler).read())
+        y_train_with_ids = DATABASE.load_object(self.y_train_with_ids_handler)
         train_ids = np.asarray([row[1] for row in y_train_with_ids])
         instances = []
 
@@ -482,16 +481,15 @@ class DataSource(object):
                 target_names.append(''.join(name).split('/')[0])
         print target_names
 
-        X_train = np.asarray(dill.loads(DATABASE.getGridFS().get(self.X_train_handler).read()))
-        X_test = np.asarray(dill.loads(DATABASE.getGridFS().get(self.X_test_handler).read()))
-        y_train_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_train_with_ids_handler).read())
-        y_test_with_ids = dill.loads(DATABASE.getGridFS().get(self.y_test_with_ids_handler).read())
+        X_train = np.asarray(DATABASE.load_object(self.X_train_handler))
+        X_test = np.asarray(DATABASE.load_object(self.X_test_handler))
+        y_train_with_ids = DATABASE.load_object(self.y_train_with_ids_handler)
+        y_test_with_ids = DATABASE.load_object(self.y_test_with_ids_handler)
         y_train = np.asarray([row[0] for row in y_train_with_ids])
         y_test = np.asarray([row[0] for row in y_test_with_ids])
 
         if 'tf-idf' in self.pre_processing_config.values():
-            pickled_model = DATABASE.getGridFS().get(self.vectorizer_handler).read()
-            vectorizer = dill.loads(pickled_model)
+            vectorizer = DATABASE.load_object(self.vectorizer_handler)
             X_train = vectorizer.transform(X_train)
             X_test = vectorizer.transform(X_test)
 

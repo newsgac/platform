@@ -24,7 +24,6 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import ShuffleSplit
 from sklearn.metrics import accuracy_score
 from src.models.data_sources.data_source import DataSource
-import src.models.data_sources.constants as DataSourceConstants
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
@@ -33,7 +32,6 @@ from sklearn.model_selection import cross_val_score, cross_val_predict, Stratifi
 from src.data_engineering.postprocessing import Result
 from src.database import DATABASE
 import numpy as np
-import dill
 
 # np.random.seed(42)
 
@@ -61,10 +59,10 @@ class CLF():
                                      learning_rate=0.15)
 
         data_source = DataSource.get_by_id(experiment.data_source_id)
-        ds_X_train = dill.loads(DATABASE.getGridFS().get(data_source.X_train_handler).read())
-        ds_X_test = dill.loads(DATABASE.getGridFS().get(data_source.X_test_handler).read())
-        ds_y_train_with_ids = dill.loads(DATABASE.getGridFS().get(data_source.y_train_with_ids_handler).read())
-        ds_y_test_with_ids = dill.loads(DATABASE.getGridFS().get(data_source.y_test_with_ids_handler).read())
+        ds_X_train = DATABASE.load_object(data_source.X_train_handler)
+        ds_X_test = DATABASE.load_object(data_source.X_test_handler)
+        ds_y_train_with_ids = DATABASE.load_object(data_source.y_train_with_ids_handler)
+        ds_y_test_with_ids = DATABASE.load_object(data_source.y_test_with_ids_handler)
 
         if "tf-idf" not in data_source.pre_processing_config.values():
             # apply feature selection TODO:test this bit
@@ -125,8 +123,7 @@ class CLF():
         return trained_model
 
     def train_nltk(self, train_vectors_handler):
-        pickled_model = DATABASE.getGridFS().get(train_vectors_handler).read()
-        vectorizer = dill.loads(pickled_model)
+        vectorizer = DATABASE.load_object(train_vectors_handler)
         trained_model = self.clf.fit(vectorizer, self.y_train)
         return trained_model
 
@@ -166,8 +163,7 @@ class CLF():
         return results_eval, results_model
 
     def populate_results_nltk(self, classifier, vectorizer_handler):
-        pickled_model = DATABASE.getGridFS().get(vectorizer_handler).read()
-        vectorizer = dill.loads(pickled_model)
+        vectorizer = DATABASE.load_object(vectorizer_handler)
 
         cv = KFold(n_splits=10, random_state=42, shuffle=True)
         X_all = np.hstack((self.X_train, self.X_test))

@@ -11,6 +11,8 @@ experiment_classes = [ExperimentNB, ExperimentRF, ExperimentSVC, ExperimentXGB]
 
 def get_experiment_by_id(id):
     db_item = DATABASE.find_one(constants.COLLECTION, {"_id": id})
+    if not db_item:
+        raise LookupError("No experiment with id %s" % id)
     for exp_class in experiment_classes:
         if exp_class.type == db_item['type']:
             return exp_class(**db_item)

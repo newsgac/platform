@@ -2,7 +2,6 @@ import datetime
 import uuid
 from collections import OrderedDict
 
-import dill
 from sklearn.preprocessing import RobustScaler
 
 from src.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
@@ -42,8 +41,6 @@ class Experiment(object):
         self.user_email = user_email
         self.display_title = display_title
         self.public_flag = public_flag
-        self.classifier = None  # classifier cache
-        self.vectorizer = None  # vectorizer cache
 
     @classmethod
     def get_by_title(cls, title):
@@ -112,28 +109,20 @@ class Experiment(object):
         return "{:2d} hours {:2d} minutes {:2d} seconds".format(int(h), int(m), int(s))
 
     def get_results_eval(self):
-        pickled_results = DATABASE.getGridFS().get(self.results_eval_handler).read()
-        return dill.loads(pickled_results)
+        return DATABASE.load_object(self.results_eval_handler)
 
     def get_results_model(self):
-        pickled_results = DATABASE.getGridFS().get(self.results_model_handler).read()
-        return dill.loads(pickled_results)
+        return DATABASE.load_object(self.results_model_handler)
 
     def predict(self, raw_text, ds):
         # TODO: test this bit
-        if not self.classifier:
-            pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-            self.classifier = dill.loads(pickled_model)
-        classifier = self.classifier
+        classifier = DATABASE.load_object(self.trained_model_handler)
         sorted_resp = {}
         preprocessor = Preprocessor(ds.pre_processing_config)
 
         if 'tf-idf' in ds.pre_processing_config.values():
             #NLTK case
-            if not self.vectorizer:
-                pickled_model = DATABASE.getGridFS().get(ds.vectorizer_handler).read()
-                self.vectorizer = dill.loads(pickled_model)
-            vectorizer = self.vectorizer
+            vectorizer = DATABASE.load_object(ds.vectorizer_handler)
 
             clean_ocr = get_clean_ocr(raw_text.lower())
 
@@ -150,12 +139,12 @@ class Experiment(object):
             ordered_feature_values = [feats[f] for f in sorted_keys if
                                       f not in DataSourceConstants.NON_FEATURE_COLUMNS]
             if 'scaling' in ds.pre_processing_config.keys():
-                scaler = dill.loads(DATABASE.getGridFS().get(ds.scaler_handler).read())
+                scaler = DATABASE.load_object(ds.scaler_handler)
                 if  not self.auto_feat:
                     # ugly solution but will refactor later
                     # descale and scale again
                     # revert the data back to original
-                    training_data = np.array(dill.loads(DATABASE.getGridFS().get(ds.X_train_handler).read()))
+                    training_data = np.array(DATABASE.load_object(ds.X_train_handler).read())
                     original_training_data = scaler.inverse_transform(training_data)
                     indexes = []
                     for i, f in enumerate(sorted(feats.keys()), 0):
@@ -181,9 +170,7 @@ class Experiment(object):
         return sorted_resp
 
     def get_classifier(self):
-        pickled_model = DATABASE.getGridFS().get(self.trained_model_handler).read()
-        classifier = dill.loads(pickled_model)
-        return classifier
+        return DATABASE.load_object(self.trained_model_handler)
 
     def populate_hypothesis_df(self, exp_data_source, hypotheses_data_source):
         from src.visualisation.comparison import ExperimentComparator
