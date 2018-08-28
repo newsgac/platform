@@ -19,6 +19,8 @@ services:
             - RABBITMQ_DEFAULT_USER=newsgac
             - RABBITMQ_DEFAULT_PASS=1234
         restart: on-failure
+        volumes:
+            - ../rabbitmq:/var/lib/rabbitmq
         networks:
             - newsgac-net
 
@@ -61,3 +63,5 @@ services:
         networks:
             - newsgac-net
             
+volumes:
+    rabbitmq:
