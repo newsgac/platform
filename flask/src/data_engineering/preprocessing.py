@@ -16,6 +16,9 @@ import src.data_engineering.feature_extraction as FE
 import src.data_engineering.utils as DataUtils
 
 import os
+
+from src.parallel_with_progress import ParallelWithProgress
+
 language_filename = os.path.join(os.path.dirname(__file__), '../../dutch_stopwords_mod.txt')
 stop_words = []
 try:
@@ -47,44 +50,45 @@ class Preprocessor():
                 self.nlp_tool = DataSourceConstants.DEFAULT_NLP_TOOL
                 self.scaling = DataSourceConstants.DEFAULT_SCALING
 
-    def do_parallel_processing(self, documents):
+    def do_parallel_processing(self, documents, progress):
+        # Parallel receives a jobs iterator, so won't know the length in advance, so we wrap progress and cache it.
+        def progress_callback(num):
+            if progress:
+                progress(num / float(len(documents)))
+
+        n_parallel_jobs = 50
+        # Frog does not work with parallelization
+        if self.nlp_tool == 'frog':
+            n_parallel_jobs = 1
 
         processed_text_list = []
         feature_list = []
         article_ids = []
-        if self.nlp_tool == 'frog':
-            # Frog does not work with parallelization
-            for processed_text, feature, id in Parallel(n_jobs=1)(
-                    delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
-                article_ids.append(id)
-                processed_text_list.append(processed_text)
-                feature_list.append(feature)
-        elif self.nlp_tool == 'spacy':
-            for processed_text, feature, id in Parallel(n_jobs=50)(
-                    delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
-                article_ids.append(id)
-                processed_text_list.append(processed_text)
-                feature_list.append(feature)
+
+        for processed_text, feature, id in ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=progress_callback)(
+                delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
+            article_ids.append(id)
+            processed_text_list.append(processed_text)
+            feature_list.append(feature)
 
         return article_ids, processed_text_list, feature_list
 
     def do_parallel_processing_matrix(self, documents):
+        n_parallel_jobs = 50
+        # Frog does not work with parallelization
+        if self.nlp_tool == 'frog':
+            n_parallel_jobs = 1
 
         feature_list = []
         article_ids = []
-        if self.nlp_tool == 'frog':
-            # Frog does not work with parallelization
-            for processed_text, feature, id in Parallel(n_jobs=1)(
-                    delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
-                feature_list.append(feature)
-                article_ids.append(id)
-        elif self.nlp_tool == 'spacy':
-            for processed_text, feature, id in Parallel(n_jobs=50)(
-                    delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
-                feature_list.append(feature)
-                article_ids.append(id)
+
+        for processed_text, feature, id in Parallel(n_jobs=n_parallel_jobs)(
+                delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
+            feature_list.append(feature)
+            article_ids.append(id)
 
         return article_ids, feature_list
+
 
 def get_clean_ocr(ocr):
 
@@ -156,4 +160,3 @@ class DataAnalyser():
 
     def __init__(self):
         pass
-

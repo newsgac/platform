@@ -123,7 +123,7 @@ class DataSource(object):
     def save_to_db(self):
         DATABASE.update(DataSourceConstants.COLLECTION, {"_id": self._id}, self.__dict__)
 
-    def process_data_source(self, config):
+    def process_data_source(self, config, progress=None):
         self.processing_started = datetime.datetime.utcnow()
         self.pre_processing_config = config
         self.save_to_db()
@@ -196,7 +196,7 @@ class DataSource(object):
                 if 'scaling' in self.pre_processing_config.keys():
                     self.display_title = self.display_title + " (SCL)"
 
-                self.apply_preprocessing_and_update_db(articles_from_db)
+                self.apply_preprocessing_and_update_db(articles_from_db, progress)
 
                 X, y = self.get_data_with_labels_from_articles(DataSource.get_articles_by_data_source(self._id))
                 y_df = pd.DataFrame(data=y, columns=['Label', 'ArticleId'])
@@ -380,13 +380,13 @@ class DataSource(object):
 
 
 
-    def apply_preprocessing_and_update_db(self, articles_from_db):
+    def apply_preprocessing_and_update_db(self, articles_from_db, progress=None):
         # apply config and pre-process article
 
         preprocessor = Preprocessor(self.pre_processing_config)
 
         if 'tf-idf' not in self.pre_processing_config.values():
-            article_ids, processed_text_list, feature_list = preprocessor.do_parallel_processing(articles_from_db)
+            article_ids, processed_text_list, feature_list = preprocessor.do_parallel_processing(articles_from_db, progress)
 
             for art_id, processed_text, features in zip(article_ids, processed_text_list, feature_list):
                 self.add_features_to_db(art_id, {'article_processed_text': processed_text, 'features':features})
