@@ -52,6 +52,3 @@ class Utils(object):
         # s = list(iterable)  # allows duplicate elements
         s = list(set(iterable))
         return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
-
-
-

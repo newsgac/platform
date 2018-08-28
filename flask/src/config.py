@@ -21,7 +21,7 @@ rabbitmq_url = 'amqp://%s:%s@rabbit//' % (environ['RABBITMQ_DEFAULT_USER'], envi
 
 if environment == Env.local:
     flask_port = 5050
-    celery_eager = True
+    celery_eager = False
     mongo_url = 'mongodb://localhost:27017'
     frog_hostname = 'localhost'
     rabbitmq_url = 'amqp://%s:%s@localhost//' % (environ['RABBITMQ_DEFAULT_USER'], environ['RABBITMQ_DEFAULT_PASS'])
