@@ -29,7 +29,7 @@ WORKDIR flask/src
 
 ENTRYPOINT ["/flask/entrypoint.sh"]
 
-CMD ["celery", "-A", "celery_tasks.celery_app", "worker", "-l", "info", "--concurrency", "10"]
+CMD ["celery", "-A", "celery_tasks.celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker1@%h"]
 
 # Usage: ENTRYPOINT application "argument", "argument", ..
 #ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker@%%h"]
