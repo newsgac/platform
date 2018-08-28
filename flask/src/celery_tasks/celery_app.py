@@ -14,3 +14,6 @@ celery_app = Celery('src.celery_tasks',
                     )
 
 celery_app.conf.task_always_eager = config.celery_eager
+celery_app.conf.task_ignore_result = False
+celery_app.conf.task_track_started = True
+celery_app.conf.result_backend = config.rabbitmq_url
