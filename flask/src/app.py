@@ -17,9 +17,12 @@ def home():
 from src.models.users.views import user_blueprint
 from src.models.experiments.views import experiment_blueprint
 from src.models.data_sources.views import data_source_blueprint
+from src.models.tasks.views import task_blueprint
+
 app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(experiment_blueprint, url_prefix="/experiments")
 app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
+app.register_blueprint(task_blueprint, url_prefix="/tasks")
 
 
 if config.environment in [config.Env.local, config.Env.localdocker]:
