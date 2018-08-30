@@ -12,7 +12,7 @@ class Database(object):
         self.URI = config.mongo_url
 
         self.client = pymongo.MongoClient(self.URI)
-        self.db = self.client["newsgacdev"]
+        self.db = self.client[config.mongo_database_name]
         self.fs = gridfs.GridFS(self.db)
 
         self.db['predictions'].create_index([("article_text", "text")])
