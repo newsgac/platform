@@ -21,6 +21,9 @@
     {% elif plot_script is defined %}
         {{ plot_script|indent(4)|safe }}
     {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <script src="/static/js/tasks.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/tasks.css">
 </head>
 <body>
 
@@ -50,6 +53,7 @@
                         class="glyphicon glyphicon-blackboard"></span> Your experiments</a></li>
                 <li><a href="{{ url_for('users.logout_user') }}"><span class="glyphicon glyphicon-log-out"></span> Log
                     out</a></li>
+                <li><a id="tasks_trigger" href="#"><span class="glyphicon glyphicon-tasks"></span> <span id="tasks_button"></span></a></li>
             </ul>
             {% else %}
             <ul class="nav navbar-nav navbar-right">
@@ -104,6 +108,6 @@
 </div>
 {% endblock %}
 
-
+    <div id="tasks_root"></div>
 </body>
 </html>

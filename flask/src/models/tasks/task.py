@@ -1,3 +1,5 @@
+import pymongo
+
 from . import constants
 from src.database import DATABASE
 
@@ -17,4 +19,4 @@ class Task(object):
 
     @classmethod
     def get_all_by_user_email(cls, user_email):
-        return list(DATABASE.find(constants.COLLECTION, {'user_email': user_email}))
+        return list(DATABASE.find(constants.COLLECTION, {'user_email': user_email}).sort('date_started', pymongo.DESCENDING))[:5]

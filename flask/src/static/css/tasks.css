@@ -1,0 +1,33 @@
+#tasks_root {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #5bc0de;
+    padding: 1em;
+    max-width: 20em;
+    max-height: 100em;
+}
+
+#tasks_root .task {
+    margin-bottom: 1em;
+}
+
+progress.failure {
+    -webkit-appearance: none;
+    appearance: none;
+    color: red;
+}
+
+progress.failure::-webkit-progress-value {
+    background-color: red;
+}
+progress.failure::-moz-progress-bar {
+	background-color: red;
+}
+
+#tasks_root.tasks_hidden {
+    max-height: 50px;
+    padding: 0;
+    border: none;
+}

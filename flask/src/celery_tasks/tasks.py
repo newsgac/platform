@@ -39,6 +39,7 @@ def process_data(self, data_source_id, config):
 def del_data(self, data_source_id):
     DataSource.get_by_id(data_source_id).delete()
 
+
 @celery_app.task(bind=True, trail=True)
 def grid_ds(self, data_source_id):
     self.update_state(state='OPTIMIZING')
