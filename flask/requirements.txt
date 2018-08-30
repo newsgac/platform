@@ -3,7 +3,7 @@ backports.weakref==1.0.post1
 bleach==1.5.0
 bokeh==0.12.13
 certifi==2017.11.5
-celery==4.1.0
+celery==4.2.1
 chardet==3.0.4
 click==6.7
 colorcet==0.9.1
@@ -53,7 +53,7 @@ tornado==4.5.3
 urllib3==1.22
 Werkzeug==0.14.1
 cython==0.27.3
-kombu==4.1.0
+kombu==4.2.1
 billiard==3.5.0.2
 pandas==0.22.0
 xgboost==0.72.1
