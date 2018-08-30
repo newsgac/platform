@@ -1,10 +1,14 @@
 from __future__ import absolute_import
+
+
 from src.celery_tasks.celery_app import celery_app
 from src.models.data_sources.data_source import DataSource
 from src.models.experiments.experiment import Experiment
 from src.models.experiments.factory import get_experiment_by_id
 from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
+
+
 
 
 @celery_app.task(bind=True)
@@ -29,6 +33,8 @@ def process_data(self, data_source_id, config):
     DataSource.get_by_id(data_source_id).process_data_source(config, progress(self))
     self.update_state(state='PROCESSING', meta={'data_source_id': data_source_id})
 
+
+# @with_user_email
 @celery_app.task(bind=True)
 def del_data(self, data_source_id):
     DataSource.get_by_id(data_source_id).delete()
