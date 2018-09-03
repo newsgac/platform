@@ -4,14 +4,16 @@ document.addEventListener('DOMContentLoaded', contentLoadedEvent => {
         template: `
 <div v-if="!hidden" id="tasks_root">
     <button type="button" class="btn btn-close" @click="hidden = true">Close</button>
-    <div v-if="!hidden" class="task" v-for="task in tasks">
-        {{ task.task_name }}
-        <progress v-if="task.status === 'SUCCESS'" class="completed" value="1"></progress>
+    <div v-if="!hidden" class="task" v-for="task in merged_tasks">
+        {{ task.name }}
+        <div v-if="task.status === 'PENDING'">Queued</div>
+        <progress v-else-if="task.status === 'SUCCESS'" class="completed" value="1"></progress>
         <template v-else-if="task.status === 'FAILURE'">
             <progress class="failure" value="1"></progress> Failed :(
         </template>
-        <template v-else-if="task.result && task.result.progress !== undefined">
-           <progress :value="task.result.progress"></progress> {{(100 * task.result.progress).toFixed(0)}} &percnt;
+        <template v-else-if="task.currentResult && task.currentResult.result.progress">
+           <progress :value="task.currentResult.result.progress"></progress> 
+           &nbsp; {{(100 * task.currentResult.result.progress).toFixed(0)}} &percnt;
        </template>
         <progress v-else>?</progress>
     </div>
@@ -20,6 +22,11 @@ document.addEventListener('DOMContentLoaded', contentLoadedEvent => {
         data: {
             tasks: [ ],
             hidden: true
+        },
+        computed: {
+            merged_tasks: function() {
+                return this.tasks.map(task => ({ ...task, currentResult: task.results[task.results.length -1]}));
+            }
         }
     });
 
@@ -31,7 +38,7 @@ document.addEventListener('DOMContentLoaded', contentLoadedEvent => {
         },
         computed: {
             runningTasks: function() {
-                return this.tasks.filter(task => task.status !== 'STARTED' && task.status !== 'SUCCESS' && task.status !== 'FAILURE').length;
+                return this.tasks.filter(task => task.status !== 'SUCCESS' && task.status !== 'FAILURE').length;
             }
         }
     });

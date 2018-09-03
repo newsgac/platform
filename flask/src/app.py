@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import sys
 import os
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from src.common.json_encoder import ISODateJSONEncoder
 from flask import Flask, render_template
 from src import config
 
@@ -24,6 +27,7 @@ app.register_blueprint(experiment_blueprint, url_prefix="/experiments")
 app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
 app.register_blueprint(task_blueprint, url_prefix="/tasks")
 
+app.json_encoder = ISODateJSONEncoder
 
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time

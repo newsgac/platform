@@ -3,14 +3,14 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 from celery import Celery
-from src.celery_tasks.UserTask import UserTask
+from src.celery_tasks.celery_tracked_task import CeleryTrackedTask
 from src import config
 
 celery_app = Celery('src.celery_tasks',
-                    broker=config.rabbitmq_url,  # use it when dockerized
+                    broker=config.rabbitmq_url,
                     backend='rpc://',
                     include=['src.celery_tasks.tasks'],
-                    task_cls=UserTask
+                    task_cls=CeleryTrackedTask
                     )
 
 celery_app.conf.task_always_eager = config.celery_eager

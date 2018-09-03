@@ -9,6 +9,10 @@ from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
 
+def progress(task):
+    def progress_update(num):
+        task.update_state(state='PROCESSING', meta={'progress': num})
+    return progress_update
 
 
 @celery_app.task(bind=True)
@@ -24,12 +28,6 @@ def del_exp(self, exp_id):
 
 @celery_app.task(bind=True)
 def process_data(self, data_source_id, config):
-    def progress(task):
-        def progress_update(num):
-            print("PROGRESS UPDATE %f" % num)
-            task.update_state(state='PROCESSING', meta={'data_source_id': data_source_id, 'progress': num})
-        return progress_update
-
     DataSource.get_by_id(data_source_id).process_data_source(config, progress(self))
     self.update_state(state='PROCESSING', meta={'data_source_id': data_source_id})
 
