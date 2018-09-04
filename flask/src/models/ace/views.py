@@ -57,7 +57,7 @@ def ace_view():
                 text_explanation_experiments.append(exp.display_title)
         experiment_ds_dict[ds_id] = exp_list
 
-    return render_template('experiments/analyse_compare_explain.html',
+    return render_template('ace/overview.html',
                            data_sources_db=processed_data_source_list,
                            experiment_ds_dict=experiment_ds_dict,
                            last_runs=last_runs
@@ -70,6 +70,6 @@ def view_ace_run(ace_id):
     ace = Ace.get_by_id(ace_id)
     data = DATABASE.load_object(ace.result)
     return render_template(
-        'experiments/analyse_compare_explain.html',
+        'ace/run.html',
         **data
     )

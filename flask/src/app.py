@@ -2,8 +2,6 @@
 import sys
 import os
 
-from src.models.ace.views import ace_blueprint
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.common.json_encoder import ISODateJSONEncoder
 from flask import Flask, render_template
@@ -22,6 +20,7 @@ from src.models.users.views import user_blueprint
 from src.models.experiments.views import experiment_blueprint
 from src.models.data_sources.views import data_source_blueprint
 from src.models.tasks.views import task_blueprint
+from src.models.ace.views import ace_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(experiment_blueprint, url_prefix="/experiments")

@@ -15,6 +15,7 @@ class ExtendedMongoBackend(MongoBackend):
         if state == states.STARTED:
             try:
                 task = TrackedTask.get_by_id(request.tracked_task_id)
+                task.status = state
                 task.results.append({
                     '_id': task_id,
                     'status': state,
