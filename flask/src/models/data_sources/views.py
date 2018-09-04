@@ -16,7 +16,6 @@ from src.models.experiments.factory import get_experiment_by_id
 from src.visualisation.resultvisualiser import ResultVisualiser
 from src.database import DATABASE
 import pandas as pd
-from bokeh.resources import INLINE
 from src import config
 
 __author__ = 'abilgin'
@@ -165,8 +164,7 @@ def visualise_stats(data_source_id):
 
     return render_template('data_sources/data_source_stats.html',
                            data_source=ds,
-                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
-                           css_resources=INLINE.render_css(),
+                           plot_script=script, plot_div=div,
                            mimetype='text/html')
 
 

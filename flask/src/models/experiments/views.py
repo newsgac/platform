@@ -21,7 +21,6 @@ import src.models.configurations.errors as ConfigurationErrors
 from src.models.data_sources.data_source import DataSource
 from src.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public
 import time
-from bokeh.resources import INLINE
 from bokeh.embed import components
 from bokeh.layouts import gridplot
 
@@ -280,7 +279,6 @@ def visualise_results(experiment_id):
                            experiment=experiment,
                            results_eval=results_eval, results_model=results_model,
                            plot_script=script, plot_div=div,
-                           js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
                            mimetype='text/html')
 
 
@@ -302,7 +300,7 @@ def predict(experiment_id):
 
             return render_template('experiments/prediction.html',
                            experiment=experiment, request = request.form,
-                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           plot_script=script, plot_div=div,
                            mimetype='text/html')
 
         except Exception as e:
@@ -335,8 +333,7 @@ def visualise_features(experiment_id):
     if script is not None:
         return render_template('experiments/features.html',
                                experiment=experiment,
-                               plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
-                               css_resources=INLINE.render_css(),
+                               plot_script=script, plot_div=div,
                                mimetype='text/html')
 
     return render_template('experiments/features.html', experiment=experiment)
@@ -361,7 +358,7 @@ def user_experiments_overview_for_prediction():
 
             return render_template('experiments/prediction_overview.html',
                            request = request.form,
-                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           plot_script=script, plot_div=div,
                            mimetype='text/html')
         except Exception as e:
             raise
@@ -401,9 +398,9 @@ def user_experiments_overview():
         div.append(div_cm)
 
         return render_template('experiments/overview.html', plot_scripts=script, plot_divs=div,
-                       js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
+                       data_sources_db=processed_data_source_list,
                        experiment_ds_dict = experiment_ds_dict,
-                       css_resources=INLINE.render_css(), mimetype='text/html')
+                       mimetype='text/html')
 
     return render_template('experiments/overview.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
@@ -442,15 +439,15 @@ def user_experiments_analyse_compare_explain():
 
         grouped_tabular_data = group_by_attr(tabular_data_dict, 'article_number')
 
+        from dill import dill
+
         return render_template('experiments/analyse_compare_explain.html',
-                       js_resources=INLINE.render_js(),
                        data_sources_db=processed_data_source_list,
                        experiment_ds_dict = experiment_ds_dict,
                        text_explanation_experiments=text_explanation_experiments,
                        articles=test_articles_genres,
                        tabular_data_dict=tabular_data_dict,
                        combinations=combinations,
-                       css_resources=INLINE.render_css(),
                        mimetype='text/html',
                        grouped_tabular_data=grouped_tabular_data
                                )
@@ -475,8 +472,7 @@ def public_experiments_overview_for_prediction():
 
             return render_template('experiments/public_prediction_overview.html',
                                    request=request.form,
-                                   plot_script=script, plot_div=div, js_resources=INLINE.render_js(),
-                                   css_resources=INLINE.render_css(),
+                                   plot_script=script, plot_div=div,
                                    mimetype='text/html')
         except Exception as e:
             print e.message
@@ -513,9 +509,9 @@ def public_experiments_overview():
         div.append(div_cm)
 
         return render_template('experiments/public_overview.html', plot_scripts=script, plot_divs=div,
-                               js_resources=INLINE.render_js(), data_sources_db=processed_data_source_list,
+                               data_sources_db=processed_data_source_list,
                                experiment_ds_dict=experiment_ds_dict,
-                               css_resources=INLINE.render_css(), mimetype='text/html')
+                               mimetype='text/html')
 
     return render_template('experiments/public_overview.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
@@ -538,7 +534,7 @@ def hypotheses_testing():
 
             return render_template('experiments/hypotheses.html',  experiments=finished_experiments, test_data_sources=test_data_sources,
                            request = request.form,
-                           plot_script=script, plot_div=div, js_resources=INLINE.render_js(), css_resources=INLINE.render_css(),
+                           plot_script=script, plot_div=div,
                            mimetype='text/html')
         except Exception as e:
             flash("Something went wrong: " + str(e.message), 'error')

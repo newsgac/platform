@@ -29,6 +29,12 @@ app.register_blueprint(task_blueprint, url_prefix="/tasks")
 
 app.json_encoder = ISODateJSONEncoder
 
+@app.context_processor
+def inject_bokeh_js_css():
+    from bokeh.resources import CDN
+    return dict(bokeh_js_css=CDN)
+
+
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time
     last_time = time.time()
