@@ -5,7 +5,31 @@
         <h1>Analyse - Compare - Explain Pipelines</h1>
     </div>
 
-    <form role="form" action="{{ url_for('experiments.user_experiments_analyse_compare_explain') }}" method="post" id="form_ace">
+    {% if last_runs|length > 0 %}
+    <div>
+        <h3>Previous runs:</h3>
+        <ul class="list-group">
+            {% for ace_run in last_runs %}
+                <li class="card list-group-item">
+                    <div class="card-body">
+                      <h4 class="card-title">
+                          {% if ace_run['is_processing'] %}
+                          {{ ace_run['experiments'] |map(attribute='display_title')|join(', ') }} (processing)
+                            {% else %}
+                        <a href="{{ url_for('.view_ace_run', ace_id=ace_run['id']) }}">
+                            {{ ace_run['experiments'] |map(attribute='display_title')|join(', ') }}
+                        </a>
+                            {% endif %}
+                      </h4>
+                      <p class="card-text"><small class="text-muted">{{ ace_run['created'].strftime("%d-%m-%Y at %H:%M") }}</small></p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form role="form" action="{{ url_for('ace.ace_view') }}" method="post" id="form_ace">
         <div>
             <div class="row">
 

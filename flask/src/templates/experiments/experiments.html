@@ -36,7 +36,7 @@
             {% if finished_experiments|length > 0 %}
                 <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_overview') }}" target="_blank">
                     <span class="glyphicon glyphicon-eye-open "></span> Overview</a>
-                <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_analyse_compare_explain') }}" target="_blank">
+                <a class="btn btn-default" href="{{ url_for('ace.ace_view') }}" target="_blank">
                     <span class="glyphicon glyphicon-blackboard "></span> ACE (Analyse, Compare, Explain)</a>
                 <a class="btn btn-default" href="{{ url_for('experiments.user_experiments_overview_for_prediction') }}" target="_blank">
                     <span class="glyphicon glyphicon-equalizer"></span> Predict</a>

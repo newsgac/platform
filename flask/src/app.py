@@ -2,6 +2,7 @@
 import sys
 import os
 
+from src.models.ace.views import ace_blueprint
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.common.json_encoder import ISODateJSONEncoder
@@ -26,6 +27,7 @@ app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(experiment_blueprint, url_prefix="/experiments")
 app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
 app.register_blueprint(task_blueprint, url_prefix="/tasks")
+app.register_blueprint(ace_blueprint, url_prefix="/ace")
 
 app.json_encoder = ISODateJSONEncoder
 

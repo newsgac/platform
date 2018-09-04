@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 
 from src.celery_tasks.celery_app import celery_app
+from src.models.ace.ace import Ace
 from src.models.data_sources.data_source import DataSource
 from src.models.experiments.experiment import Experiment
 from src.models.experiments.factory import get_experiment_by_id
@@ -66,6 +67,15 @@ def predict_overview_public(self, raw_text):
     comparator = ExperimentComparator(finished_experiments)
     self.update_state(state='PREDICTING')
     return comparator.visualise_prediction_comparison(raw_text)
+
+
+@celery_app.task(bind=True, trail=True)
+def run_ace(self, ace_id):
+    ace = Ace.get_by_id(ace_id)
+    ace.run()
+    print('processing', ace)
+
+
 
 # @celery_app.task(bind=True, trail=True)
 # def ace_exp(self, finished_exp_ids):

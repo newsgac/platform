@@ -404,55 +404,6 @@ def user_experiments_overview():
 
     return render_template('experiments/overview.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
-@experiment_blueprint.route('/analyse_compare_explain',  methods=['GET', 'POST'])
-@user_decorators.requires_login
-@back.anchor
-def user_experiments_analyse_compare_explain():
-
-    processed_data_source_list = DataSource.get_processed_datasets()
-    used_data_source_ids_by_user = Experiment.get_used_data_sources_for_user(user_email=session['email'])
-    experiment_ds_dict = {}
-    text_explanation_experiments = []
-
-    for ds_id in used_data_source_ids_by_user:
-        exp_list = Experiment.get_finished_user_experiments_using_data_id(user_email=session['email'], ds_id=ds_id)
-        if 'tf-idf' in DataSource.get_by_id(id=ds_id).pre_processing_config.values():
-            for exp in exp_list:
-                text_explanation_experiments.append(exp.display_title)
-        experiment_ds_dict[ds_id] = exp_list
-
-    if request.method == 'POST':
-
-        finished_experiments = []
-        for exp_id in request.form.getlist('compared_experiments'):
-            finished_experiments.append(get_experiment_by_id(str(exp_id)))
-
-        comparator = ExperimentComparator(finished_experiments)
-        # get the test articles
-        test_articles_genres = comparator.retrieveUniqueTestArticleGenreTuplesBasedOnRawText()
-        tabular_data_dict, combinations = comparator.generateAgreementOverview(test_articles_genres)
-
-        def group_by_attr(iterable, attr):
-            from operator import itemgetter
-            from itertools import groupby
-            return { k: list(v) for k,v in groupby(sorted(iterable, key=itemgetter(attr)), key=itemgetter(attr)) }
-
-        grouped_tabular_data = group_by_attr(tabular_data_dict, 'article_number')
-
-        from dill import dill
-
-        return render_template('experiments/analyse_compare_explain.html',
-                       data_sources_db=processed_data_source_list,
-                       experiment_ds_dict = experiment_ds_dict,
-                       text_explanation_experiments=text_explanation_experiments,
-                       articles=test_articles_genres,
-                       tabular_data_dict=tabular_data_dict,
-                       combinations=combinations,
-                       mimetype='text/html',
-                       grouped_tabular_data=grouped_tabular_data
-                               )
-
-    return render_template('experiments/analyse_compare_explain.html', data_sources_db=processed_data_source_list, experiment_ds_dict = experiment_ds_dict)
 
 @experiment_blueprint.route('/public_prediction_overview', methods=['GET', 'POST'])
 @back.anchor
