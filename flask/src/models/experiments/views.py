@@ -286,17 +286,10 @@ def visualise_results(experiment_id):
 @user_decorators.requires_login
 def predict(experiment_id):
     experiment = get_experiment_by_id(experiment_id)
-    script = None
-    div = None
 
     if request.method == 'POST':
         try:
-            task = predict_exp.delay(experiment_id, request.form['raw_text'])
-            task.wait()
-
-            if task.status == 'SUCCESS':
-                script = task.result[0]
-                div = task.result[1]
+            script, div = predict_exp(experiment_id, request.form['raw_text'])
 
             return render_template('experiments/prediction.html',
                            experiment=experiment, request = request.form,
@@ -344,22 +337,15 @@ def visualise_features(experiment_id):
 @back.anchor
 def user_experiments_overview_for_prediction():
     # call overview method with the finished experiments that belong to the user
-    script = None
-    div = None
-
     if request.method == 'POST':
         try:
-            task = predict_overview.delay(session['email'], request.form['raw_text'])
-            task.wait()
-
-            if task.status == 'SUCCESS':
-                script = task.result[0]
-                div = task.result[1]
+            script, div = predict_overview(session['email'], request.form['raw_text'])
 
             return render_template('experiments/prediction_overview.html',
                            request = request.form,
                            plot_script=script, plot_div=div,
                            mimetype='text/html')
+
         except Exception as e:
             raise
         #     print e.message

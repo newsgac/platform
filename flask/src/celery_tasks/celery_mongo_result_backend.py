@@ -11,7 +11,8 @@ from src.models.tasks.tracked_task import TrackedTask
 class ExtendedMongoBackend(MongoBackend):
     def _store_result(self, task_id, result, state,
                       traceback=None, request=None, **kwargs):
-
+        return result
+        print('storing result')
         if state == states.STARTED:
             try:
                 task = TrackedTask.get_by_id(request.tracked_task_id)
@@ -35,6 +36,9 @@ class ExtendedMongoBackend(MongoBackend):
 
         else:
             # `request` is not available when task.update_state() is triggered
+            print('storing result2')
+            if not task_id:
+                return result
             task = TrackedTask.find_one({'results._id': task_id})
             if state in [states.FAILURE, states.SUCCESS]:
                 task.date_done = datetime.utcnow()

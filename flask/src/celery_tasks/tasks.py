@@ -33,7 +33,6 @@ def process_data(self, data_source_id, config):
     self.update_state(state='PROCESSING', meta={'data_source_id': data_source_id})
 
 
-# @with_user_email
 @celery_app.task(bind=True)
 def del_data(self, data_source_id):
     DataSource.get_by_id(data_source_id).delete()
@@ -48,7 +47,7 @@ def grid_ds(self, data_source_id):
 def predict_exp(self, exp_id, raw_text):
     exp = get_experiment_by_id(exp_id)
     data_source = DataSource.get_by_id(exp.data_source_id)
-    self.update_state(state='PREDICTING', meta={'experiment_id':exp_id})
+    self.update_state(state='PREDICTING', meta={'experiment_id': exp_id})
     plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(
         exp.predict(raw_text, data_source),
         exp.display_title)
