@@ -27,6 +27,7 @@ from src.models.data_sources.data_source import DataSource
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.neural_network import MLPClassifier
 from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
 from src.data_engineering.postprocessing import Result
@@ -52,6 +53,9 @@ class CLF():
 
         elif experiment.type == "NB":
             self.clf = MultinomialNB(alpha=0.1)
+
+        elif experiment.type == "MLP":
+            self.clf = MLPClassifier()
 
         elif experiment.type == "XGB":
             self.clf = XGBClassifier(max_depth=experiment.max_depth, n_estimators=experiment.n_estimators,

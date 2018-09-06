@@ -11,9 +11,11 @@ from src.database import DATABASE
 from src.models.configurations.configuration_rf import ConfigurationRF
 from src.models.configurations.configuration_xgb import ConfigurationXGB
 from src.models.configurations.configuration_nb import ConfigurationNB
+from src.models.configurations.configuration_mlp import ConfigurationMLP
 from src.models.experiments.experiment import Experiment
 from src.models.experiments.experiment_xgb import ExperimentXGB
 from src.models.experiments.experiment_nb import ExperimentNB
+from src.models.experiments.experiment_mlp import ExperimentMLP
 from src.models.experiments.experiment_rf import ExperimentRF
 from src.models.experiments.experiment_svc import ExperimentSVC
 import src.models.users.decorators as user_decorators
@@ -29,8 +31,6 @@ from src.visualisation.comparison import ExperimentComparator
 from src.visualisation.resultvisualiser import ResultVisualiser
 
 from decimal import *
-
-from src import config
 
 getcontext().prec = 2
 
@@ -91,6 +91,47 @@ def create_experiment_nb():
 
 
     return render_template('experiments/new_experiment_nb.html', ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict, request={})
+
+@experiment_blueprint.route('/new_mlp', methods=['GET', 'POST'])
+@user_decorators.requires_login
+@back.anchor
+def create_experiment_mlp():
+    # get the list of processed data sources of the user for only TF-IDF representation
+    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True, tfidf=True)
+    manual_feature_dict = DataIO.get_feature_names_with_descriptions()
+
+    if not existing_data_source_titles:
+        flash("There are no processed data sources for training, redirecting to data sources page.", 'warning')
+        return redirect((url_for('data_sources.user_data_sources')))
+
+    if request.method == 'POST':
+        if request.form["data_source"]:
+            configuration = ConfigurationMLP(user_email= session['email'], form = request.form)
+            try:
+                if ConfigurationMLP.is_config_unique(configuration):
+                    configuration.save_to_db()
+                    display_title = request.form['experiment_display_title']
+                    public_flag = 'public_flag' in request.form
+                    experiment = ExperimentMLP(user_email=session['email'],
+                                               display_title=display_title+" ("+configuration.data_source_title+")",
+                                               public_flag=public_flag,
+                                            **dict(configuration=configuration))
+                    experiment.save_to_db()
+                    return redirect(url_for('.user_experiments'))
+            except ConfigurationErrors.ConfigAlreadyExistsError as e:
+                    error = e.message
+                    flash(error, 'error')
+                    return render_template('experiments/new_experiment_mlp.html', request=request.form,
+                                           ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+        else:
+            flash('Please choose a data source!', 'error')
+            return render_template('experiments/new_experiment_mlp.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
+                           feature_dict = manual_feature_dict)
+
+
+    return render_template('experiments/new_experiment_mlp.html', ds_titles_from_db=existing_data_source_titles,
                            feature_dict = manual_feature_dict, request={})
 
 @experiment_blueprint.route('/new_rf', methods=['GET', 'POST'])
@@ -242,6 +283,7 @@ def get_experiment_page(experiment_id):
     experiment = get_experiment_by_id(experiment_id)
     experiment_type_template_map = {
         ExperimentNB.type:  'experiments/experiment_nb.html',
+        ExperimentMLP.type:  'experiments/experiment_mlp.html',
         ExperimentSVC.type: 'experiments/experiment_svc.html',
         ExperimentRF.type:  'experiments/experiment_rf.html',
         ExperimentXGB.type: 'experiments/experiment_xgb.html',

@@ -1,12 +1,13 @@
 from src.database import DATABASE
 from src.models.experiments.experiment_nb import ExperimentNB
+from src.models.experiments.experiment_mlp import ExperimentMLP
 from src.models.experiments.experiment_rf import ExperimentRF
 from src.models.experiments.experiment_xgb import ExperimentXGB
 from src.models.experiments.experiment_svc import ExperimentSVC
 
 from . import constants
 
-experiment_classes = [ExperimentNB, ExperimentRF, ExperimentSVC, ExperimentXGB]
+experiment_classes = [ExperimentNB, ExperimentMLP, ExperimentRF, ExperimentSVC, ExperimentXGB]
 
 
 def get_experiment_by_id(id):
