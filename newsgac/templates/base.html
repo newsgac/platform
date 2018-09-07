@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NEWSGAC DEV</title>
+
+    {% include 'html_dependencies.html' %}
+
+    {% if js_resources is defined %}
+    {{ js_resources|indent(4)|safe }}
+    {% endif %}
+
+    {% if css_resources is defined %}
+    {{ css_resources|indent(4)|safe }}
+    {% endif %}
+
+    {% if plot_scripts is defined %}
+        {% for plot_script in plot_scripts %}
+            {{ plot_script|indent(4)|safe }}
+        {% endfor %}
+    {% elif plot_script is defined %}
+        {{ plot_script|indent(4)|safe }}
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment.min.js"></script>
+    <script src="/static/js/tasks.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/tasks.css">
+    {% for js in bokeh_js_css.js_files %}
+        <script src="{{ js }}"></script>
+    {% endfor %}
+    {% for css in bokeh_js_css.css_files %}
+        <link rel="stylesheet" type="text/css" href="{{ css }}">
+    {% endfor %}
+
+
+</head>
+<body>
+
+
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/" title="Home">NEWSGAC-DEV</a>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="{{ url_for('experiments.index') }}">Public experiments</a></li>
+            </ul>
+            {% if session['email'] %}
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('data_sources.user_data_sources') }}"><span
+                        class="glyphicon glyphicon-hdd"></span> Your data</a></li>
+                <li><a href="{{ url_for('experiments.user_experiments') }}"><span
+                        class="glyphicon glyphicon-blackboard"></span> Your experiments</a></li>
+                <li><a href="{{ url_for('users.logout_user') }}"><span class="glyphicon glyphicon-log-out"></span> Log
+                    out</a></li>
+                <li><a id="tasks_trigger" href="#"><span class="glyphicon glyphicon-tasks"></span> <span id="tasks_button"></span></a></li>
+            </ul>
+            {% else %}
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('users.register_user') }}"><span class="glyphicon glyphicon-user"></span> Sign
+                    up</a></li>
+                <li><a href="{{ url_for('users.login_user') }}"><span class="glyphicon glyphicon-log-in"></span> Log in</a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+{% block message_content %}
+
+<div class="container" style="max-width: 60%">
+    {% with messages = get_flashed_messages(with_categories = true) or []%}
+    {% for category, message in messages %}
+    {% if category == 'error' %}
+    <div class="alert alert-danger alert-dismissible fade in">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+        </button>
+        <strong>Error! </strong>{{message}}
+    </div>
+    {% elif category == 'success' %}
+    <div class="alert alert-success alert-dismissible fade in">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+        </button>
+        <strong>Success! </strong>{{message}}
+    </div>
+    {% elif category == 'warning' %}
+    <div class="alert alert-warning alert-dismissible fade in">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+        </button>
+        <strong>Warning! </strong>{{message}}
+    </div>
+    {% elif category == 'info' %}
+    <div class="alert alert-info alert-dismissible fade in">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+        </button>
+        <strong>Info! </strong>{{message}}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endwith %}
+</div>
+
+<div class="content">
+    {% block content %} {% endblock %}
+</div>
+{% endblock %}
+
+    <div id="tasks_root"></div>
+</body>
+</html>
