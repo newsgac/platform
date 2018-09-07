@@ -1,0 +1,38 @@
+FROM python:2.7
+
+MAINTAINER abilgin
+
+RUN ["mkdir", "flask"]
+RUN ["mkdir", "flask/datasets"]
+
+COPY requirements.txt /flask/requirements.txt
+
+RUN ["pip", "install", "-r", "flask/requirements.txt"]
+# RUN ["pip", "install", "fasttext==0.8.3"]
+
+# Usage: ADD [source directory or URL] [destination directory]
+# If, however, the source is a URL (e.g. http://github.com/user/file/), 
+# then the contents of the URL are downloaded and placed at the destination.
+# ADD requirements.txt src/requirements.txt
+# ADD src/run.py flask/src/run.py
+
+#COPY ./datasets/ /flask/datasets/
+#COPY dutch_stopwords_mod.txt /flask/dutch_stopwords_mod.txt
+#COPY ./install_nltk.py /flask/install_nltk.py
+
+COPY . /flask
+RUN chmod a+x /flask/entrypoint.sh
+
+RUN python <<< "import nltk; nltk.download('punkt')"
+
+WORKDIR flask/src
+
+ENTRYPOINT ["/flask/entrypoint.sh"]
+
+CMD ["celery", "-A", "celery_tasks.celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker1@%h"]
+
+# Usage: ENTRYPOINT application "argument", "argument", ..
+#ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker@%%h"]
+#ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker2@%h"]
+#ENTRYPOINT ["celery", "-A", "celery_app", "worker", "-l", "info", "--concurrency", "10", "-n", "worker3@%h"]
+
