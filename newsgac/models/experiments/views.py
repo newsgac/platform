@@ -21,7 +21,7 @@ from newsgac.models.experiments.experiment_svc import ExperimentSVC
 import newsgac.users.view_decorators as user_decorators
 import newsgac.models.configurations.errors as ConfigurationErrors
 from newsgac.models.data_sources.data_source_old import DataSource
-from newsgac.celery_tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public
+from newsgac.tasks.tasks import run_exp, del_exp, predict_exp, predict_overview, predict_overview_public
 import time
 from bokeh.embed import components
 from bokeh.layouts import gridplot

@@ -2,6 +2,7 @@ from pymodm import MongoModel, EmbeddedMongoModel, fields, files
 from pymodm.errors import DoesNotExist, ValidationError
 
 from newsgac.common.mixins import CreatedUpdated
+from newsgac.tasks.models import TrackedTask
 from newsgac.users.models import User
 
 
@@ -31,13 +32,13 @@ class Article(EmbeddedMongoModel):
 
 
 class DataSource(CreatedUpdated, MongoModel):
-    user = fields.ReferenceField(User)
-    filename = fields.CharField(validators=[has_extension('txt', 'csv')])
-    display_title = fields.CharField()
-    description = fields.CharField()
-    file = fields.FileField()
+    user = fields.ReferenceField(User, required=True)
+    filename = fields.CharField(required=True, validators=[has_extension('txt', 'csv')])
+    display_title = fields.CharField(required=True)
+    description = fields.CharField(required=True)
+    file = fields.FileField(required=True)
     articles = fields.EmbeddedDocumentListField(Article)
-    task_id = fields.CharField()
+    task = fields.ReferenceField(TrackedTask)
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 

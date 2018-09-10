@@ -1,3 +1,6 @@
+import os
+import sys
+
 import pytest
 from newsgac.app import app as flask_app
 from pymodm.connection import _get_db
@@ -7,7 +10,7 @@ from pymodm.connection import _get_db
 def client():
     _client = flask_app.test_client()
 
-    def login(username='test', password='test'):
+    def login(username='test@test.com', password='testtesttest'):
         return _client.post('/users/login', data=dict(
             identifier=username,
             password=password
@@ -37,6 +40,17 @@ def setup_db(db):
     # drops whole db, and adds a user 'test'
     for collection_name in db.collection_names():
         db[collection_name].drop()
+
+
+@pytest.fixture(scope="module")
+def test_user(db):
     from newsgac.users.models import User
-    user = User(email='test', password='test')
+    user = User(email='test@test.com', password='testtesttest', name='Test', surname='User')
     user.save(full_clean=False)
+    return user
+
+
+@pytest.yield_fixture()
+def dataset_balanced_100():
+    with open(os.path.join(sys.path[0], 'test', 'mocks', 'balanced_label_date_100.txt'), 'r') as f:
+        yield f

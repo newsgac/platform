@@ -3,10 +3,10 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from newsgac.common.json_encoder import ISODateJSONEncoder
 from flask import Flask, render_template
 from newsgac import config
-from database import db
+from newsgac.database import db
+from newsgac.common.json_encoder import _JSONEncoder
 
 __author__ = 'abilgin'
 
@@ -29,7 +29,7 @@ app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
 app.register_blueprint(task_blueprint, url_prefix="/tasks")
 app.register_blueprint(ace_blueprint, url_prefix="/ace")
 
-app.json_encoder = ISODateJSONEncoder
+app.json_encoder = _JSONEncoder
 
 @app.context_processor
 def inject_bokeh_js_css():

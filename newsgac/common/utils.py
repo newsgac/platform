@@ -25,6 +25,9 @@ def check_hashed_password(password, hashed_password):
     """
     return pbkdf2_sha512.verify(password, hashed_password)
 
+def is_hashed_password(password):
+    return re.search('^\$pbdkf2-sha512.*$', password) is not None
+
 # @staticmethod
 def email_is_valid(email):
     email_address_matcher = re.compile('(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)')

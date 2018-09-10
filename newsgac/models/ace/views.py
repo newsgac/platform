@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session
 
-from newsgac.celery_tasks.tasks import run_ace
+from newsgac.tasks.tasks import run_ace
 from newsgac.common.back import back
 import newsgac.users.view_decorators as user_decorators
 from newsgac.database import DATABASE

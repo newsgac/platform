@@ -1,6 +1,6 @@
 import re
 
-from newsgac.celery_tasks.celery_app import celery_app
+from newsgac.tasks.celery_app import celery_app
 from newsgac.data_sources.models import DataSource, Article
 
 import newsgac.data_engineering.utils as DataUtils
@@ -8,7 +8,7 @@ import newsgac.data_engineering.utils as DataUtils
 from datetime import datetime
 
 
-def process_articles(data_source):
+def process_data_source(data_source):
     file = data_source.file.file.read()
     duplicate_count = 0
     other_count = 0
@@ -64,12 +64,11 @@ def process_articles(data_source):
 
     print "Found ", other_count, " other genre in documents.."
     print "Found ", duplicate_count, " duplicate(s) in documents.."
-    data_source.save(cascade=True)
 
 
 @celery_app.task(bind=True, trail=True)
 def process(self, data_source_id):
+    self.update_state(state='Bla', meta={'score': 5})
     data_source = DataSource.objects.get({'_id': data_source_id})
-    print('processing')
-    process_articles(data_source)
-    return 1
+    process_data_source(data_source)
+    data_source.save(cascade=True)

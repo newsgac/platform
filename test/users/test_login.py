@@ -1,7 +1,7 @@
-def test_login_logout(client):
+def test_login_logout(test_user, client):
     """Make sure login and logout works."""
 
-    rv = client.login('test', 'test')
+    rv = client.login()
     assert b'You were successfully logged in.' in rv.data
 
     rv = client.logout()
@@ -14,5 +14,5 @@ def test_login_wrong_username(client):
 
 
 def test_login_wrong_password(client):
-    rv = client.login('test', '123')
+    rv = client.login('test@test.com', '123')
     assert b'User not found or password incorrect' in rv.data

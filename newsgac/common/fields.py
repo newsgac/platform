@@ -1,6 +1,6 @@
 from pymodm import CharField, FileField
 
-from newsgac.common.utils import hash_password
+from newsgac.common.utils import hash_password, is_hashed_password
 
 from dill import dill
 
@@ -11,6 +11,8 @@ class PasswordField(CharField):
         return hash_password(value)
 
     def to_mongo(self, value):
+        if is_hashed_password(value):
+            return value
         return PasswordField.hash(value)
 
 

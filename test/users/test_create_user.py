@@ -11,14 +11,14 @@ def test_invalid_email():
 
 
 def test_invalid_password():
-    user = User(email='test@test.com', password='test')
+    user = User(email='testuser@test.com', password='test')
     with pytest.raises(ValidationError):
         user.save()
 
 
 def test_password_is_hashed():
     password = 'testtesttest'
-    user = User(email='test@test.com', password=password, name='Test', surname='User')
+    user = User(email='testuser@test.com', password=password, name='Test', surname='User')
     user.save()
     user.refresh_from_db()
     assert user.password != password

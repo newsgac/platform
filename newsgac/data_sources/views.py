@@ -4,7 +4,9 @@ import time
 from flask import Blueprint, render_template, request, session, url_for, flash
 from pymodm.errors import ValidationError
 from werkzeug.utils import redirect
-from newsgac.celery_tasks.tasks import process_data, del_data, grid_ds
+
+from newsgac.tasks.models import TrackedTask
+from newsgac.tasks.tasks import process_data, del_data, grid_ds
 
 import newsgac.data_sources.errors as DataSourceErrors
 from newsgac.common.back import back
@@ -16,6 +18,7 @@ from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process
 from newsgac.models.experiments.experiment import Experiment
 from newsgac.models.experiments.factory import get_experiment_by_id
+from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 from newsgac.database import DATABASE
 import pandas as pd
@@ -41,12 +44,19 @@ def create_data_source():
     if request.method == 'POST':
         try:
             form_dict = request.form.to_dict()
+
             data_source = DataSource(**form_dict)
             data_source.filename = secure_filename(request.files['file'].filename)
             data_source.file = request.files['file']
+            data_source.user = User(email=session['email'])
             data_source.save()
             flash('The file has been successfully uploaded.', 'success')
-            process(data_source._id)
+
+            eager_task_result = process.delay(data_source._id)
+            data_source.refresh_from_db()
+            data_source.task = TrackedTask(_id=eager_task_result.id)
+            data_source.save()
+
             return redirect(url_for("data_sources.user_data_sources"))
         except ValidationError as e:
             if 'filename' in e.message:

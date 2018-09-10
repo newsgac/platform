@@ -37,7 +37,7 @@ def register_user():
         form_dict = request.form.to_dict()
         try:
             user = User(**form_dict)
-            user.save(force_insert=True)
+            user.save(force_insert=True)  # force_insert throws when primary key exists (email)
             session['email'] = user.email
             flash('You were successfully registered.', 'success')
             return redirect(url_for("experiments.user_experiments"))

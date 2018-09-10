@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 
-from newsgac.celery_tasks.celery_app import celery_app
+from newsgac.tasks.celery_app import celery_app
 from newsgac.models.ace.ace import Ace
 from newsgac.models.data_sources.data_source_old import DataSource
 from newsgac.models.experiments.experiment import Experiment
