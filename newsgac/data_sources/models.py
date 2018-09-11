@@ -1,10 +1,15 @@
+import itertools
+import operator
+
 from pymodm import MongoModel, EmbeddedMongoModel, fields, files
 from pymodm.errors import DoesNotExist, ValidationError
 
 from newsgac.common.mixins import CreatedUpdated
-from newsgac.tasks.models import TrackedTask
+from newsgac.data_sources.errors import ResourceNotProcessedError, ResourceError
+from newsgac.tasks.models import TrackedTask, Status
 from newsgac.users.models import User
 
+import newsgac.data_engineering.utils as DataUtils
 
 def is_unique(field_name):
     # todo: is broken (not valid when updating)
@@ -31,6 +36,8 @@ class Article(EmbeddedMongoModel):
     label = fields.CharField()
 
 
+
+
 class DataSource(CreatedUpdated, MongoModel):
     user = fields.ReferenceField(User, required=True)
     filename = fields.CharField(required=True, validators=[has_extension('txt', 'csv')])
@@ -42,3 +49,19 @@ class DataSource(CreatedUpdated, MongoModel):
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
+    def status(self):
+        if self.task:
+            return self.task.status
+        else:
+            return 'UNKNOWN'
+
+    def count_labels(self):
+        if not self.status() == Status.SUCCESS:
+            raise ResourceNotProcessedError('DataSource has not been processed (yet)')
+        get_item = operator.attrgetter('label')
+        return {DataUtils.genre_codebook_friendly[k]: len(list(g)) for k, g in
+                       itertools.groupby(sorted(self.articles, key=get_item), get_item)}
+
+    def process(self):
+        if self.status() in [Status.SUCCESS, Status.STARTED]:
+            raise ResourceError('Resource already processed or in progress')

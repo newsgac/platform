@@ -1,3 +1,5 @@
+from pandas import DataFrame
+
 from newsgac.data_engineering.postprocessing import Result
 from bokeh.models import (
     ColumnDataSource,
@@ -254,20 +256,30 @@ class ResultVisualiser(object):
         return p, script, div
 
     @staticmethod
-    def visualize_df_stats(df, title):
-        df = df.reset_index().rename(columns={'index': 'genre'})
-        data = df.to_dict(orient='list')
-        idx = df['genre'].tolist()
+    def visualize_data_source_stats(data_source):
+        # https://bokeh.pydata.org/en/latest/docs/user_guide/categorical.html#nested-categories
+        title = data_source.display_title
+        articles = map(lambda article: {
+            'year': str(article.year),
+            'label': article.label
+        }, data_source.articles)
 
-        x = [(year, genre) for year in sorted(df.columns[1:]) for genre in idx]
-        counts = sum(zip(sum((data[year] for year in sorted(df.columns[1:])),[])), ())  # like an hstack
+        df = DataFrame(articles)
+
+        result = df.groupby(['year', 'label']).size().to_frame('size').to_dict(orient='split')
+
+        x = result['index']
+        counts = [val[0] for val in result['data']]
 
         source = ColumnDataSource(data=dict(x=x, counts=counts))
-        p = figure(x_range=FactorRange(*x), plot_height=400, plot_width=1200, title="Distribution of genres over time in "+ title,
+
+        p = figure(x_range=FactorRange(*x), plot_height=400, plot_width=1200, title="Distribution of genres over time in " + title,
                    toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
 
-        p.vbar(x='x', top='counts', width=1.0, source=source, line_color="white",
-               fill_color=factor_cmap('x', palette=Category20[10], factors=idx, start=1, end=2))
+        p.vbar(source=source, x='x', top='counts', width=1, line_color="white",
+               fill_color=factor_cmap('x', palette=Category20[10], factors=sorted(list(df.label.unique())), start=1,
+                                      end=2)
+               )
 
         p.x_range.range_padding = 0.1
         p.xgrid.grid_line_color = None

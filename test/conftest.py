@@ -27,6 +27,8 @@ def client():
 
 @pytest.fixture
 def app():
+    app_context = flask_app.test_request_context()
+    app_context.push()
     yield flask_app
 
 
@@ -37,16 +39,17 @@ def db():
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_db(db):
-    # drops whole db, and adds a user 'test'
+    # drops whole db
     for collection_name in db.collection_names():
         db[collection_name].drop()
 
 
 @pytest.fixture(scope="module")
 def test_user(db):
+    # creates a user 'test@test.com'
     from newsgac.users.models import User
     user = User(email='test@test.com', password='testtesttest', name='Test', surname='User')
-    user.save(full_clean=False)
+    user.save()
     return user
 
 

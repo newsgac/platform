@@ -10,6 +10,10 @@ class ResourceDisplayTitleAlreadyExistsError(ResourceError):
     pass
 
 
+class ResourceNotProcessedError(ResourceError):
+    pass
+
+
 # class ResourceFilenameAlreadyExistsError(ResourceError):
 #     pass
 

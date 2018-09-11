@@ -1,14 +1,17 @@
 from __future__ import absolute_import
 
+import itertools
+import operator
 import time
+
+from bson import ObjectId
 from flask import Blueprint, render_template, request, session, url_for, flash
 from pymodm.errors import ValidationError
 from werkzeug.utils import redirect
 
 from newsgac.tasks.models import TrackedTask
-from newsgac.tasks.tasks import process_data, del_data, grid_ds
+from newsgac.tasks.tasks import del_data, grid_ds
 
-import newsgac.data_sources.errors as DataSourceErrors
 from newsgac.common.back import back
 import newsgac.users.view_decorators as user_decorators
 from werkzeug.utils import secure_filename
@@ -20,7 +23,6 @@ from newsgac.models.experiments.experiment import Experiment
 from newsgac.models.experiments.factory import get_experiment_by_id
 from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
-from newsgac.database import DATABASE
 import pandas as pd
 
 __author__ = 'abilgin'
@@ -68,9 +70,19 @@ def create_data_source():
 @user_decorators.requires_login
 def get_data_source_page(data_source_id):
     # return the data source page with the type code
-    ds = DataSource.get_by_id(data_source_id)
 
-    return render_template('data_sources/data_source.html', data_source=ds)
+    data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
+    label_count=None
+    try:
+        label_count = data_source.count_labels()
+    except:
+        pass
+
+    return render_template(
+        'data_sources/data_source.html',
+        data_source=data_source,
+        label_count=label_count
+    )
 
 @data_source_blueprint.route('/article/<string:article_id>')
 @user_decorators.requires_login
@@ -115,64 +127,17 @@ def explain_features_for_experiment(article_id, article_num, genre, experiment_i
     return render_template('data_sources/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
 
 
-@data_source_blueprint.route('/process_real/<string:data_source_id>', methods=['GET'])
-@user_decorators.requires_login
-def process_data_source_unlabelled(data_source_id):
-    data_source = DataSource.get_by_id(data_source_id)
-    task = process_data.delay(data_source_id, None)
-
-    time.sleep(0.5)
-    return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
-
-@data_source_blueprint.route('/process/<string:data_source_id>', methods=['GET', 'POST'])
-@user_decorators.requires_login
-def process_data_source(data_source_id):
-
-    data_source = DataSource.get_by_id(data_source_id)
-    if request.method == 'POST':
-        if data_source.pre_processing_config and not data_source.processing_started:
-            task = process_data.delay(data_source_id, data_source.pre_processing_config)
-            time.sleep(0.5)
-            return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
-
-        try:
-            config_dict = {}
-            if 'auto_data' in request.form:
-                config_dict['auto_data'] = True
-            else:
-                for config, value in request.form.items():
-                    if value == "":
-                        config_dict[config] = True
-                    else:
-                        config_dict[config] = value
-
-            if data_source.is_preprocessing_config_unique(config_dict):
-                task = process_data.delay(data_source_id, config_dict)
-                time.sleep(0.5)
-                return redirect(url_for('.get_data_source_page', data_source_id=data_source_id))
-
-        except DataSourceErrors.ProcessingConfigAlreadyExists as e:
-            error = e.message
-            flash(error, 'error')
-            return render_template('data_sources/configure_data_source.html', request=request.form)
-
-    return render_template('data_sources/configure_data_source.html')
-
-
 @data_source_blueprint.route('/visualise/<string:data_source_id>')
 @user_decorators.requires_login
-def visualise_stats(data_source_id):
-    ds = DataSource.get_by_id(data_source_id)
+def visualise_data_source(data_source_id):
+    data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
 
-    print (ds.stats_all)
-    stats_df = pd.DataFrame(ds.stats_all, columns=ds.stats_all.keys())
-    stats_df.fillna(0, inplace=True)
-
-    script, div = ResultVisualiser.visualize_df_stats(stats_df, ds.display_title)
+    script, div = ResultVisualiser.visualize_data_source_stats(data_source)
 
     return render_template('data_sources/data_source_stats.html',
-                           data_source=ds,
-                           plot_script=script, plot_div=div,
+                           data_source=data_source,
+                           plot_script=script,
+                           plot_div=div,
                            mimetype='text/html')
 
 

@@ -37,6 +37,11 @@ def inject_bokeh_js_css():
     return dict(bokeh_js_css=CDN)
 
 
+@app.template_filter('datetime')
+def _format_datetime(date):
+    return date.strftime('%Y %M %d, %H:%m')
+
+
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time
     last_time = time.time()
