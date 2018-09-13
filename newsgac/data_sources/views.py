@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import itertools
-import operator
 import time
 
 from bson import ObjectId
@@ -23,7 +21,6 @@ from newsgac.models.experiments.experiment import Experiment
 from newsgac.models.experiments.factory import get_experiment_by_id
 from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
-import pandas as pd
 
 __author__ = 'abilgin'
 
@@ -72,10 +69,10 @@ def get_data_source_page(data_source_id):
     # return the data source page with the type code
 
     data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
-    label_count=None
+    label_count = None
     try:
         label_count = data_source.count_labels()
-    except:
+    except Exception:
         pass
 
     return render_template(
@@ -84,6 +81,7 @@ def get_data_source_page(data_source_id):
         label_count=label_count
     )
 
+#todo: check
 @data_source_blueprint.route('/article/<string:article_id>')
 @user_decorators.requires_login
 def get_article_page(article_id):
@@ -92,6 +90,7 @@ def get_article_page(article_id):
     ## TODO: bug on adding articles to processed_data
     return render_template('data_sources/article.html', article=art, descriptions=DataUtils.feature_descriptions)
 
+#todo: check
 @data_source_blueprint.route('/article/show/<string:article_id>', methods=['GET'])
 @user_decorators.requires_login
 def show_article_summary(article_id):
@@ -100,6 +99,8 @@ def show_article_summary(article_id):
 
     return render_template('data_sources/article_summary.html', article_summary=art)
 
+
+#todo: check
 @data_source_blueprint.route('/explain/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
 @user_decorators.requires_login
 def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
@@ -113,6 +114,7 @@ def explain_article_for_experiment(article_id, article_num, genre, experiment_id
 
     return render_template('data_sources/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
 
+#todo: check
 @data_source_blueprint.route('/explain_features/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>/', methods=['GET'])
 @user_decorators.requires_login
 def explain_features_for_experiment(article_id, article_num, genre, experiment_id):
@@ -140,7 +142,7 @@ def visualise_data_source(data_source_id):
                            plot_div=div,
                            mimetype='text/html')
 
-
+#todo: check
 @data_source_blueprint.route('/recommend/<string:data_source_id>')
 @user_decorators.requires_login
 def apply_grid_search(data_source_id):
@@ -156,12 +158,7 @@ def apply_grid_search(data_source_id):
     return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
                            feature_reduction=feature_reduction)
 
-@data_source_blueprint.route('/overview',  methods=['GET'])
-@user_decorators.requires_login
-@back.anchor
-def sources_overview():
-    return render_template('underconstruction.html')
-
+#todo: check
 @data_source_blueprint.route('/delete/<string:data_source_id>')
 @user_decorators.requires_login
 def delete_data_source(data_source_id):
@@ -177,6 +174,7 @@ def delete_data_source(data_source_id):
     time.sleep(0.5)
     return back.redirect()
 
+#todo: check
 @data_source_blueprint.route('/delete_all')
 @user_decorators.requires_login
 def delete_all():

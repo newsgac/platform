@@ -1,10 +1,11 @@
-from pymodm import MongoModel, fields, validators
-from pymodm.errors import DoesNotExist
+from enum import Enum
+from pymodm import MongoModel, fields
 
+from newsgac.common.fields import EnumField
 from newsgac.common.mixins import CreatedUpdated
 
 
-class Status:
+class Status(Enum):
     QUEUED = 'QUEUED'
     STARTED = 'STARTED'
     SUCCESS = 'SUCCESS'
@@ -19,7 +20,7 @@ class TrackedTask(CreatedUpdated, MongoModel):
     _id = fields.UUIDField(primary_key=True)
     name = fields.CharField(required=True)
     backend = fields.CharField(required=True, default='celery')
-    status = fields.CharField(required=True, default=Status.QUEUED)  # enum validator?
+    status = EnumField(required=True, choices=Status, default=Status.QUEUED)
     task_args = fields.ListField(default=[], blank=True)
     task_kwargs = fields.DictField(default={}, blank=True)
     children = fields.ListField(fields.ReferenceField('TrackedTask'), default=[], blank=True)

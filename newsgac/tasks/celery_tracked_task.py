@@ -17,7 +17,10 @@ class CeleryTrackedTask(Task):
             backend='celery',
             result={}
         )
-        task.save()
+        try:
+            task.save()
+        except Exception as e:
+            raise
         task_eager_result = super(CeleryTrackedTask, self).apply_async(args, kwargs, task_id=task_id, **options)
 
         # task.refresh_from_db()

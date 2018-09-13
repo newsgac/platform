@@ -7,11 +7,11 @@
     {% include 'html_dependencies.html' %}
 
     {% if js_resources is defined %}
-    {{ js_resources|indent(4)|safe }}
+        {{ js_resources|indent(4)|safe }}
     {% endif %}
 
     {% if css_resources is defined %}
-    {{ css_resources|indent(4)|safe }}
+        {{ css_resources|indent(4)|safe }}
     {% endif %}
 
     {% if plot_scripts is defined %}
@@ -55,22 +55,47 @@
                 <li><a href="{{ url_for('experiments.index') }}">Public experiments</a></li>
             </ul>
             {% if session['email'] %}
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="{{ url_for('data_sources.user_data_sources') }}"><span
-                        class="glyphicon glyphicon-hdd"></span> Your data</a></li>
-                <li><a href="{{ url_for('experiments.user_experiments') }}"><span
-                        class="glyphicon glyphicon-blackboard"></span> Your experiments</a></li>
-                <li><a href="{{ url_for('users.logout_user') }}"><span class="glyphicon glyphicon-log-out"></span> Log
-                    out</a></li>
-                <li><a id="tasks_trigger" href="#"><span class="glyphicon glyphicon-tasks"></span> <span id="tasks_button"></span></a></li>
-            </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="{{ url_for('data_sources.user_data_sources') }}">
+                            <span class="glyphicon glyphicon-hdd"></span>
+                            Your data
+                        </a>
+                    </li>
+                     <li>
+                        <a href="{{ url_for('pre_processors.user_pre_processors') }}">
+                            <span class="glyphicon glyphicon-flash"></span>
+                            Your pipelines
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('experiments.user_experiments') }}">
+                            <span class="glyphicon glyphicon-blackboard"></span>
+                            Your experiments
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('users.logout_user') }}">
+                            <span class="glyphicon glyphicon-log-out"></span>
+                            Log out
+                        </a>
+                    </li>
+                    <li>
+                        <a id="tasks_trigger" href="#">
+                            <span class="glyphicon glyphicon-tasks"></span>
+                            <span id="tasks_button"></span>
+                        </a>
+                    </li>
+                </ul>
             {% else %}
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="{{ url_for('users.register_user') }}"><span class="glyphicon glyphicon-user"></span> Sign
-                    up</a></li>
-                <li><a href="{{ url_for('users.login_user') }}"><span class="glyphicon glyphicon-log-in"></span> Log in</a>
-                </li>
-            </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{{ url_for('users.register_user') }}"><span class="glyphicon glyphicon-user"></span>
+                        Sign
+                        up</a></li>
+                    <li><a href="{{ url_for('users.login_user') }}"><span class="glyphicon glyphicon-log-in"></span> Log
+                        in</a>
+                    </li>
+                </ul>
             {% endif %}
         </div>
     </div>
@@ -78,43 +103,47 @@
 
 {% block message_content %}
 
-<div class="container" style="max-width: 60%">
-    {% with messages = get_flashed_messages(with_categories = true) or []%}
-    {% for category, message in messages %}
-    {% if category == 'error' %}
-    <div class="alert alert-danger alert-dismissible fade in">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
-        </button>
-        <strong>Error! </strong>{{message}}
+    <div class="container" style="max-width: 60%">
+        {% with messages = get_flashed_messages(with_categories = true) or [] %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Error! </strong>{{ message }}
+                    </div>
+                {% elif category == 'success' %}
+                    <div class="alert alert-success alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Success! </strong>{{ message }}
+                    </div>
+                {% elif category == 'warning' %}
+                    <div class="alert alert-warning alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Warning! </strong>{{ message }}
+                    </div>
+                {% elif category == 'info' %}
+                    <div class="alert alert-info alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Info! </strong>{{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
     </div>
-    {% elif category == 'success' %}
-    <div class="alert alert-success alert-dismissible fade in">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
-        </button>
-        <strong>Success! </strong>{{message}}
-    </div>
-    {% elif category == 'warning' %}
-    <div class="alert alert-warning alert-dismissible fade in">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
-        </button>
-        <strong>Warning! </strong>{{message}}
-    </div>
-    {% elif category == 'info' %}
-    <div class="alert alert-info alert-dismissible fade in">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
-        </button>
-        <strong>Info! </strong>{{message}}
-    </div>
-    {% endif %}
-    {% endfor %}
-    {% endwith %}
-</div>
 
-<div class="content">
-    {% block content %} {% endblock %}
-</div>
+    <div class="content">
+        {% block content %} {% endblock %}
+    </div>
 {% endblock %}
 
-    <div id="tasks_root"></div>
+<div id="tasks_root"></div>
 </body>
 </html>

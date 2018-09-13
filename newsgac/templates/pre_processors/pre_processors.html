@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if pre_processors|length == 0 %}
+        <div class="page-header">
+            <h1>Pre-processing configurations</h1>
+            <a class="btn btn-success" href="{{ url_for('pre_processors.new_pre_processor') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+        </div>
+        <p><i>There are no preprocessors to view.</i></p>
+    {% else %}
+        <div class="page-header">
+            <h1>Pre-processing configurations</h1>
+            <a class="btn btn-success" href="{{ url_for('pre_processors.new_pre_processor') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+            {% if processed_pre_processors|length > 0 %}
+                <a class="btn btn-info disabled" href="{{ url_for('pre_processors.sources_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
+            {% endif %}
+            <a class="btn btn-danger" data-toggle="confirmation" data-popout="true"
+               data-title="This action cannot be undone. Are you sure?"
+               href="{{ url_for('pre_processors.delete_all') }}"
+               data-btn-ok-label="Yes, delete" data-btn-cancel-label="No, cancel" >
+                <span class="glyphicon glyphicon-trash"></span> Delete All</a>
+        </div>
+
+        <!--<div class="container">-->
+            <div class="row">
+                <div class="col-xs-12">
+                    <table id="pre_processors_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                    <!--<caption class="text-center">DataTables</caption>-->
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Time of creation</th>
+                            <th>Stop word removal</th>
+                            <th>Lemmatization</th>
+                            <th>NLP Tool</th>
+                            <th>Scaling</th>
+                            <th>Features</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for pre_processor in pre_processors %}
+                        <tr>
+                            <td><a href="{{ url_for('pre_processors.get_pre_processor_page', pre_processor_id = pre_processor._id) }}">{{ pre_processor.display_title }}</a></td>
+                            <td>{{ pre_processor.created|datetime }}</td>
+                            <td>{{ pre_processor.sw_removal }}</td>
+                            <td>{{ pre_processor.lemmatization}}</td>
+                            <td>{{ pre_processor.nlp_tool }}</td>
+                            <td>{{ pre_processor.scaling }}</td>
+                            <td>{{ pre_processor.features | join(', ') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    </table>
+                </div>
+            </div>
+        <!--</div>-->
+
+    {% endif %}
+{% endblock %}
+

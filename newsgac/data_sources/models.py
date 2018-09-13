@@ -1,32 +1,16 @@
 import itertools
 import operator
 
-from pymodm import MongoModel, EmbeddedMongoModel, fields, files
+from pymodm import MongoModel, EmbeddedMongoModel, fields
 from pymodm.errors import DoesNotExist, ValidationError
 
 from newsgac.common.mixins import CreatedUpdated
 from newsgac.data_sources.errors import ResourceNotProcessedError, ResourceError
+from newsgac.data_sources.validators import has_extension
 from newsgac.tasks.models import TrackedTask, Status
 from newsgac.users.models import User
 
 import newsgac.data_engineering.utils as DataUtils
-
-def is_unique(field_name):
-    # todo: is broken (not valid when updating)
-    def test_unique(value):
-        try:
-            DataSource.objects.get({field_name: value})
-            raise ValidationError('%s is not unique: ' % value)
-        except DoesNotExist:
-            pass
-    return test_unique
-
-
-def has_extension(*extensions):
-    def test_extension(value):
-        if '.' not in value or value.split('.')[-1].lower() not in extensions:
-            raise ValidationError('File extension not allowed')
-    return test_extension
 
 
 class Article(EmbeddedMongoModel):
@@ -34,8 +18,6 @@ class Article(EmbeddedMongoModel):
     date = fields.DateTimeField()
     year = fields.IntegerField()
     label = fields.CharField()
-
-
 
 
 class DataSource(CreatedUpdated, MongoModel):
@@ -55,12 +37,25 @@ class DataSource(CreatedUpdated, MongoModel):
         else:
             return 'UNKNOWN'
 
+    def full_clean(self, exclude=None):
+        super(DataSource, self).full_clean(exclude)
+        if not self._id:
+            try:
+                DataSource.objects.get({'display_title': self.display_title})
+            except DoesNotExist as e:
+                return
+            raise ValidationError('Display title exists')
+
+
+
     def count_labels(self):
         if not self.status() == Status.SUCCESS:
             raise ResourceNotProcessedError('DataSource has not been processed (yet)')
         get_item = operator.attrgetter('label')
-        return {DataUtils.genre_codebook_friendly[k]: len(list(g)) for k, g in
-                       itertools.groupby(sorted(self.articles, key=get_item), get_item)}
+        return {
+            DataUtils.genre_codebook_friendly[k]: len(list(g)) for k, g in
+            itertools.groupby(sorted(self.articles, key=get_item), get_item)
+        }
 
     def process(self):
         if self.status() in [Status.SUCCESS, Status.STARTED]:

@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', contentLoadedEvent => {
                 vm1.tasks = tasks;
                 vm2.tasks = tasks;
             });
-        setTimeout(loopFetchData, 5000)
+        // setTimeout(loopFetchData, 5000)
     };
     loopFetchData();
 });

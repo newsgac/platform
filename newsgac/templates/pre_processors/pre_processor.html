@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h1>Configure Data Source Pre-processing </h1>
+    </div>
+
+    <!--You can change the '.connecting-line' width to 70% and the '.wizard .nav-tabs > li' width to 33% in the CSS.-->
+
+    <div class="row" id="vue-root">
+        <section>
+            <div class="wizard">
+                <form role="form" id="data_source_config" method="post">
+                    <div class="tab-content">
+
+                        <div class="tab-pane active" role="tabpanel" id="step1">
+                            <div class="step33">
+                                <h5><strong>Pre-process options</strong></h5>
+                                <hr>
+
+                                <div class="row mar_ned"></div>
+
+                                <div class="details_div_data">
+                                    <div class="row mar_ned">
+                                        <div class="col-md-3">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Display title</strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-8">
+                                            <input v-model="model.display_title" title="Display title" type="text" name="display_title"/>
+                                            <span class="help-block"><i>The display title of this pre-processing configuration.</i></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mar_ned">
+                                        <div class="col-md-3">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Stop-words removal</strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" checked name="sw_removal" id="sw_removal"
+                                                           v-model="model.sw_removal">
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span class="help-block"><i>The most common words that are not specific to the different classes are removed.</i></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mar_ned"></div>
+
+                                    <div class="row mar_ned">
+                                        <div class="col-md-3">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Lemmatization</strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" checked name="lemmatization"
+                                                           id="lemmatization" v-model="model.lemmatization">
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span class="help-block"><i>The process of removing inflectional endings of a word in order to return the base or dictionary form, which is known as the lemma.</i></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mar_ned"></div>
+
+                                    <div class="row mar_ned"></div>
+
+                                    <div class="row mar_ned">
+                                        <div class="col-md-4">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Natural language processing tool for feature extraction</strong>
+                                                <span class="help-block"><i>The tool to be used for processing sentences. Frog and Spacy uses manually curated features whereas TF-IDF uses raw words as features.</i></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="btn-group">
+                                                <div
+                                                        v-for="(value, key) in nlp_tools"
+                                                        @click="model.nlp_tool=key"
+                                                        :class="['btn', 'btn-default', {active: model.nlp_tool === key}]"
+                                                >
+                                                    [[ value ]]
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row mar_ned"></div>
+
+                                    <div class="row mar_ned">
+                                        <div class="col-md-3">
+                                            <p align="right" class="center-align-pad">
+                                                <strong>Scaling</strong>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" checked name="scaling" id="scaling"
+                                                           v-model="model.scaling">
+                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span class="help-block"><i>Transforms features by using statistics that are robust to outliers. (Works with numerical features extracted using Spacy or Frog.)</i></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <hr>
+                                <div :class="{collapse: model.nlp_tool !== 'frog'}">
+                                    <h5><strong>Feature selection</strong></h5>
+                                    <hr>
+                                        <div class="row mar_ned" v-for="(value, key) in features">
+                                            <div class="col-md-3">
+                                                <p align="right" class="center-align-pad">
+                                                    <strong>[[key]]</strong>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-1">
+{#                                                <div class="checkbox">#}
+{#                                                    <label>#}
+                                                        <input
+                                                                type="checkbox"
+                                                                :name="key"
+                                                                :id="key"
+                                                                v-model="model.features[key]"
+                                                                :disabled="model.nlp_tool !== 'frog'"
+                                                        >
+                                                        <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+{#                                                    </label>#}
+{#                                                </div>#}
+                                            </div>
+                                            <div class="col-md-8">
+                                                <span class="help-block"><i>[[value]]<br/></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mar_ned"></div>
+                                </div>
+                            </div>
+
+
+                            <ul class="list-inline pull-right">
+                                <li>
+                                    <button @click="save()" type="button" class="btn btn-success">Save</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', e => {
+            const saveUrl = '{{ save_url }}';
+            v = new Vue({
+                el: '#vue-root',
+                delimiters: ['[[', ']]'],
+                data: {
+                    nlp_tools: {frog: 'Frog', spacy: 'Spacy', 'tf-idf': 'TF-IDF'},
+                    model: {{ pre_processor|safe }},
+                    features: {{ features|safe }},
+                },
+                methods: {
+                    save: function() {
+                        console.log(this.$data.model);
+                        fetch(saveUrl, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8",
+                            },
+                            body: JSON.stringify(this.$data.model)
+                        });
+                    }
+                },
+                created: function() {
+                    if (this.model.features.length === 0) {
+
+                        for (let feature of Object.keys(this.features)) {
+                            this.$set(this.model.features, feature, true);
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

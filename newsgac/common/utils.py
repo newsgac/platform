@@ -1,3 +1,5 @@
+import json
+
 from passlib.hash import pbkdf2_sha512
 import re
 from dateutil import tz
@@ -53,3 +55,8 @@ def powerset(iterable):
     # s = list(iterable)  # allows duplicate elements
     s = list(set(iterable))
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+
+def model_to_json(model):
+    model_dict = model.to_son().to_dict()
+    del model_dict['_cls']
+    return json.dumps(model_dict)
