@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if learners|length == 0 %}
+        <div class="page-header">
+            <h1>Learner configurations</h1>
+            <a class="btn btn-success" href="{{ url_for('learners.new_learner') }}">
+                <span class="glyphicon glyphicon-plus "></span>
+                New
+            </a>
+        </div>
+        <p><i>There are no learners to view.</i></p>
+    {% else %}
+        <div class="page-header">
+            <h1>Learner configurations</h1>
+            <div class="dropdown" style="display: inline-block">
+                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-plus "></span>
+                    New
+                </button>
+                <div class="dropdown-menu">
+                    {% for key, value in learner_classes.iteritems() %}
+                        <li>
+                            <a class="dropdown-item"
+                               href="{{ url_for('learners.new_learner', learner_tag=key) }}">{{ value }}</a>
+                        </li>
+                    {% endfor %}
+                </div>
+            </div>
+            <a class="btn btn-danger" data-toggle="confirmation" data-popout="true"
+               data-title="This action cannot be undone. Are you sure?"
+               href="{{ url_for('learners.delete_all') }}"
+               data-btn-ok-label="Yes, delete" data-btn-cancel-label="No, cancel">
+                <span class="glyphicon glyphicon-trash"></span> Delete All
+            </a>
+        </div>
+
+        <!--<div class="container">-->
+            <div class="row">
+                <div class="col-xs-12">
+                    <table id="learners_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                    <!--<caption class="text-center">DataTables</caption>-->
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Time of creation</th>
+                            <th>Class</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for learner in learners %}
+                        <tr>
+                            <td><a href="{{ url_for('learners.get_learner_page', learner_id = learner._id) }}">{{ learner.display_title }}</a></td>
+                            <td>{{ learner.created|datetime }}</td>
+                            <td>{{ learner_classes[learner._tag] }}</td>
+                            <td>{{ learner.parameters | dict_string }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    </table>
+                </div>
+            </div>
+        <!--</div>-->
+
+    {% endif %}
+{% endblock %}
+

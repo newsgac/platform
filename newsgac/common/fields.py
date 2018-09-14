@@ -1,14 +1,13 @@
 from enum import Enum
-from pymodm import CharField, FileField
+import pymodm.fields
 from pymodm.base.fields import MongoBaseField
 from pymodm.errors import ValidationError
-
 from newsgac.common.utils import hash_password, is_hashed_password
 
 from dill import dill
 
 
-class PasswordField(CharField):
+class PasswordField(pymodm.fields.CharField):
     @staticmethod
     def hash(value):
         return hash_password(value)
@@ -19,7 +18,7 @@ class PasswordField(CharField):
         return PasswordField.hash(value)
 
 
-class ObjectField(FileField):
+class ObjectField(pymodm.fields.FileField):
     def to_mongo(self, value):
         return super(self, dill.dumps(value))
 
@@ -35,11 +34,12 @@ def enum_validator(enum):
 
 
 class EnumField(MongoBaseField):
-    def __init__(self, choices, **kwargs):
+    def __init__(self, *args, **kwargs):
+        choices = kwargs.pop('choices')
         if not issubclass(choices, Enum):
             raise TypeError('EnumField: choices is not a subclass of Enum')
         self.choices_enum = choices
-        super(EnumField, self).__init__(**kwargs)
+        super(EnumField, self).__init__(*args, **kwargs)
         self.validators.append(enum_validator(choices))
 
     def to_mongo(self, value):
@@ -48,4 +48,3 @@ class EnumField(MongoBaseField):
 
     def to_python(self, value):
         return self.choices_enum(value)
-

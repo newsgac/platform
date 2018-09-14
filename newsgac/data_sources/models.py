@@ -39,7 +39,7 @@ class DataSource(CreatedUpdated, MongoModel):
 
     def full_clean(self, exclude=None):
         super(DataSource, self).full_clean(exclude)
-        if not self._id:
+        if not self._id:  # ensure unique display_title
             try:
                 DataSource.objects.get({'display_title': self.display_title})
             except DoesNotExist as e:

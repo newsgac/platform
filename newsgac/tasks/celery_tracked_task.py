@@ -7,7 +7,7 @@ from newsgac.tasks.models import TrackedTask, Status
 
 class CeleryTrackedTask(Task):
     def apply_async(self, args=None, kwargs=None, **options):
-        task_id = options.get('task_id', str(uuid.uuid4()))
+        task_id = options.pop('task_id', str(uuid.uuid4()))
         task = TrackedTask(
             _id=task_id,
             name=self.name,

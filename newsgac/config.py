@@ -31,7 +31,7 @@ if environment in [Env.local, Env.test]:
 
 if environment == Env.test:
     mongo_database_name = 'newsgactest'
-    celery_eager = True
+    celery_eager = False
 
 
 

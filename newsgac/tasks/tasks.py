@@ -16,6 +16,15 @@ def progress(task):
     return progress_update
 
 
+@celery_app.task(bind=True, trail=True)
+def sleep(self, sleep_time):
+    from time import sleep
+    sleep(sleep_time)
+    return 10
+sleep.description='bla'
+
+
+
 @celery_app.task(bind=True)
 def run_exp(self, exp_id):
     exp = get_experiment_by_id(exp_id)

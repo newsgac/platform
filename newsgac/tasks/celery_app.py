@@ -15,7 +15,7 @@ register('myjson', _dumps, _loads, content_type='application/x-myjson', content_
 celery_app = Celery('newsgac.tasks',
                     broker=config.rabbitmq_url,
                     backend='rpc://',
-                    include=['newsgac.tasks', 'newsgac.data_sources.tasks'],
+                    include=['newsgac.tasks', 'newsgac.data_sources.tasks', 'newsgac.tasks.tasks'],
                     task_cls=CeleryTrackedTask
                     )
 

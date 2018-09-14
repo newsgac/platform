@@ -21,6 +21,7 @@ from newsgac.users.views import user_blueprint
 from newsgac.models.experiments.views import experiment_blueprint
 from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pre_processors.views import pre_processor_blueprint
+from newsgac.learners.views import learner_blueprint
 from newsgac.models.tasks.views import task_blueprint
 from newsgac.models.ace.views import ace_blueprint
 
@@ -28,6 +29,7 @@ app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(experiment_blueprint, url_prefix="/experiments")
 app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
 app.register_blueprint(pre_processor_blueprint, url_prefix="/pre_processors")
+app.register_blueprint(learner_blueprint, url_prefix="/learners")
 app.register_blueprint(task_blueprint, url_prefix="/tasks")
 app.register_blueprint(ace_blueprint, url_prefix="/ace")
 
@@ -39,10 +41,18 @@ def inject_bokeh_js_css():
     return dict(bokeh_js_css=CDN)
 
 
+@app.context_processor
+def inject_pymodm_fields():
+    from pymodm import fields
+    return dict(pymodm_fields=fields)
+
 @app.template_filter('datetime')
 def _format_datetime(date):
     return date.strftime('%d-%m-%Y %H:%m')
 
+@app.template_filter('dict_string')
+def _format_dict_string(dict_val):
+    return ', '.join("%s=%s" % (key, val) for (key, val) in dict_val.iteritems() if key != '_cls')
 
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time
