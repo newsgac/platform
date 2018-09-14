@@ -35,13 +35,11 @@ def enum_validator(enum):
 
 
 class EnumField(MongoBaseField):
-    def __init__(self, verbose_name=None, mongo_name=None, primary_key=False, blank=False, required=False, default=None,
-                 choices=None, validators=None):
+    def __init__(self, choices, **kwargs):
         if not issubclass(choices, Enum):
-            raise Exception('EnumField: Choices is not a subclass of Enum')
+            raise TypeError('EnumField: choices is not a subclass of Enum')
         self.choices_enum = choices
-        super(EnumField, self).__init__(verbose_name, mongo_name, primary_key, blank, required, default, None,
-                                        validators)
+        super(EnumField, self).__init__(**kwargs)
         self.validators.append(enum_validator(choices))
 
     def to_mongo(self, value):

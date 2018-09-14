@@ -8,7 +8,7 @@ from newsgac.data_engineering.data_io import get_feature_names_with_descriptions
 from newsgac.data_engineering.utils import features
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
-from newsgac.pre_processors.models import PreProcessor
+from newsgac.pre_processors.models import PreProcessor, NlpTool, nlp_tool_readable
 from newsgac.common.back import back
 
 __author__ = 'abilgin'
@@ -20,7 +20,6 @@ pre_processor_blueprint = Blueprint('pre_processors', __name__)
 @requires_login
 @back.anchor
 def user_pre_processors():
-    # todo: get users data sources only
     pre_processors = list(PreProcessor.objects.values())
     return render_template("pre_processors/pre_processors.html", pre_processors=pre_processors)
 
@@ -30,20 +29,12 @@ def user_pre_processors():
 @back.anchor
 def new_pre_processor():
     if request.method == 'POST':
-        try:
-            pre_processor = PreProcessor(
-                # display_title=request.form.get('display_title'),
-                # sw_removal='sw_removal' in request.form,
-                # lemmatization='lemmatization' in request.form,
-                # nlp_tool=request.form.get('nlp_tool'),
-                # scaling='scaling' in request.form,
-                user=User(email=session['email']),
-                **request.json
-            )
-        except Exception as e:
-            pass
-        # if pre_processor.nlp_tool == 'frog':
-        #     pre_processor.features = [feature for feature in features if feature in request.form]
+        pre_processor = PreProcessor(
+            user=User(email=session['email']),
+            **request.json
+        )
+        if pre_processor.nlp_tool != NlpTool.FROG:
+            pre_processor.features = {}
 
         try:
             pre_processor.save()
@@ -58,6 +49,7 @@ def new_pre_processor():
     return render_template(
         "pre_processors/pre_processor.html",
         pre_processor=model_to_json(pre_processor),
+        nlp_tools=json.dumps({tool.value: nlp_tool_readable(tool) for tool in NlpTool}),
         features=json.dumps(get_feature_names_with_descriptions()),
         save_url=url_for('pre_processors.new_pre_processor')
     )

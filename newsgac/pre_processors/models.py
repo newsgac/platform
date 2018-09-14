@@ -1,8 +1,10 @@
 import itertools
 import operator
 
+from enum import Enum
 from pymodm import MongoModel, EmbeddedMongoModel, fields
 
+from newsgac.common.fields import EnumField
 from newsgac.common.mixins import CreatedUpdated
 from newsgac.tasks.models import TrackedTask, Status
 from newsgac.users.models import User
@@ -11,23 +13,28 @@ from newsgac.data_engineering.utils import features
 import newsgac.data_engineering.utils as DataUtils
 
 
-class PreProcessor(CreatedUpdated, MongoModel):
-    # configuration options:
-    # OCR
-    # Stop word removal
-    # Lemmatization / Stemming
-    # Vectorizer (FROG / TF-IDF)
-    # scaling
-    # caching?
+class NlpTool(Enum):
+    FROG = 'frog'
+    SPACY = 'spacy'
+    TFIDF = 'tf-idf'
 
+
+def nlp_tool_readable(tool):
+    return {
+        NlpTool.FROG: 'Frog',
+        NlpTool.SPACY: 'Spacy',
+        NlpTool.TFIDF: 'TF-IDF',
+    }[NlpTool(tool)]
+
+
+class PreProcessor(CreatedUpdated, MongoModel):
     user = fields.ReferenceField(User, required=True)
     display_title = fields.CharField(required=True)
-    # description = fields.CharField(required=True)
     sw_removal = fields.BooleanField(required=True, default=True)
     lemmatization = fields.BooleanField(required=True, default=True)
-    nlp_tool = fields.CharField(required=True, default="tf-idf", choices=["frog", "spacy", "tf-idf"])
+    nlp_tool = EnumField(required=True, choices=NlpTool)
     scaling = fields.BooleanField(required=True, default=True)
-    features = fields.ListField(fields.CharField(choices=features), blank=True)
+    features = fields.DictField(default={feature: True for feature in features})
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
@@ -37,9 +44,9 @@ class PreProcessor(CreatedUpdated, MongoModel):
             display_title="",
             sw_removal=cls.sw_removal.default,
             lemmatization=cls.lemmatization.default,
-            nlp_tool=None,
+            nlp_tool=NlpTool.TFIDF,
             scaling=cls.scaling.default,
-            features=[]
+            features=cls.features.default
         )
 
 

@@ -121,7 +121,7 @@
 
                                 </div>
                                 <hr>
-                                <div :class="{collapse: model.nlp_tool !== 'frog'}">
+                                <div v-if="model.nlp_tool === 'frog'">
                                     <h5><strong>Feature selection</strong></h5>
                                     <hr>
                                         <div class="row mar_ned" v-for="(value, key) in features">
@@ -131,18 +131,17 @@
                                                 </p>
                                             </div>
                                             <div class="col-md-1">
-{#                                                <div class="checkbox">#}
-{#                                                    <label>#}
+                                                <div class="checkbox">
+                                                    <label>
                                                         <input
                                                                 type="checkbox"
                                                                 :name="key"
                                                                 :id="key"
                                                                 v-model="model.features[key]"
-                                                                :disabled="model.nlp_tool !== 'frog'"
                                                         >
                                                         <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-{#                                                    </label>#}
-{#                                                </div>#}
+                                                    </label>
+                                                </div>
                                             </div>
                                             <div class="col-md-8">
                                                 <span class="help-block"><i>[[value]]<br/></i></span>
@@ -172,13 +171,12 @@
                 el: '#vue-root',
                 delimiters: ['[[', ']]'],
                 data: {
-                    nlp_tools: {frog: 'Frog', spacy: 'Spacy', 'tf-idf': 'TF-IDF'},
+                    nlp_tools: {{ nlp_tools|safe }},
                     model: {{ pre_processor|safe }},
                     features: {{ features|safe }},
                 },
                 methods: {
                     save: function() {
-                        console.log(this.$data.model);
                         fetch(saveUrl, {
                             method: "POST",
                             headers: {
@@ -188,14 +186,6 @@
                         });
                     }
                 },
-                created: function() {
-                    if (this.model.features.length === 0) {
-
-                        for (let feature of Object.keys(this.features)) {
-                            this.$set(this.model.features, feature, true);
-                        }
-                    }
-                }
             });
         });
     </script>
