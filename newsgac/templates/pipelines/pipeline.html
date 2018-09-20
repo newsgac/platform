@@ -1,18 +1,114 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="page-header">
-        <h1>Configure Data Source Pre-processing </h1>
+        <h1>Configure Pipeline</h1>
     </div>
 
     <!--You can change the '.connecting-line' width to 70% and the '.wizard .nav-tabs > li' width to 33% in the CSS.-->
 
     <div class="row" id="vue-root">
         <section>
-            <div class="wizard">
+            <div>
                 <form role="form" id="data_source_config" method="post">
                     <div class="tab-content">
 
-                        <div class="tab-pane active" role="tabpanel" id="step1">
+
+
+
+
+
+
+
+                        <div class="row mar_ned">
+                            <div class="col-md-3">
+                                <p align="right" class="center-align-pad">
+                                    <strong>Display title</strong>
+                                </p>
+                            </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-8">
+                                <input v-model="model.display_title" title="Display title" type="text"
+                                       name="display_title"/>
+                                <span class="help-block"><i>The display title of this pre-processing configuration.</i></span>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="wizard">
+                            <div class="wizard-inner">
+                                <div class="connecting-line"></div>
+                                <ul class="nav nav-tabs" role="tablist">
+
+
+                                    <li role="presentation" class="active">
+                                        <a title="Step 1: Learners">
+                                <span class="round-tab">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </span>
+                                        </a>
+                                    </li>
+
+                                    <li role="presentation" class="">
+                                        <a title="Step 2: Pre-processing">
+                                <span class="round-tab">
+                                    <i class="glyphicon glyphicon-file"></i>
+                                </span>
+                                        </a>
+                                    </li>
+
+
+                                    <!--
+                                    <li role="presentation" class="disabled">
+                                        <a href="#complete" data-toggle="tab" aria-controls="complete" role="tab"
+                                           title="Step 3: Display Configuration and Complete">
+                                            <span class="round-tab">
+                                                <i class="glyphicon glyphicon-ok"></i>
+                                            </span>
+                                        </a>
+                                    </li>
+                                    -->
+                                </ul>
+                            </div>
+
+
+
+
+
+
+                            <div class="dropdown" style="display: inline-block">
+                                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                    <span class="glyphicon glyphicon-plus "></span>
+                                    [[ model.learner && model.learner.name || "Select..." ]]
+                                </button>
+                                <div class="dropdown-menu">
+                                        <li v-for="learner in learners">
+                                            <a
+                                                    class="dropdown-item"
+                                                    @click="model.learner = learners[learner.tag].default"
+                                            >[[ learner.name ]]</a>
+                                        </li>
+                                </div>
+                            </div>
+
+
+
+
+
+
+
+
+
+
+                            <div class="tab-pane active" role="tabpanel" id="step1">
                             <div class="step33">
                                 <h5><strong>Pre-process options</strong></h5>
                                 <hr>
@@ -20,18 +116,6 @@
                                 <div class="row mar_ned"></div>
 
                                 <div class="details_div_data">
-                                    <div class="row mar_ned">
-                                        <div class="col-md-3">
-                                            <p align="right" class="center-align-pad">
-                                                <strong>Display title</strong>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-1"></div>
-                                        <div class="col-md-8">
-                                            <input v-model="model.display_title" title="Display title" type="text" name="display_title"/>
-                                            <span class="help-block"><i>The display title of this pre-processing configuration.</i></span>
-                                        </div>
-                                    </div>
                                     <div class="row mar_ned">
                                         <div class="col-md-3">
                                             <p align="right" class="center-align-pad">
@@ -172,8 +256,12 @@
                 delimiters: ['[[', ']]'],
                 data: {
                     nlp_tools: {{ nlp_tools|safe }},
-                    model: {{ pre_processor|safe }},
+                    model: {{ pipeline|safe }},
                     features: {{ features|safe }},
+                    learners: {{ learners|safe }},
+                },
+                computed: {
+
                 },
                 methods: {
                     save: function() {

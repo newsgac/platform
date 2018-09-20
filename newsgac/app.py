@@ -20,7 +20,7 @@ def home():
 from newsgac.users.views import user_blueprint
 from newsgac.models.experiments.views import experiment_blueprint
 from newsgac.data_sources.views import data_source_blueprint
-from newsgac.pre_processors.views import pre_processor_blueprint
+from newsgac.pipelines.views import pipeline_blueprint
 from newsgac.learners.views import learner_blueprint
 from newsgac.models.tasks.views import task_blueprint
 from newsgac.models.ace.views import ace_blueprint
@@ -28,7 +28,7 @@ from newsgac.models.ace.views import ace_blueprint
 app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(experiment_blueprint, url_prefix="/experiments")
 app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
-app.register_blueprint(pre_processor_blueprint, url_prefix="/pre_processors")
+app.register_blueprint(pipeline_blueprint, url_prefix="/pipelines")
 app.register_blueprint(learner_blueprint, url_prefix="/learners")
 app.register_blueprint(task_blueprint, url_prefix="/tasks")
 app.register_blueprint(ace_blueprint, url_prefix="/ace")

@@ -1,18 +1,14 @@
-from pymodm import MongoModel, fields
+from pymodm import MongoModel, fields, EmbeddedMongoModel
 
 from newsgac.common.mixins import CreatedUpdated
 from newsgac.users.models import User
 
 
-class Learner(CreatedUpdated, MongoModel):
+class Learner(CreatedUpdated, EmbeddedMongoModel):
     class Meta:
         collection_name = 'learner'
 
-    user = fields.ReferenceField(User, required=True)
-    display_title = fields.CharField(required=True)
     _tag = fields.CharField(required=True)
-    created = fields.DateTimeField()
-    updated = fields.DateTimeField()
 
     def set_default_parameters(self):
         fields = self.__class__.parameter_fields()
@@ -30,8 +26,22 @@ class Learner(CreatedUpdated, MongoModel):
         return cls.parameters.related_model._mongometa.get_fields()
 
     @classmethod
-    def new(cls, **kwargs):
+    def parameter_dict(cls):
+        def map_field(field):
+            attrs = ['attname', 'default', 'choices', 'verbose_name', 'description']
+            field_dict = field.__dict__
+            result_field_dict = {'type': field.__class__.__name__}
+            for attr in attrs:
+                if attr in field_dict.keys():
+                    result_field_dict[attr] = field_dict[attr]
+            return result_field_dict
+
+        result = map(map_field, cls.parameters.related_model._mongometa.get_fields())
+        return result
+
+    @classmethod
+    def create(cls, **kwargs):
         model = cls(**kwargs)
         model.set_default_parameters()
-        model.display_title = ""
+        model._tag = cls.tag
         return model
