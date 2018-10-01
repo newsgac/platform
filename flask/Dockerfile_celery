@@ -8,7 +8,7 @@ RUN ["mkdir", "flask/datasets"]
 COPY requirements.txt /flask/requirements.txt
 
 RUN ["pip", "install", "-r", "flask/requirements.txt"]
-RUN ["pip", "install", "fasttext==0.8.3"]
+# RUN ["pip", "install", "fasttext==0.8.3"]
 
 # Usage: ADD [source directory or URL] [destination directory]
 # If, however, the source is a URL (e.g. http://github.com/user/file/), 
