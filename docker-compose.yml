@@ -28,6 +28,7 @@ services:
         build:
             context: ./flask
             dockerfile: Dockerfile_celery
+        image: worker
         links:
             - rabbit
             - database
@@ -50,6 +51,7 @@ services:
         build:
             context: ./flask
             dockerfile: Dockerfile_flask
+        image: web
         links:
             - worker
             - rabbit
