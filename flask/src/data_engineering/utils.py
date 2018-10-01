@@ -25,55 +25,72 @@ genres = {
     2: ['Interview'],
     3: ['Reportage/feature'],
     4: ['Verslag'],
-    5: ['Opiniestuk/Hoofdredactioneel commentaar'],
+    5: ['Opiniestuk'],
     6: ['Recensie'],
     7: ['Achtergrond/Nieuwsanalyse'],
     8: ['Column'],
-    9: ['Other']
+    9: ['Hoofdredactioneel commentaar'],
+    10: ['Service'],
+    11: ['Losse afbeelding'],
+    12: ['Overzicht'],
+    13: ['Ingezonden brief'],
+    14: ['Fictie'],
+    15: ['Essay'],
+    16: ['Mededeling krant (rectificatie)'],
+    17: ['Profiel/portret/necrologie'],
+    18: ['Moppen/spreuken/puzzels/weetjes']
+
 }
 
 genres_labels = {
     'Unlabelled': -1,
     'Nieuwsbericht': 1,
     'Interview': 2,
-    'Reportage': 3,
+    'Reportage/feature': 3,
     'Verslag': 4,
     'Opiniestuk': 5,
     'Recensie': 6,
     'Achtergrond': 7,
     'Column': 8,
-    'Other' : 9
+    'HR commentaar': 9,
+    'Service': 10,
+    'Afbeelding': 11,
+    'Overzicht': 12,
+    'Brief': 13,
+    'Fictie': 14,
+    'Essay': 15,
+    'Rectificatie': 16,
+    'Profiel': 17,
+    'Moppen': 18
 }
+
+genres_labels_inverse = {v: k for k, v in genres_labels.iteritems()}
+
 
 genre_codebook = {
     'UNL' : -1,
-    'INT' : 2,
     'NIE' : 1,
+    'INT' : 2,
     'REP' : 3,
-    'FEA' : 3,
     'VER' : 4,
     'OPI' : 5,
-    'HOO' : 5,
     'REC' : 6,
     'ACH' : 7,
     'COL' : 8,
-    'OTH' : 9
+    'HOO' : 9,
+    'SER' : 10,
+    'LOS' : 11,
+    'OVE' : 12,
+    'ING' : 13,
+    'FIC' : 14,
+    'ESS' : 15,
+    'MED' : 16,
+    'PRO' : 17,
+    'MOP' : 18
 }
 
-genre_codebook_friendly = {
-    'INT' : 'Interview',
-    'NIE' : 'Nieuwsbericht',
-    'REP' : 'Reportage',
-    'FEA' : 'Reportage',
-    'VER' : 'Verslag',
-    'OPI' : 'Opiniestuk',
-    'HOO' : 'Opiniestuk',
-    'REC' : 'Recensie',
-    'ACH' : 'Achtergrond',
-    'COL' : 'Column',
-    'UNL' : 'Unlabelled',
-    'OTH' : 'Other'
-}
+
+genre_codebook_friendly = { code: genres_labels_inverse[num] for code, num in genre_codebook.iteritems() }
 
 features = [
     'direct_quotes',
