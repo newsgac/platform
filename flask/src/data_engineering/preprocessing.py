@@ -66,7 +66,8 @@ class Preprocessor():
         article_ids = []
 
         for processed_text, feature, id in ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=progress_callback)(
-                delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents):
+                delayed(process_raw_text_for_config)(self, d['article_raw_text'], d['_id']) for d in documents
+        ):
             article_ids.append(id)
             processed_text_list.append(processed_text)
             feature_list.append(feature)

@@ -314,10 +314,21 @@ class Article(object):
         # Sentence chunk cleaned OCR with Segtok
         # sentences = [s for s in segmenter.split_single(clean_ocr) if s]
         sentences = [s for s in sent_tokenize(clean_ocr) if s]
-        sentence_count = len(sentences)
+
+        MAX_TOKENS = 48
+        new_sentences = []
+        for sentence in sentences:
+            words = sentence.split(' ')
+            while len(words) > MAX_TOKENS:
+                new_sentences.append(' '.join(words[:MAX_TOKENS]) + '.')
+                words = words[MAX_TOKENS:]
+            if len(words) > 0:
+                new_sentences.append(' '.join(words) + '.')
+
+        sentence_count = len(new_sentences)
 
         # Chunk, tokenize, tag, lemmatize with Frog
-        tokens = self.frog(sentences)
+        tokens = self.frog(new_sentences)
 
         # Word count
         token_count = len(tokens)
