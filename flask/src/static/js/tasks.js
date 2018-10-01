@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', contentLoadedEvent => {
     document.getElementById('tasks_trigger').addEventListener('click', () => vm1.$data.hidden = false);
 
     const loopFetchData = () => {
-        fetch('/tasks')
+        fetch('/tasks/')
             .then(r => r.json())
             .then(tasks => {
                 vm1.tasks = tasks;
