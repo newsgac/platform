@@ -98,7 +98,7 @@ def create_experiment_nb():
 @back.anchor
 def create_experiment_mlp():
     # get the list of processed data sources of the user for only TF-IDF representation
-    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True, tfidf=True)
+    existing_data_source_titles = DataSource.get_training_titles_by_user_email(user_email=session['email'], processed=True)
     manual_feature_dict = DataIO.get_feature_names_with_descriptions()
 
     if not existing_data_source_titles:
