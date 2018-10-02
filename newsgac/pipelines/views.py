@@ -6,13 +6,15 @@ from pymodm.errors import ValidationError
 
 from newsgac.common.utils import model_to_json, model_to_dict
 from newsgac.data_engineering.data_io import get_feature_names_with_descriptions
-from newsgac.data_engineering.utils import features
+from newsgac.data_sources.models import DataSource
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
-from newsgac.pipelines.models import NlpTool, nlp_tool_readable, Pipeline
+from newsgac.pipelines.models import Pipeline
 from newsgac.common.back import back
 
-__author__ = 'abilgin'
+
+from newsgac.nlp_tools import nlp_tools
+from newsgac.learners import learners
 
 pipeline_blueprint = Blueprint('pipelines', __name__)
 
@@ -24,6 +26,32 @@ def user_pipelines():
     pipelines = list(Pipeline.objects.values())
     return render_template("pipelines/pipelines.html", pipelines=pipelines)
 
+
+learners_dict = {
+    learner.tag: {
+        'name': learner.name,
+        'parameters': learner.parameter_dict(),
+        'default':  model_to_dict(learner.create())
+    }
+    for learner in learners
+}
+
+
+nlp_tools_dict = {
+    tool.tag: {
+        'name': tool.name,
+        'parameters': tool.parameter_dict(),
+    }
+    for tool in nlp_tools
+}
+
+def get_data_sources_dict():
+    return {
+        str(data_source.pk): {
+            'display_title': data_source.display_title,
+        }
+        for data_source in list(DataSource.objects.all())
+    }
 
 @pipeline_blueprint.route('/new', methods=['GET', 'POST'])
 @requires_login
@@ -47,22 +75,12 @@ def new_pipeline():
     else:
         pipeline = Pipeline.create()
 
-    from newsgac.learners import learners
-
-    learners_dict = {
-        learner.tag: {
-            'name': learner.name,
-            'parameters': learner.parameter_dict(),
-            'default':  model_to_dict(learner.create())
-        }
-        for learner in learners
-    }
 
     return render_template(
         "pipelines/pipeline.html",
         pipeline=model_to_json(pipeline),
-        nlp_tools=json.dumps({tool.value: nlp_tool_readable(tool) for tool in NlpTool}),
-        features=json.dumps(get_feature_names_with_descriptions()),
+        data_sources=json.dumps(get_data_sources_dict()),
+        nlp_tools=json.dumps(nlp_tools_dict),
         save_url=url_for('pipelines.new_pipeline'),
         learners=json.dumps(learners_dict)
     )

@@ -56,10 +56,29 @@ def powerset(iterable):
     s = list(set(iterable))
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
-def model_to_dict(model):
+
+def model_to_dict(model, remove_cls=True):
     model_dict = model.to_son().to_dict()
-    del model_dict['_cls']
+    if remove_cls:
+        remove_cls_from_dict(model_dict)
     return model_dict
+
+
+def remove_cls_from_dict(model_dict):
+    """
+    Remove _cls keys from dict representations of models (they are added by pymodm to_son())
+    :param model_dict: the dict representation of a model still containing _cls keys
+    """
+    if isinstance(model_dict, dict):
+        if '_cls' in model_dict:
+            del model_dict['_cls']
+        for value in model_dict.values():
+            remove_cls_from_dict(value)
+
+    if isinstance(model_dict, list):
+        for value in model_dict:
+            remove_cls_from_dict(value)
+
 
 def model_to_json(model):
     return json.dumps(model_to_dict(model))

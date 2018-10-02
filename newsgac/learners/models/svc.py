@@ -16,12 +16,12 @@ class Parameters(EmbeddedMongoModel):
             ('sigmoid', 'Sigmoid'),
         ]
     )
+    kernel.description = 'The kernel type to be used in the algorithm.'
 
     penalty_parameter_c = fields.FloatField(required=True, default=1.0)
-    random_state = fields.IntegerField(required=True, default=42)
-
-    kernel.description='The kernel type to be used in the algorithm.'
     penalty_parameter_c.description = 'Penalty parameter C of the error term.'
+
+    random_state = fields.IntegerField(required=True, default=42)
     random_state.description = 'Enter an integer for a random seed.'
 
 

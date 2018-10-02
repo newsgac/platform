@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "learners/parameter_field.html" as f with context %}
 {% block content %}
     <div class="page-header">
         <h1>Configure Pipeline</h1>
@@ -11,6 +12,18 @@
             <div>
                 <form role="form" id="data_source_config" method="post">
                     <div class="tab-content">
+
+
+
+
+                        <div class="tab-pane active">
+                            <div class="step33">
+                                <h5><strong>Ttile & Source</strong></h5>
+                                <hr>
+
+                                <div class="row mar_ned"></div>
+
+
 
 
 
@@ -40,64 +53,97 @@
 
 
 
-
-
-
-                        <div class="wizard">
-                            <div class="wizard-inner">
-                                <div class="connecting-line"></div>
-                                <ul class="nav nav-tabs" role="tablist">
-
-
-                                    <li role="presentation" class="active">
-                                        <a title="Step 1: Learners">
-                                <span class="round-tab">
-                                    <i class="glyphicon glyphicon-pencil"></i>
-                                </span>
-                                        </a>
-                                    </li>
-
-                                    <li role="presentation" class="">
-                                        <a title="Step 2: Pre-processing">
-                                <span class="round-tab">
-                                    <i class="glyphicon glyphicon-file"></i>
-                                </span>
-                                        </a>
-                                    </li>
-
-
-                                    <!--
-                                    <li role="presentation" class="disabled">
-                                        <a href="#complete" data-toggle="tab" aria-controls="complete" role="tab"
-                                           title="Step 3: Display Configuration and Complete">
-                                            <span class="round-tab">
-                                                <i class="glyphicon glyphicon-ok"></i>
-                                            </span>
-                                        </a>
-                                    </li>
-                                    -->
-                                </ul>
+                        <div class="row mar_ned">
+                            <div class="col-md-3">
+                                <p align="right" class="center-align-pad">
+                                    <strong>Data source</strong>
+                                </p>
                             </div>
-
-
-
-
-
-
-                            <div class="dropdown" style="display: inline-block">
-                                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                                    <span class="glyphicon glyphicon-plus "></span>
-                                    [[ model.learner && model.learner.name || "Select..." ]]
-                                </button>
-                                <div class="dropdown-menu">
-                                        <li v-for="learner in learners">
-                                            <a
-                                                    class="dropdown-item"
-                                                    @click="model.learner = learners[learner.tag].default"
-                                            >[[ learner.name ]]</a>
-                                        </li>
-                                </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-8">
+                                <select name="data_sources"
+                                        class="selectpicker show-tick"
+                                        data-width="85%"
+                                        data-actions-box="true"
+                                        v-model="model.data_source">
+                                    <option
+                                            v-for="data_source, data_source_key in data_sources"
+                                            :value="data_source_key"
+                                            :label="data_source.display_title">
+                                        [[ data_source.display_title ]]
+                                    </option>
+                                </select>
+                                <span class="help-block"><i>The data source for this pipeline.</i></span>
                             </div>
+                        </div>
+
+
+                            </div></div>
+
+
+
+
+
+
+
+
+{##}
+{##}
+{#                        <div class="wizard">#}
+{#                            <div class="wizard-inner">#}
+{#                                <div class="connecting-line"></div>#}
+{#                                <ul class="nav nav-tabs" role="tablist">#}
+{##}
+{##}
+{#                                    <li role="presentation" class="active">#}
+{#                                        <a title="Step 1: Learners">#}
+{#                                <span class="round-tab">#}
+{#                                    <i class="glyphicon glyphicon-pencil"></i>#}
+{#                                </span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{##}
+{#                                    <li role="presentation" class="">#}
+{#                                        <a title="Step 2: Pre-processing">#}
+{#                                <span class="round-tab">#}
+{#                                    <i class="glyphicon glyphicon-file"></i>#}
+{#                                </span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{##}
+{##}
+{#                                    <!--#}
+{#                                    <li role="presentation" class="disabled">#}
+{#                                        <a href="#complete" data-toggle="tab" aria-controls="complete" role="tab"#}
+{#                                           title="Step 3: Display Configuration and Complete">#}
+{#                                            <span class="round-tab">#}
+{#                                                <i class="glyphicon glyphicon-ok"></i>#}
+{#                                            </span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    -->#}
+{#                                </ul>#}
+{#                            </div>#}
+{##}
+
+
+
+{##}
+{##}
+{#                            <div class="dropdown" style="display: inline-block">#}
+{#                                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">#}
+{#                                    <span class="glyphicon glyphicon-plus "></span>#}
+{#                                    [[ model.learner && model.learner.name || "Select..." ]]#}
+{#                                </button>#}
+{#                                <div class="dropdown-menu">#}
+{#                                        <li v-for="learner in learners">#}
+{#                                            <a#}
+{#                                                    class="dropdown-item"#}
+{#                                                    @click="model.learner = learners[learner.tag].default"#}
+{#                                            >[[ learner.name ]]</a>#}
+{#                                        </li>#}
+{#                                </div>#}
+{#                            </div>#}
 
 
 
@@ -110,7 +156,7 @@
 
                             <div class="tab-pane active" role="tabpanel" id="step1">
                             <div class="step33">
-                                <h5><strong>Pre-process options</strong></h5>
+                                <h5><strong>Pre-processing</strong></h5>
                                 <hr>
 
                                 <div class="row mar_ned"></div>
@@ -156,82 +202,47 @@
                                             <span class="help-block"><i>The process of removing inflectional endings of a word in order to return the base or dictionary form, which is known as the lemma.</i></span>
                                         </div>
                                     </div>
-                                    <div class="row mar_ned"></div>
-
-                                    <div class="row mar_ned"></div>
-
-                                    <div class="row mar_ned">
-                                        <div class="col-md-4">
-                                            <p align="right" class="center-align-pad">
-                                                <strong>Natural language processing tool for feature extraction</strong>
-                                                <span class="help-block"><i>The tool to be used for processing sentences. Frog and Spacy uses manually curated features whereas TF-IDF uses raw words as features.</i></span>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="btn-group">
-                                                <div
-                                                        v-for="(value, key) in nlp_tools"
-                                                        @click="model.nlp_tool=key"
-                                                        :class="['btn', 'btn-default', {active: model.nlp_tool === key}]"
-                                                >
-                                                    [[ value ]]
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="row mar_ned"></div>
-
-                                    <div class="row mar_ned">
-                                        <div class="col-md-3">
-                                            <p align="right" class="center-align-pad">
-                                                <strong>Scaling</strong>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" checked name="scaling" id="scaling"
-                                                           v-model="model.scaling">
-                                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <span class="help-block"><i>Transforms features by using statistics that are robust to outliers. (Works with numerical features extracted using Spacy or Frog.)</i></span>
-                                        </div>
-                                    </div>
-
                                 </div>
-                                <hr>
-                                <div v-if="model.nlp_tool === 'frog'">
-                                    <h5><strong>Feature selection</strong></h5>
+                            </div>
+                            <div class="tab-pane active">
+                                <div class="step33">
+                                    <h5><strong>NLP tools</strong></h5>
                                     <hr>
-                                        <div class="row mar_ned" v-for="(value, key) in features">
-                                            <div class="col-md-3">
+
+                                    <div class="row mar_ned"></div>
+                                        <div class="row mar_ned"></div>
+                                        <div class="row mar_ned"></div>
+
+                                        <div class="row mar_ned">
+                                            <div class="col-md-4">
                                                 <p align="right" class="center-align-pad">
-                                                    <strong>[[key]]</strong>
+                                                    <strong>Natural language processing tool for feature extraction</strong>
+                                                    <span class="help-block"><i>The tool to be used for processing sentences. Frog and Spacy uses manually curated features whereas TF-IDF uses raw words as features.</i></span>
                                                 </p>
                                             </div>
-                                            <div class="col-md-1">
-                                                <div class="checkbox">
-                                                    <label>
-                                                        <input
-                                                                type="checkbox"
-                                                                :name="key"
-                                                                :id="key"
-                                                                v-model="model.features[key]"
-                                                        >
-                                                        <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                                                    </label>
+                                            <div class="col-md-4">
+                                                <div class="btn-group">
+                                                    <div
+                                                            v-for="(value, key) in nlp_tools"
+                                                            @click="setNlpTool(key)"
+                                                            :class="['btn', 'btn-default', {active: model.nlp_tool._tag === key}]"
+                                                    >
+                                                        [[ value.name ]]
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
-                                                <span class="help-block"><i>[[value]]<br/></i></span>
-                                            </div>
                                         </div>
+
                                         <div class="row mar_ned"></div>
+
+                                        <div v-for="param in nlpParams">
+                                            <hr>
+                                            <parameter-field
+                                                v-model="model.nlp_tool.parameters[param.attname]"
+                                                :param="param"
+                                            ></parameter-field>
+                                            <div class="row mar_ned"></div>
+                                        </div>
                                 </div>
                             </div>
 
@@ -251,30 +262,104 @@
     <script>
         document.addEventListener('DOMContentLoaded', e => {
             const saveUrl = '{{ save_url }}';
+            Vue.options.delimiters = ['[[', ']]'];
+
+            initComponents();
+
             v = new Vue({
                 el: '#vue-root',
-                delimiters: ['[[', ']]'],
                 data: {
                     nlp_tools: {{ nlp_tools|safe }},
                     model: {{ pipeline|safe }},
-                    features: {{ features|safe }},
                     learners: {{ learners|safe }},
+                    data_sources: {{ data_sources|safe }},
                 },
                 computed: {
-
+                    nlpParams: function() {
+                        return this.nlp_tools[this.model.nlp_tool._tag].parameters;
+                    }
                 },
                 methods: {
+                    setNlpTool: function(toolKey) {
+                        this.model.nlp_tool._tag = toolKey;
+                        this.model.nlp_tool.parameters = {};
+                        // set defaults for this tool:
+                        this.nlp_tools[toolKey].parameters.forEach((param) => {
+                            this.$set(this.model.nlp_tool.parameters, param.attname, param.default);
+                        });
+
+                    },
                     save: function() {
                         fetch(saveUrl, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json; charset=utf-8",
                             },
-                            body: JSON.stringify(this.$data.model)
+                            body: JSON.stringify(this.model)
                         });
                     }
                 },
             });
+
+            function initComponents() {
+                Vue.component('document-field', {
+                    props: ['param', 'value'],
+                    methods: {
+                        log: console.log
+                    },
+                    template: `
+                        <div>
+                            <h6><strong>[[ param.verbose_name || param.attname ]]</strong></h6>
+                            <span class="help-block"><i>[[param.description]]</i></span>
+                            <parameter-field v-for="field in param.model" :param="field" :value="value[field.attname]" @input="value[field.attname] = $event; $emit('input', value)"></parameter-field>
+                        </div>
+                      `
+                });
+
+
+
+                Vue.component('boolean-field', {
+                    props: ['param', 'value'],
+                    methods: {
+                        log: console.log
+                    },
+                    template: `
+                        <div class="row mar_ned">
+                            <div class="col-md-3">
+                                <p align="right" class="center-align-pad">
+                                    <strong>[[ param.verbose_name || param.attname ]]</strong>
+                                </p>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" :checked="value" @input="$emit('input', $event.target.checked)">
+                                        <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <span class="help-block"><i>[[param.description]].</i></span>
+                            </div>
+                        </div>
+                      `
+                });
+
+
+                Vue.component('parameter-field', {
+                    props: ['param', 'value'],
+                    template: `<div>
+                                    <boolean-field v-if="param.type === 'BooleanField'" @input="$emit('input', $event)" v-bind="$props"></boolean-field>
+                                    <document-field v-else-if="param.type === 'EmbeddedDocumentField'" @input="$emit('input', $event)" v-bind="$props"></document-field>
+                                    <span v-else>[[param.type]]</span>
+                                </div>`
+                });
+            }
+
+
+
+
+
         });
     </script>
 {% endblock %}

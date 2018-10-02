@@ -27,14 +27,14 @@ services:
     worker:
         hostname: celeryworker
         volumes:
-            - ./flask/src:/flask/src
+            - ./newsgac:/newsgac
         env_file:
             - .env.localdocker
         command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A celery_tasks.celery_app worker -l info --concurrency 1 -n worker1@%h" ]
 
     web:
         volumes:
-            - ./flask/src:/flask/src
+            - ./newsgac:/newsgac
         ports:
             - "5000:5000"
         env_file:

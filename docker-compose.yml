@@ -26,7 +26,7 @@ services:
 
     worker:
         build:
-            context: ./flask
+            context: ./newsgac
             dockerfile: Dockerfile_celery
         links:
             - rabbit
@@ -48,7 +48,7 @@ services:
 
     web:
         build:
-            context: ./flask
+            context: ./newsgac
             dockerfile: Dockerfile_flask
         links:
             - worker

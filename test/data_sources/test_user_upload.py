@@ -21,6 +21,7 @@ def test_new_page(client):
     assert is_valid_html(sv.data)
 
 
+@pytest.mark.timeout(10)
 def test_upload(client, dataset_balanced_100):
     sv = client.post('/data_sources/new', data=dict(
         file=(dataset_balanced_100, 'dataset.txt'),

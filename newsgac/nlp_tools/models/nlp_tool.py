@@ -1,17 +1,14 @@
 from pymodm import fields, EmbeddedMongoModel
 
-from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import ParametersMixin
 
 
-class Learner(ParametersMixin, EmbeddedMongoModel):
+class NlpTool(ParametersMixin, EmbeddedMongoModel):
     _tag = fields.CharField(required=True)
-    trainedModel = ObjectField()
 
     def save(self, **kwargs):
         self._tag = self.__class__.tag
-        super(Learner, self).save(**kwargs)
-
+        super(NlpTool, self).save(**kwargs)
 
     @classmethod
     def create(cls, **kwargs):

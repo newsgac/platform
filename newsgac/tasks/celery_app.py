@@ -19,6 +19,7 @@ celery_app = Celery('newsgac.tasks',
                     task_cls=CeleryTrackedTask
                     )
 
+celery_app.conf.broker_connection_timeout = 1
 celery_app.conf.task_always_eager = config.celery_eager
 celery_app.conf.task_ignore_result = False
 celery_app.conf.task_track_started = True
