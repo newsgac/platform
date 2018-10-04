@@ -144,3 +144,38 @@ class Frog(NlpTool):
     name = 'Frog'
     tag = 'frog'
     parameters = fields.EmbeddedDocumentField(Parameters)
+
+    def tokenize(self, article):
+        def frog(self, sentences):
+
+            '''
+            Analyze text with Frog NLP suite.
+            '''
+            # tokens = []
+            tokens_new = []
+            to_frog = sentences
+            while len(to_frog):
+                batch_size = 10 if len(to_frog) >= 10 else len(to_frog)
+                batch = ' '.join(to_frog[:batch_size]).encode('utf-8')
+
+                # data = ''
+                data_new = []
+                i = 0
+                while not data_new:
+                    # data = frog_nl.process_raw(batch)
+                    frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
+                    data_new = frogclient.process(batch)
+
+                    # data = data.decode('utf-8')
+
+                # usage with frog_nl
+                # lines = [l.split('\t') for l in data.split('\n') if l]
+                # tokens += [l for l in lines if len(l) == 10]
+                for d in data_new:
+                    if None not in d:
+                        d = ('',) + d  # tackle with the index change diff between local FROG to FROG server in docker
+                        tokens_new.append(d)
+
+                to_frog = to_frog[batch_size:]
+
+            return tokens_new

@@ -12,12 +12,18 @@ from newsgac.common.json_encoder import _dumps, _loads
 
 register('myjson', _dumps, _loads, content_type='application/x-myjson', content_encoding='utf-8')
 
-celery_app = Celery('newsgac.tasks',
-                    broker=config.rabbitmq_url,
-                    backend='rpc://',
-                    include=['newsgac.tasks', 'newsgac.data_sources.tasks', 'newsgac.tasks.tasks'],
-                    task_cls=CeleryTrackedTask
-                    )
+celery_app = Celery(
+    'newsgac.tasks',
+    broker=config.rabbitmq_url,
+    backend='rpc://',
+    include=[
+        'newsgac.tasks',
+        'newsgac.data_sources.tasks',
+        'newsgac.pipelines.tasks',
+        'newsgac.tasks.tasks',
+    ],
+    task_cls=CeleryTrackedTask
+)
 
 celery_app.conf.broker_connection_timeout = 1
 celery_app.conf.task_always_eager = config.celery_eager

@@ -10,7 +10,7 @@ from newsgac.data_sources.validators import has_extension
 from newsgac.tasks.models import TrackedTask, Status
 from newsgac.users.models import User
 
-import newsgac.data_engineering.utils as DataUtils
+import pipelines.data_engineering.utils as DataUtils
 
 
 class Article(EmbeddedMongoModel):

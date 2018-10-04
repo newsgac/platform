@@ -5,26 +5,25 @@
 stop-word removal, stemming, etc. using specified NLP methods.
 '''
 
-import newsgac.models.data_sources.constants as DataSourceConstants
-from stop_words import get_stop_words
 import re
-import numpy as np
+import os
+
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.externals.joblib import Parallel
 from sklearn.externals.joblib import delayed
-import newsgac.data_engineering.feature_extraction as FE
-import newsgac.data_engineering.utils as DataUtils
-
-import os
+import newsgac.pipelines.data_engineering.feature_extraction as FE
+import newsgac.pipelines.data_engineering.utils as DataUtils
 
 from newsgac.parallel_with_progress import ParallelWithProgress
+from newsgac import config
 
-language_filename = os.path.join(os.path.dirname(__file__), '../../dutch_stopwords_mod.txt')
+language_filename = os.path.join(config.root_path, 'dutch_stopwords_mod.txt')
 stop_words = []
 try:
     with open(language_filename, 'rb') as language_file:
-        stop_words = [line.decode('utf-8').strip()
-                      for line in language_file.readlines()]
+        stop_words = [
+            line.decode('utf-8').strip() for line in language_file.readlines()
+        ]
 except:
     raise IOError(
         '{0}" file is unreadable, check your installation.'.format(
@@ -115,6 +114,7 @@ def get_clean_ocr(ocr):
 
     return clean_ocr
 
+
 def process_raw_text_for_config(preprocessor, raw_text, id=None):
 
     # raw_text = raw_text.encode('utf-8')
@@ -140,12 +140,8 @@ def process_raw_text_for_config(preprocessor, raw_text, id=None):
     return processed_text, valid_dict, id
 
 def remove_stop_words(text):
-    # stopwords = get_stop_words('nl')
     pattern = re.compile(r'\b(' + r'|'.join(stop_words) + r')\b\s*')
     reg_text = pattern.sub('', text)
-    # print text
-    # print "After"
-    # print reg_text
 
     return reg_text
 

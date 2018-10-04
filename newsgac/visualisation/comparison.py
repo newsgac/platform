@@ -12,7 +12,7 @@ from collections import defaultdict
 from newsgac.common import utils
 from newsgac.database import DATABASE
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
-from newsgac.models.data_sources.data_source_old import DataSource
+# from newsgac.models.data_sources.data_source_old import DataSource
 
 
 __author__ = 'abilgin'

@@ -2,8 +2,8 @@ import uuid
 import newsgac.models.configurations.constants as ConfigurationConstants
 import newsgac.models.configurations.errors as ConfigurationErrors
 from newsgac.database import DATABASE
-from newsgac.models.data_sources.data_source_old import DataSource
-import newsgac.data_engineering.data_io as DataIO
+# from newsgac.models.data_sources.data_source_old import DataSource
+import pipelines.data_engineering.data_io as DataIO
 
 __author__ = 'abilgin'
 

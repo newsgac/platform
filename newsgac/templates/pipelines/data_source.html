@@ -1,0 +1,29 @@
+<div class="row mar_ned">
+    <div class="col-md-3">
+        <p align="right" class="center-align-pad">
+            <strong>Data source</strong>
+        </p>
+    </div>
+    <div class="col-md-1"></div>
+    <div class="col-md-8">
+        <select name="data_sources"
+                class="selectpicker show-tick"
+                data-width="85%"
+                data-actions-box="true"
+                v-model="model.data_source">
+            <option
+                    disabled
+                    :value="null"
+                    label="Select...">
+                Select...
+            </option>
+            <option
+                    v-for="data_source, data_source_key in data_sources"
+                    :value="data_source_key"
+                    :label="data_source.display_title">
+                [[ data_source.display_title ]]
+            </option>
+        </select>
+        <span class="help-block"><i>The data source for this pipeline.</i></span>
+    </div>
+</div>

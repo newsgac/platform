@@ -5,7 +5,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from flask import Flask, render_template
 from newsgac import config
-from newsgac.database import db
 from newsgac.common.json_encoder import _JSONEncoder
 
 __author__ = 'abilgin'
@@ -22,7 +21,7 @@ from newsgac.models.experiments.views import experiment_blueprint
 from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
 from newsgac.learners.views import learner_blueprint
-from newsgac.models.tasks.views import task_blueprint
+from tasks.views import task_blueprint
 from newsgac.models.ace.views import ace_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix="/users")
@@ -48,7 +47,7 @@ def inject_pymodm_fields():
 
 @app.template_filter('datetime')
 def _format_datetime(date):
-    return date.strftime('%d-%m-%Y %H:%m')
+    return date.strftime('%d-%m-%Y %H:%M')
 
 @app.template_filter('dict_string')
 def _format_dict_string(dict_val):

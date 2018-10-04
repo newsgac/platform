@@ -12,10 +12,7 @@ class _JSONEncoder(JSONEncoder):
             if isinstance(obj, date):
                 return obj.isoformat()
             if isinstance(obj, ObjectId):
-                return {
-                    '__type__': '__objectid__',
-                    'id': str(obj)
-                }
+                return str(obj)
             iterable = iter(obj)
         except TypeError:
             pass
@@ -31,8 +28,8 @@ def _decoder(obj):
 
 
 # Encoder function
-def _dumps(obj):
-    return json.dumps(obj, cls=_JSONEncoder)
+def _dumps(obj, cls=_JSONEncoder, **kwargs):
+    return json.dumps(obj, cls=cls, **kwargs)
 
 
 # Decoder function

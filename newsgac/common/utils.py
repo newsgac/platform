@@ -5,6 +5,8 @@ import re
 from dateutil import tz
 from itertools import chain, combinations
 
+from common.json_encoder import _dumps
+
 __author__ = 'abilgin'
 
 # @staticmethod
@@ -80,5 +82,5 @@ def remove_cls_from_dict(model_dict):
             remove_cls_from_dict(value)
 
 
-def model_to_json(model):
-    return json.dumps(model_to_dict(model))
+def model_to_json(model, **kwargs):
+    return _dumps(model_to_dict(model), **kwargs)

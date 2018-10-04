@@ -3,7 +3,7 @@ import uuid
 
 import pymongo
 
-from newsgac.models.data_sources.data_source_old import DataSource
+# from newsgac.models.data_sources.data_source_old import DataSource
 from newsgac.models.experiments.factory import get_experiment_by_id
 from newsgac.visualisation.comparison import ExperimentComparator
 from . import constants

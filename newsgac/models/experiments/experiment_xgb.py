@@ -6,7 +6,7 @@ import pandas as pd
 from newsgac.database import DATABASE
 from newsgac.machine_learning.clf import CLF
 from newsgac.models.configurations.configuration_xgb import ConfigurationXGB
-from newsgac.models.data_sources.data_source_old import DataSource
+# from newsgac.models.data_sources.data_source_old import DataSource
 from newsgac.models.experiments import constants as ExperimentConstants
 from newsgac.models.experiments.experiment import Experiment
 

@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 
 from newsgac.data_sources.models import Article
-import newsgac.data_engineering.utils as DataUtils
+import pipelines.data_engineering.utils as DataUtils
 
 
 def process_data_source(data_source):

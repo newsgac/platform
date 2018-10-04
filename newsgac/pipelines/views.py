@@ -1,30 +1,24 @@
 from __future__ import absolute_import
 
-from flask import Blueprint, render_template, request, session, flash, json, url_for
+from bson import ObjectId
+from flask import Blueprint, render_template, request, session, json, url_for, Response
 
 from pymodm.errors import ValidationError
 
+from newsgac.common.json_encoder import _dumps
+from newsgac.common.back import back
+
+from newsgac.pipelines.models import Pipeline
+from newsgac.pipelines.tasks import run_pipeline_task
+
 from newsgac.common.utils import model_to_json, model_to_dict
-from newsgac.data_engineering.data_io import get_feature_names_with_descriptions
 from newsgac.data_sources.models import DataSource
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
-from newsgac.pipelines.models import Pipeline
-from newsgac.common.back import back
-
-
+from newsgac.learners.factory import learners, create_learner
 from newsgac.nlp_tools import nlp_tools
-from newsgac.learners import learners
-
+from newsgac.nlp_tools.factory import create_nlp_tool
 pipeline_blueprint = Blueprint('pipelines', __name__)
-
-
-@pipeline_blueprint.route('/')
-@requires_login
-@back.anchor
-def user_pipelines():
-    pipelines = list(Pipeline.objects.values())
-    return render_template("pipelines/pipelines.html", pipelines=pipelines)
 
 
 learners_dict = {
@@ -53,107 +47,130 @@ def get_data_sources_dict():
         for data_source in list(DataSource.objects.all())
     }
 
-@pipeline_blueprint.route('/new', methods=['GET', 'POST'])
+
+@pipeline_blueprint.route('/')
 @requires_login
 @back.anchor
-def new_pipeline():
-    if request.method == 'POST':
-        pipeline = Pipeline(
-            user=User(email=session['email']),
-            **request.json
-        )
-        if pipeline.nlp_tool != NlpTool.FROG:
-            pipeline.features = {}
+def user_pipelines():
+    pipelines = [
+        {
+            'id': str(pipeline._id),
+            'created': pipeline.created,
+            'display_title': pipeline.display_title,
+            'nlp_tool': {
+                'name': pipeline.nlp_tool.__class__.name,
+            },
+            'learner': {
+                'name': pipeline.learner.__class__.name,
+            },
+            'data_source': {
+                'display_title': pipeline.data_source.display_title
+            },
+            'json': model_to_json(pipeline, indent=4)
 
-        try:
-            pipeline.save()
-            flash('The configuration has been saved.', 'success')
+        } for pipeline in list(Pipeline.objects.all())
+    ]
 
-        except ValidationError as e:
-            flash(str(e), 'error')
+    return render_template(
+        "pipelines/pipelines.html",
+        pipelines=pipelines,
+        nlp_tools=nlp_tools_dict,
+        learners=learners_dict
+    )
 
+
+@pipeline_blueprint.route('/new/', methods=['GET'])
+@pipeline_blueprint.route('/new/<from_pipeline_id>', methods=['GET'])
+@requires_login
+@back.anchor
+def new_pipeline(from_pipeline_id=None):
+    if from_pipeline_id is not None:
+        pipeline = Pipeline.objects.get({'_id': ObjectId(from_pipeline_id)})
+        pipeline.display_title = pipeline.display_title + ' (copy)'
+        pipeline._id = None
+        pipeline.user = None
     else:
         pipeline = Pipeline.create()
 
+    pipeline = model_to_dict(pipeline)
+
+    pipeline.pop('_id', None)
+    pipeline.pop('user', None)
+    pipeline.pop('created', None)
+    pipeline.pop('updated', None)
+    pipeline.pop('task', None)
 
     return render_template(
         "pipelines/pipeline.html",
-        pipeline=model_to_json(pipeline),
+        pipeline=_dumps(pipeline),
         data_sources=json.dumps(get_data_sources_dict()),
         nlp_tools=json.dumps(nlp_tools_dict),
-        save_url=url_for('pipelines.new_pipeline'),
+        save_url=url_for('pipelines.new_pipeline_save'),
+        pipelines_url=url_for('pipelines.user_pipelines'),
         learners=json.dumps(learners_dict)
     )
 
 
-#
-# @pipeline_blueprint.route('/new', methods=['GET', 'POST'])
-# @user_decorators.requires_login
-# @back.anchor
-# def create_pipeline():
-#     if request.method == 'POST':
-#         try:
-#             form_dict = request.form.to_dict()
-#
-#             pipeline = DataSource(**form_dict)
-#             pipeline.filename = secure_filename(request.files['file'].filename)
-#             pipeline.file = request.files['file']
-#             pipeline.user = User(email=session['email'])
-#             pipeline.save()
-#             flash('The file has been successfully uploaded.', 'success')
-#
-#             eager_task_result = process.delay(pipeline._id)
-#             pipeline.refresh_from_db()
-#             pipeline.task = TrackedTask(_id=eager_task_result.id)
-#             pipeline.save()
-#
-#             return redirect(url_for("pipelines.user_pipelines"))
-#         except ValidationError as e:
-#             if 'filename' in e.message:
-#                 flash('The file type is not supported! Try again using the allowed file formats.', 'error')
-#
-#     return render_template('pipelines/new_pipeline.html', form=request.form)
-#
-@pipeline_blueprint.route('/<string:pipeline_id>')
+@pipeline_blueprint.route('/new', methods=['POST'])
 @requires_login
-def get_pipeline_page(pipeline_id):
-    return render_template(
-        "pipelines/pipeline.html",
-        features=get_feature_names_with_descriptions()
+def new_pipeline_save():
+    pipeline = Pipeline(
+        user=User(email=session['email']),
+        **request.json
     )
-    # return the data source page with the type code
-    pass
-    # pipeline = DataSource.objects.get({'_id': ObjectId(pipeline_id)})
-    # label_count = None
-    # try:
-    #     label_count = pipeline.count_labels()
-    # except Exception:
-    #     pass
-    #
-    # return render_template(
-    #     'pipelines/pipeline.html',
-    #     pipeline=pipeline,
-    #     label_count=label_count
-    # )
+
+    pipeline.nlp_tool = create_nlp_tool(request.json['nlp_tool']['_tag'], False, **request.json['nlp_tool'])
+    pipeline.learner = create_learner(request.json['learner']['_tag'], False, **request.json['learner'])
+
+    try:
+        pipeline.save()
+        task = run_pipeline_task.delay(str(pipeline._id))
+        pipeline.task = task.task
+        pipeline.save()
+        return Response(
+            model_to_json(pipeline),
+            status=201,
+            headers={
+                'content-type': 'application/json'
+            }
+        )
+
+    except ValidationError as e:
+        return Response(
+            json.dumps({'error': e.message}),
+            status=400,
+            headers={
+                'content-type': 'application/json',
+            }
+        )
+
+    except Exception as e:
+        return Response(
+            json.dumps({'error': {'serverError': [e.message]}}),
+            status=500,
+            headers={
+                'content-type': 'application/json',
+            }
+        )
 
 
-#
-# @pipeline_blueprint.route('/article/<string:article_id>')
-# @user_decorators.requires_login
-# def get_article_page(article_id):
-#     # display the processed data source instance which is an article
-#     art = DataSource.get_processed_article_by_id(article_id)
-#     ## TODO: bug on adding articles to processed_data
-#     return render_template('pipelines/article.html', article=art, descriptions=DataUtils.feature_descriptions)
-#
-# @pipeline_blueprint.route('/article/show/<string:article_id>', methods=['GET'])
-# @user_decorators.requires_login
-# def show_article_summary(article_id):
-#     # display the processed data source instance which is an article
-#     art = DataSource.get_processed_article_by_id(article_id)
-#
-#     return render_template('pipelines/article_summary.html', article_summary=art)
-#
+@pipeline_blueprint.route('/<string:pipeline_id>/delete')
+@requires_login
+def delete_pipeline(pipeline_id):
+    pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
+    pipeline.delete()
+
+    return back.redirect()
+
+
+@pipeline_blueprint.route('/delete_all')
+@requires_login
+def delete_all():
+    for pipeline in list(Pipeline.objects.all()):
+        pipeline.delete()
+
+    return back.redirect()
+
 # @pipeline_blueprint.route('/explain/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
 # @user_decorators.requires_login
 # def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
@@ -210,41 +227,5 @@ def get_pipeline_page(pipeline_id):
 #     return render_template('pipelines/recommendation.html', pipeline = ds, report_per_score = report_per_score,
 #                            feature_reduction=feature_reduction)
 #
-# @pipeline_blueprint.route('/overview',  methods=['GET'])
-# @user_decorators.requires_login
-# @back.anchor
-# def sources_overview():
-#     return render_template('underconstruction.html')
-#
-# @pipeline_blueprint.route('/delete/<string:pipeline_id>')
-# @user_decorators.requires_login
-# def delete_pipeline(pipeline_id):
-#
-#     existing_experiments = Experiment.get_any_user_experiments_using_data_id(user_email=session['email'], ds_id=pipeline_id)
-#     ds = DataSource.get_by_id(pipeline_id)
-#     if len(existing_experiments) > 0:
-#         error = "There are existing experiments using this data source ("+ str(ds.display_title)+ "). Please delete the experiments connected with this data source first!"
-#         flash(error, 'error')
-#         return redirect((url_for('experiments.user_experiments')))
-#
-#     task = del_data.delay(pipeline_id)
-#     time.sleep(0.5)
-#     return back.redirect()
-#
 
-@pipeline_blueprint.route('/delete_all')
-@requires_login
-def delete_all():
-    pass
-    # existing_experiments = Experiment.get_by_user_email(session['email'])
-    # if len(existing_experiments) > 0:
-    #     error = "There are existing experiments using the data sources. Please delete all the experiments first!"
-    #     flash(error, 'error')
-    #     return redirect((url_for('experiments.user_experiments')))
-    # pipelines = DataSource.get_by_user_email(user_email=session['email'])
-    #
-    # for ds in pipelines:
-    #     task = del_data.delay(ds._id)
-    #
-    # time.sleep(0.5)
-    # return back.redirect()
+

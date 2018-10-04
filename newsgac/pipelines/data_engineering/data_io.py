@@ -2,7 +2,7 @@
 import csv
 import os
 import numpy as np
-from newsgac.data_engineering import utils
+from pipelines.data_engineering import utils
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '../../datasets/')
 

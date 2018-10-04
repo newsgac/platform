@@ -3,15 +3,14 @@ from __future__ import division
 import numpy as np
 from newsgac.database import DATABASE
 from sklearn.metrics import confusion_matrix
-import newsgac.data_engineering.utils as DataUtils
-from newsgac.models.data_sources.data_source_old import DataSource
-import newsgac.models.data_sources.constants as DataSourceConstants
+import pipelines.data_engineering.utils as DataUtils
+# from newsgac.models.data_sources.data_source_old import DataSource
+# import newsgac.models.data_sources.constants as DataSourceConstants
 from sklearn import metrics
 from lime.lime_text import LimeTextExplainer
 from lime.lime_tabular import LimeTabularExplainer
 from sklearn.pipeline import make_pipeline
-import newsgac.data_engineering.feature_extraction as FE
-from newsgac.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, remove_stop_words, apply_lemmatization
+from pipelines.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, remove_stop_words, apply_lemmatization
 
 # np.random.seed(42)
 

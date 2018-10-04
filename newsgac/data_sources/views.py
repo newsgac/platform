@@ -1,23 +1,20 @@
 from __future__ import absolute_import
 
-import time
-
 from bson import ObjectId
 from flask import Blueprint, render_template, request, session, url_for, flash
 from pymodm.errors import ValidationError
 from werkzeug.utils import redirect
 
 from newsgac.tasks.models import TrackedTask
-from newsgac.tasks.tasks import del_data, grid_ds
+# from newsgac.tasks.tasks import del_data, grid_ds
 
 from newsgac.common.back import back
 import newsgac.users.view_decorators as user_decorators
 from werkzeug.utils import secure_filename
-import newsgac.data_engineering.utils as DataUtils
-from newsgac.data_engineering.postprocessing import Explanation
+import pipelines.data_engineering.utils as DataUtils
+from newsgac.pipelines.data_engineering.postprocessing import Explanation
 from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process
-from newsgac.models.experiments.experiment import Experiment
 from newsgac.models.experiments.factory import get_experiment_by_id
 from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
@@ -142,51 +139,51 @@ def visualise_data_source(data_source_id):
                            plot_div=div,
                            mimetype='text/html')
 
-#todo: check
-@data_source_blueprint.route('/recommend/<string:data_source_id>')
-@user_decorators.requires_login
-def apply_grid_search(data_source_id):
-    ds = DataSource.get_by_id(data_source_id)
+# #todo: check
+# @data_source_blueprint.route('/recommend/<string:data_source_id>')
+# @user_decorators.requires_login
+# def apply_grid_search(data_source_id):
+#     ds = DataSource.get_by_id(data_source_id)
+#
+#     task = grid_ds.delay(data_source_id)
+#     task.wait()
+#
+#     if len(task.result) > 1:
+#         report_per_score = task.result[0][0]
+#         feature_reduction = task.result[0][1]
+#
+#     return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
+#                            feature_reduction=feature_reduction)
 
-    task = grid_ds.delay(data_source_id)
-    task.wait()
-
-    if len(task.result) > 1:
-        report_per_score = task.result[0][0]
-        feature_reduction = task.result[0][1]
-
-    return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
-                           feature_reduction=feature_reduction)
-
-#todo: check
-@data_source_blueprint.route('/delete/<string:data_source_id>')
-@user_decorators.requires_login
-def delete_data_source(data_source_id):
-
-    existing_experiments = Experiment.get_any_user_experiments_using_data_id(user_email=session['email'], ds_id=data_source_id)
-    ds = DataSource.get_by_id(data_source_id)
-    if len(existing_experiments) > 0:
-        error = "There are existing experiments using this data source ("+ str(ds.display_title)+ "). Please delete the experiments connected with this data source first!"
-        flash(error, 'error')
-        return redirect((url_for('experiments.user_experiments')))
-
-    task = del_data.delay(data_source_id)
-    time.sleep(0.5)
-    return back.redirect()
-
-#todo: check
-@data_source_blueprint.route('/delete_all')
-@user_decorators.requires_login
-def delete_all():
-    existing_experiments = Experiment.get_by_user_email(session['email'])
-    if len(existing_experiments) > 0:
-        error = "There are existing experiments using the data sources. Please delete all the experiments first!"
-        flash(error, 'error')
-        return redirect((url_for('experiments.user_experiments')))
-    data_sources = DataSource.get_by_user_email(user_email=session['email'])
-
-    for ds in data_sources:
-        task = del_data.delay(ds._id)
-
-    time.sleep(0.5)
-    return back.redirect()
+# #todo: check
+# @data_source_blueprint.route('/delete/<string:data_source_id>')
+# @user_decorators.requires_login
+# def delete_data_source(data_source_id):
+#
+#     existing_experiments = Experiment.get_any_user_experiments_using_data_id(user_email=session['email'], ds_id=data_source_id)
+#     ds = DataSource.get_by_id(data_source_id)
+#     if len(existing_experiments) > 0:
+#         error = "There are existing experiments using this data source ("+ str(ds.display_title)+ "). Please delete the experiments connected with this data source first!"
+#         flash(error, 'error')
+#         return redirect((url_for('experiments.user_experiments')))
+#
+#     task = del_data.delay(data_source_id)
+#     time.sleep(0.5)
+#     return back.redirect()
+#
+# #todo: check
+# @data_source_blueprint.route('/delete_all')
+# @user_decorators.requires_login
+# def delete_all():
+#     existing_experiments = Experiment.get_by_user_email(session['email'])
+#     if len(existing_experiments) > 0:
+#         error = "There are existing experiments using the data sources. Please delete all the experiments first!"
+#         flash(error, 'error')
+#         return redirect((url_for('experiments.user_experiments')))
+#     data_sources = DataSource.get_by_user_email(user_email=session['email'])
+#
+#     for ds in data_sources:
+#         task = del_data.delay(ds._id)
+#
+#     time.sleep(0.5)
+#     return back.redirect()

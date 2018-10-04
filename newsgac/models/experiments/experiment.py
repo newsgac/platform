@@ -4,14 +4,14 @@ from collections import OrderedDict
 
 from sklearn.preprocessing import RobustScaler
 
-from newsgac.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
+from pipelines.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, \
     remove_stop_words, apply_lemmatization
 from newsgac.machine_learning.clf import CLF
 from newsgac.database import DATABASE
 import newsgac.models.experiments.constants as ExperimentConstants
-import newsgac.models.data_sources.constants as DataSourceConstants
+# import newsgac.models.data_sources.constants as DataSourceConstants
 from newsgac.common import utils
-import newsgac.data_engineering.utils as DataUtilities
+import pipelines.data_engineering.utils as DataUtilities
 
 from newsgac.models.users.user_old import User
 import numpy as np

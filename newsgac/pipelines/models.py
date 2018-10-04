@@ -7,6 +7,7 @@ from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.users.models import User
+from newsgac.tasks.models import TrackedTask
 
 
 class Pipeline(CreatedUpdated, MongoModel):
@@ -20,6 +21,7 @@ class Pipeline(CreatedUpdated, MongoModel):
     lemmatization = fields.BooleanField(required=True, default=True)
     nlp_tool = fields.EmbeddedDocumentField(NlpTool, blank=True, required=True, default=TFIDF.create())
     learner = fields.EmbeddedDocumentField(Learner)
+    task = fields.ReferenceField(TrackedTask)
 
     @classmethod
     def create(cls):

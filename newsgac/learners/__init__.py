@@ -1,5 +1,5 @@
-from models.nb import LearnerNB
-from models.svc import LearnerSVC
+from newsgac.learners.models.nb import LearnerNB
+from newsgac.learners.models.svc import LearnerSVC
 
 learners = [
     LearnerNB,

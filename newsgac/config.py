@@ -1,4 +1,4 @@
-from os import environ
+from os import environ, path
 
 
 class Env:
@@ -7,6 +7,8 @@ class Env:
     test = 'test'
     production = 'production'
 
+
+root_path = path.dirname(path.abspath(__file__))
 
 environment = environ['ENVIRONMENT']
 secret_key = environ['FLASK_SECRET_KEY']
@@ -24,7 +26,7 @@ rabbitmq_url = 'amqp://%s:%s@rabbit//' % (environ['RABBITMQ_DEFAULT_USER'], envi
 
 if environment in [Env.local, Env.test]:
     flask_port = 5050
-    celery_eager = True
+    celery_eager = False
     mongo_host = 'localhost'
     frog_hostname = 'localhost'
     rabbitmq_url = 'amqp://%s:%s@localhost//' % (environ['RABBITMQ_DEFAULT_USER'], environ['RABBITMQ_DEFAULT_PASS'])

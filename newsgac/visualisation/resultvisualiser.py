@@ -1,6 +1,6 @@
 from pandas import DataFrame
 
-from newsgac.data_engineering.postprocessing import Result
+from pipelines.data_engineering.postprocessing import Result
 from bokeh.models import (
     ColumnDataSource,
     LabelSet,
@@ -14,9 +14,8 @@ from bokeh.plotting import figure
 from bokeh.layouts import gridplot
 import colorcet
 import numpy as np
-import newsgac.data_engineering.data_io as DataIO
-import newsgac.data_engineering.utils as DataUtils
-from bokeh.transform import dodge, factor_cmap
+import pipelines.data_engineering.utils as DataUtils
+from bokeh.transform import factor_cmap
 from bokeh.palettes import Category20
 
 

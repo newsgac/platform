@@ -1,8 +1,10 @@
-from . import nlp_tools
+from newsgac.nlp_tools.models.frog import Frog
+from newsgac.nlp_tools.models.tfidf import TFIDF
 
+tools = [Frog, TFIDF]
 
 def create_nlp_tool(tag, with_defaults=True, **kwargs):
-    for tool in nlp_tools:
+    for tool in tools:
         if tool.tag == tag:
             if with_defaults:
                 return tool.create(**kwargs)

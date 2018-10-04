@@ -27,5 +27,5 @@ class CeleryTrackedTask(Task):
         # task.children = task_eager_result.children or []
         # task.parent = task_eager_result.parent
         # task.save()
-
+        task_eager_result.task = task
         return task_eager_result

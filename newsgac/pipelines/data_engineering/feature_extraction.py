@@ -25,16 +25,11 @@ from __future__ import unicode_literals
 import re
 import time
 import urllib
-import numpy as np
-from sklearn.externals.joblib import Parallel
-from sklearn.externals.joblib import delayed
-from scipy import sparse
-import newsgac.data_engineering.utils as Utilities
+import pipelines.data_engineering.utils as Utilities
 from collections import OrderedDict
 from lxml import etree
 # from segtok import segmenter
 from nltk.tokenize import sent_tokenize
-from sklearn.base import BaseEstimator, TransformerMixin
 import spacy
 from newsgac import config
 from pynlpl.clients.frogclient import FrogClient
@@ -44,54 +39,7 @@ from pynlpl.clients.frogclient import FrogClient
 # frog_nl = frog.Frog(frog.FrogOptions(parser=False))
 
 
-class ArticleTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, url=None, text=None, preprocessor=None):
-        self.art = Article(text=text)
-        self.preprocessor = preprocessor
 
-    def fit(self, X, y):
-        return None
-
-    def transform(self, X):
-        self.X = X
-        # count = 0
-        # results = []
-        # for x in X:
-        #     print count
-        #     new_art = Article(text=x)
-        #     new_art.get_features_spacy()
-        #     print new_art.features.values()
-        #     res = np.reshape(new_art.features.values(), (1, len(new_art.features.values())))
-        #     print "Result reshaped ", res
-        #     results.append(res)
-        #     count += 1
-        # print "Article Transformer : ", results
-        # return np.array(results)
-
-        Xs = Parallel(n_jobs=50)(
-            delayed(_transform_one)(x, self.preprocessor) for x in self.X if len(x)>10)
-        if not Xs:
-            # All transformers are None
-            return np.zeros((X.shape[0], 0))
-        if any(sparse.issparse(f) for f in Xs):
-            # Xs = sparse.hstack(Xs).tocsr()
-            Xs = sparse.vstack(Xs).tocsr()
-        else:
-            # Xs = np.hstack(Xs)
-            Xs = np.vstack(Xs)
-        return Xs
-
-def _transform_one(x, preprocessor):
-    from newsgac.data_engineering.preprocessing import process_raw_text_for_config
-    processed_text, features, id = process_raw_text_for_config(preprocessor, x)
-    # new_art = Article(text=x)
-    # new_art.get_features_spacy()
-    sorted_keys = sorted(features.keys())
-    import newsgac.models.data_sources.constants as DataSourceConstants
-    ordered_feature_values = [features[f] for f in sorted_keys if
-                              f not in DataSourceConstants.NON_FEATURE_COLUMNS]
-    res = np.reshape(ordered_feature_values, (1, len(ordered_feature_values)))
-    return res
 
 
 class Article(object):

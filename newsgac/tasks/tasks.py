@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 from newsgac.tasks.celery_app import celery_app
 from newsgac.models.ace.ace import Ace
-from newsgac.models.data_sources.data_source_old import DataSource
+# from newsgac.models.data_sources.data_source_old import DataSource
 from newsgac.models.experiments.experiment import Experiment
 from newsgac.models.experiments.factory import get_experiment_by_id
 from newsgac.visualisation.comparison import ExperimentComparator
@@ -36,52 +36,52 @@ def del_exp(self, exp_id):
     exp = get_experiment_by_id(exp_id)
     exp.delete()
 
-@celery_app.task(bind=True)
-def process_data(self, data_source_id, config):
-    DataSource.get_by_id(data_source_id).process_data_source(config, progress(self))
-    self.update_state(state='PROCESSING', meta={'data_source_id': data_source_id})
+# @celery_app.task(bind=True)
+# def process_data(self, data_source_id, config):
+#     DataSource.get_by_id(data_source_id).process_data_source(config, progress(self))
+#     self.update_state(state='PROCESSING', meta={'data_source_id': data_source_id})
 
 
-@celery_app.task(bind=True)
-def del_data(self, data_source_id):
-    DataSource.get_by_id(data_source_id).delete()
+# @celery_app.task(bind=True)
+# def del_data(self, data_source_id):
+#     DataSource.get_by_id(data_source_id).delete()
 
 
-@celery_app.task(bind=True, trail=True)
-def grid_ds(self, data_source_id):
-    self.update_state(state='OPTIMIZING')
-    return DataSource.get_by_id(data_source_id).apply_grid_search()
+# @celery_app.task(bind=True, trail=True)
+# def grid_ds(self, data_source_id):
+#     self.update_state(state='OPTIMIZING')
+#     return DataSource.get_by_id(data_source_id).apply_grid_search()
 
-@celery_app.task(bind=True, trail=True)
-def predict_exp(self, exp_id, raw_text):
-    exp = get_experiment_by_id(exp_id)
-    data_source = DataSource.get_by_id(exp.data_source_id)
-    self.update_state(state='PREDICTING', meta={'experiment_id': exp_id})
-    plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(
-        exp.predict(raw_text, data_source),
-        exp.display_title)
-    return script, div
+# @celery_app.task(bind=True, trail=True)
+# def predict_exp(self, exp_id, raw_text):
+#     exp = get_experiment_by_id(exp_id)
+#     data_source = DataSource.get_by_id(exp.data_source_id)
+#     self.update_state(state='PREDICTING', meta={'experiment_id': exp_id})
+#     plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(
+#         exp.predict(raw_text, data_source),
+#         exp.display_title)
+#     return script, div
 
-@celery_app.task(bind=True, trail=True)
-def predict_overview(self, user_email, raw_text):
-    finished_experiments = Experiment.get_finished_user_experiments(user_email)
-    comparator = ExperimentComparator(finished_experiments)
-    self.update_state(state='PREDICTING')
-    return comparator.visualise_prediction_comparison(raw_text)
+# @celery_app.task(bind=True, trail=True)
+# def predict_overview(self, user_email, raw_text):
+#     finished_experiments = Experiment.get_finished_user_experiments(user_email)
+#     comparator = ExperimentComparator(finished_experiments)
+#     self.update_state(state='PREDICTING')
+#     return comparator.visualise_prediction_comparison(raw_text)
 
-@celery_app.task(bind=True, trail=True)
-def predict_overview_public(self, raw_text):
-    finished_experiments = Experiment.get_public_experiments()
-    comparator = ExperimentComparator(finished_experiments)
-    self.update_state(state='PREDICTING')
-    return comparator.visualise_prediction_comparison(raw_text)
+# @celery_app.task(bind=True, trail=True)
+# def predict_overview_public(self, raw_text):
+#     finished_experiments = Experiment.get_public_experiments()
+#     comparator = ExperimentComparator(finished_experiments)
+#     self.update_state(state='PREDICTING')
+#     return comparator.visualise_prediction_comparison(raw_text)
 
 
-@celery_app.task(bind=True, trail=True)
-def run_ace(self, ace_id):
-    ace = Ace.get_by_id(ace_id)
-    ace.run()
-    print('processing', ace)
+# @celery_app.task(bind=True, trail=True)
+# def run_ace(self, ace_id):
+#     ace = Ace.get_by_id(ace_id)
+#     ace.run()
+#     print('processing', ace)
 
 
 

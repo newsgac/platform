@@ -1,18 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
-
-
-
-
-
-
-
-
-
-
-
-
     {% if pipelines|length == 0 %}
         <div class="page-header">
             <h1>Pipeline configurations</h1>
@@ -58,24 +45,41 @@
                         <tr>
                             <th>Title</th>
                             <th>Time of creation</th>
-                            <th>Stop word removal</th>
-                            <th>Lemmatization</th>
+                            <th>Data source</th>
                             <th>NLP Tool</th>
-                            <th>Scaling</th>
-                            <th>Features</th>
+                            <th>Learner</th>
+                            <th></th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {% for pipeline in pipelines %}
                         <tr>
-                            <td><a href="{{ url_for('pipelines.get_pipeline_page', pipeline_id = pipeline._id) }}">{{ pipeline.display_title }}</a></td>
+                            <td title="{{ pipeline.json}}">{{ pipeline.display_title }}</td>
                             <td>{{ pipeline.created|datetime }}</td>
-                            <td>{{ pipeline.sw_removal }}</td>
-                            <td>{{ pipeline.lemmatization}}</td>
-                            <td>{{ pipeline.nlp_tool }}</td>
-                            <td>{{ pipeline.scaling }}</td>
-                            <td>{{ pipeline.features | join(', ') }}</td>
+                            <td>{{ pipeline.data_source.display_title }}</td>
+                            <td>{{ pipeline.nlp_tool.name }}</td>
+                            <td>{{ pipeline.learner.name }}</td>
+                            <td>
+                                <a class="btn btn-primary"
+                                   href="{{ url_for('pipelines.new_pipeline', from_pipeline_id = pipeline.id) }}">
+                                        <span class="glyphicon glyphicon-file"></span>
+                                    Copy
+                                </a>
+                                <a class="btn btn-danger"
+                                   data-toggle="confirmation"
+                                   data-popout="true"
+                                   data-title="This action cannot be undone. Are you sure?"
+                                   href="{{ url_for('pipelines.delete_pipeline', pipeline_id = pipeline.id) }}"
+                                   data-btn-ok-label="Yes, delete"
+                                   data-btn-cancel-label="No, cancel"
+                                   data-original-title=""
+                                   title="">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    Delete
+                                </a>
+
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

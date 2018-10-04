@@ -18,19 +18,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-from collections import OrderedDict
 
 from sklearn.model_selection import KFold
-from sklearn.model_selection import ShuffleSplit
 from sklearn.metrics import accuracy_score
-from newsgac.models.data_sources.data_source_old import DataSource
+# from newsgac.models.data_sources.data_source_old import DataSource
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from xgboost import XGBClassifier
-from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedShuffleSplit
-from newsgac.data_engineering.postprocessing import Result
+from sklearn.model_selection import cross_val_score, cross_val_predict
+from newsgac.pipelines.data_engineering.postprocessing import Result
 from newsgac.database import DATABASE
 import numpy as np
 
