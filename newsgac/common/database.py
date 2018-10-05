@@ -15,7 +15,7 @@ class Database(object):
         self.db = self.client[config.mongo_database_name]
         self.fs = gridfs.GridFS(self.db)
 
-        self.db['predictions'].create_index([("article_text", "text")])
+        # self.db['predictions'].create_index([("article_text", "text")])
 
         self.object_cache = {}
 

@@ -84,3 +84,25 @@ def remove_cls_from_dict(model_dict):
 
 def model_to_json(model, **kwargs):
     return _dumps(model_to_dict(model), **kwargs)
+
+
+def split_chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in xrange(0, len(l), n):
+        yield l[i:i + n]
+
+
+def split_long_sentences(sentences, max_tokens=48):
+    new_sentences = []
+
+    for sentence in sentences:
+        words = sentence.split(' ')
+
+        while len(words) > max_tokens:
+            new_sentences.append(' '.join(words[:max_tokens]) + '.')
+            words = words[max_tokens:]
+
+        if len(words) > 0:
+           new_sentences.append(' '.join(words))
+
+    return new_sentences

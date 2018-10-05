@@ -23,7 +23,8 @@ def login_user():
             user = User.from_login(identifier, password)
             session['email'] = user.email
             flash('You were successfully logged in.', 'success')
-            return redirect(url_for("experiments.user_experiments"))
+            # return redirect(url_for("experiments.user_experiments"))
+            return redirect('/')
         except UserError:
             flash('User not found or password incorrect', 'error')
 
