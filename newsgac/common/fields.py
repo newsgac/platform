@@ -1,7 +1,12 @@
+import gridfs
+from bson import ObjectId
 from enum import Enum
 import pymodm.fields
 from pymodm.base.fields import MongoBaseField
+from pymodm.connection import _get_db
 from pymodm.errors import ValidationError
+from pymodm.files import FieldFile
+
 from newsgac.common.utils import hash_password, is_hashed_password
 
 from dill import dill
@@ -18,12 +23,22 @@ class PasswordField(pymodm.fields.CharField):
         return PasswordField.hash(value)
 
 
-class ObjectField(pymodm.fields.FileField):
+class ObjectField(pymodm.fields.MongoBaseField):
     def to_mongo(self, value):
-        return super(self, dill.dumps(value))
+        fs = gridfs.GridFS(_get_db())
+        return fs.put(dill.dumps(value))
 
     def to_python(self, value):
-        return dill.loads(super(self, value))
+        if isinstance(value, ObjectId):
+            fs = gridfs.GridFS(_get_db())
+            return super(ObjectField, self).to_python(dill.loads(fs.get(value).read()))
+        return super(ObjectField, self).to_python(value)
+
+    @staticmethod
+    def delete(hash):
+        data_ref = _get_db()['cache'].find_one({'hash': hash})['data']
+        fs = gridfs.GridFS(_get_db())
+        fs.delete(data_ref)
 
 
 def enum_validator(enum):

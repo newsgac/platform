@@ -1,5 +1,6 @@
 from pymodm import MongoModel, fields
 
+from newsgac.caches.models import Cache
 from newsgac.common.mixins import CreatedUpdated
 from newsgac.data_sources.models import DataSource
 from newsgac.learners import LearnerSVC
@@ -22,6 +23,13 @@ class Pipeline(CreatedUpdated, MongoModel):
     nlp_tool = fields.EmbeddedDocumentField(NlpTool, blank=True, required=True, default=TFIDF.create())
     learner = fields.EmbeddedDocumentField(Learner)
     task = fields.ReferenceField(TrackedTask)
+
+    features = fields.ReferenceField(Cache)
+
+    def delete(self):
+        if self.features:
+            self.features.delete()
+        super(Pipeline, self).delete()
 
     @classmethod
     def create(cls):

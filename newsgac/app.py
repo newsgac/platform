@@ -2,7 +2,7 @@
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from flask import Flask, render_template
 from newsgac import config
 from newsgac.common.json_encoder import _JSONEncoder
