@@ -5,7 +5,7 @@ import re
 from dateutil import tz
 from itertools import chain, combinations
 
-from common.json_encoder import _dumps
+from newsgac.common.json_encoder import _dumps
 
 __author__ = 'abilgin'
 

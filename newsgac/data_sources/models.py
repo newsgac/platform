@@ -3,6 +3,7 @@ import operator
 
 from pymodm import MongoModel, EmbeddedMongoModel, fields
 from pymodm.errors import DoesNotExist, ValidationError
+from sklearn.model_selection import ShuffleSplit
 
 from newsgac.common.mixins import CreatedUpdated
 from newsgac.data_sources.errors import ResourceNotProcessedError, ResourceError
@@ -28,6 +29,10 @@ class DataSource(CreatedUpdated, MongoModel):
     file = fields.FileField(required=True)
     articles = fields.EmbeddedDocumentListField(Article)
     task = fields.ReferenceField(TrackedTask)
+
+    train_indices = fields.ListField(fields.IntegerField())
+    test_indices = fields.ListField(fields.IntegerField())
+
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
@@ -57,6 +62,16 @@ class DataSource(CreatedUpdated, MongoModel):
             itertools.groupby(sorted(self.articles, key=get_item), get_item)
         }
 
+
     def process(self):
         if self.status() in [Status.SUCCESS, Status.STARTED]:
             raise ResourceError('Resource already processed or in progress')
+
+
+    def split_test_train(self):
+        if len(self.articles) == 0:
+            raise ValueError('DataSource has no articles (process first?)')
+        splitter = ShuffleSplit(n_splits=1, test_size=0.1, random_state=42)
+        split_result = list(splitter.split(range(len(self.articles))))
+        self.train_indices = split_result[0][0]
+        self.test_indices = split_result[0][1]

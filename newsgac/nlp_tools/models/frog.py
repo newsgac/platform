@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+import numpy
 from nltk import sent_tokenize
 from pymodm import EmbeddedMongoModel
 from pymodm import fields
@@ -38,7 +41,24 @@ class Frog(NlpTool):
     tag = 'frog'
     parameters = fields.EmbeddedDocumentField(Parameters)
 
-    def get_features(self, text):
-        return {k: v for k,v in get_frog_features(text).iteritems() if self.parameters.features.to_son().to_dict()[k]}
+    def get_features(self, articles):
+        features = []
+        for article in articles:
+            article_features = {
+                k: v for k,v in
+                get_frog_features(article['text']).iteritems()
+                if self.parameters.features.to_son().to_dict()[k]
+            }
+            features.append(OrderedDict(sorted(article_features.items(), key=lambda t: t[0])))
+
+        # assert each article has the same set of feature keys
+        for i in range(len(features) - 1):
+            assert features[i].keys() == features[i+1].keys()
+
+        # features is a list of ordered dicts like { [feature_name]: [feature_value] }
+        feature_names = features[0].keys()
+        feature_values = numpy.array([feature.values() for feature in features], dtype='float32')
+
+        return feature_names, feature_values
 
 

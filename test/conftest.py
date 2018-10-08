@@ -57,3 +57,8 @@ def test_user(db):
 def dataset_balanced_100():
     with open(os.path.join(sys.path[0], 'test', 'mocks', 'balanced_label_date_100.txt'), 'r') as f:
         yield f
+
+@pytest.yield_fixture()
+def dataset_balanced_10():
+    with open(os.path.join(sys.path[0], 'test', 'mocks', 'balanced_label_date_10.txt'), 'r') as f:
+        yield f

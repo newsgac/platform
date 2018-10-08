@@ -5,12 +5,12 @@ from newsgac.data_sources.models import Article
 import pipelines.data_engineering.utils as DataUtils
 
 
-def process_data_source(data_source):
-    file = data_source.file.file.read()
+def get_articles_from_file(file):
     duplicate_count = 0
     other_count = 0
+    articles = []
 
-    for line in file.splitlines():
+    for line in file.read().splitlines():
         article = Article()
 
         line = line.rstrip()
@@ -54,12 +54,19 @@ def process_data_source(data_source):
             article.date = datetime.strptime(date_str_corr, "%d/%m/%Y")
             article.raw_text = groups[2].rstrip().decode('utf-8')
 
-            if article.raw_text not in map(lambda a: a.raw_text, data_source.articles):
-                data_source.articles.append(article)
+
+            if article.raw_text not in map(lambda a: a.raw_text, articles):
+                articles.append(article)
             else:
                 duplicate_count += 1
 
     print "Found ", other_count, " other genre in documents.."
     print "Found ", duplicate_count, " duplicate(s) in documents.."
 
+    return articles
+
+
+def process_data_source(data_source):
+    data_source.articles = get_articles_from_file(data_source.file.file)
+    data_source.split_test_train()
     data_source.save(cascade=True)

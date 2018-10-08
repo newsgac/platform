@@ -21,7 +21,7 @@ from newsgac.models.experiments.views import experiment_blueprint
 from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
 from newsgac.learners.views import learner_blueprint
-from tasks.views import task_blueprint
+from newsgac.tasks.views import task_blueprint
 from newsgac.models.ace.views import ace_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix="/users")

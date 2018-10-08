@@ -41,7 +41,7 @@ def register_user():
             user.save(force_insert=True)  # force_insert throws when primary key exists (email)
             session['email'] = user.email
             flash('You were successfully registered.', 'success')
-            return redirect(url_for("experiments.user_experiments"))
+            return redirect('/')
         except ValidationError as e:
             error_dict = e.message
             if 'password' in error_dict.keys():
