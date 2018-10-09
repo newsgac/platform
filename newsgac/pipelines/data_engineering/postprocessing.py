@@ -19,20 +19,11 @@ __author__ = 'abilgin'
 class Result(object):
 
     def __init__(self, y_test, y_pred):
-
         self.y_test = y_test
         self.y_pred = y_pred
 
-        self.genre_names = []
-        genre_order = []
-        for number, name in DataUtils.genres.items():
-            if 'Unlabelled' not in name:
-                self.genre_names.append(''.join(name).split('/')[0])
-                genre_order.append(number)
-
-
         #TODO: DEBUG here to see whether genre names and confusion matrix match
-        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=sorted(genre_order))
+        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=DataUtils.genre_codes)
         print self.confusion_matrix
 
         self.precision_weighted = format(metrics.precision_score(self.y_test, self.y_pred, average='weighted'), '.2f')

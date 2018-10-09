@@ -1,6 +1,6 @@
 from sklearn.preprocessing import RobustScaler
 
-from learners import LearnerSVC
+from learners import LearnerSVC, LearnerNB
 from newsgac.nlp_tools import Frog
 from newsgac.pipelines.models import Pipeline
 from newsgac.pipelines.run import run_pipeline
@@ -12,7 +12,7 @@ def test_create_frog_svc_pipeline(test_user, data_source_balanced_10):
         user=test_user,
         data_source=data_source_balanced_10,
         nlp_tool=Frog.create(),
-        learner=LearnerSVC.create()
+        learner=LearnerNB.create()
     )
     pipeline.save()
     run_pipeline(pipeline)

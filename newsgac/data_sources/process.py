@@ -31,7 +31,7 @@ def get_articles_from_file(file):
         groups = reg_res.groups()
         article.label = groups[0].rstrip()
 
-        if article.label not in DataUtils.genre_codebook_friendly.keys():
+        if article.label not in DataUtils.genre_codes:
             article.label = 'OTH'
             other_count += 1
 

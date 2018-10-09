@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pymodm import DateTimeField, EmbeddedDocumentField
 
+from common.fields import ObjectField
 from newsgac.common.utils import model_to_dict
 
 
@@ -17,6 +18,22 @@ class CreatedUpdated(object):
             self.created = datetime.now()
         self.updated = datetime.now()
         super(CreatedUpdated, self).save(**kwargs)
+
+
+class DeleteObjectsMixin(object):
+    def delete(self):
+        object_paths = []
+        def delete_objects_in_field(field, path):
+            if isinstance(field, ObjectField):
+                object_paths.append(path + [field.attname])
+            if isinstance(field, EmbeddedDocumentField):
+                for sub_field in field.related_model._mongometa.get_fields():
+                    delete_objects_in_field(sub_field, path + [field.attname])
+        for field in self._mongometa.get_fields():
+            delete_objects_in_field(field, [])
+
+        # todo: delete files from object_paths
+        pass
 
 
 class ParametersMixin(object):

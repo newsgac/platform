@@ -42,12 +42,13 @@ class Frog(NlpTool):
     parameters = fields.EmbeddedDocumentField(Parameters)
 
     def get_features(self, articles):
+        extract_features_dict = self.parameters.features.to_son().to_dict()
         features = []
         for article in articles:
             article_features = {
                 k: v for k,v in
                 get_frog_features(article['text']).iteritems()
-                if self.parameters.features.to_son().to_dict()[k]
+                if extract_features_dict[k]
             }
             features.append(OrderedDict(sorted(article_features.items(), key=lambda t: t[0])))
 
@@ -57,7 +58,7 @@ class Frog(NlpTool):
 
         # features is a list of ordered dicts like { [feature_name]: [feature_value] }
         feature_names = features[0].keys()
-        feature_values = numpy.array([feature.values() for feature in features], dtype='float32')
+        feature_values = numpy.array([numpy.array(feature.values()) for feature in features], dtype='float32')
 
         return feature_names, feature_values
 

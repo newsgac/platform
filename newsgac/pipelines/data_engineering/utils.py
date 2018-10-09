@@ -19,78 +19,73 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-genres = {
-    -1: ['Unlabelled'],
-    1: ['Nieuwsbericht'],
-    2: ['Interview'],
-    3: ['Reportage/feature'],
-    4: ['Verslag'],
-    5: ['Opiniestuk'],
-    6: ['Recensie'],
-    7: ['Achtergrond/Nieuwsanalyse'],
-    8: ['Column'],
-    9: ['Hoofdredactioneel commentaar'],
-    10: ['Service'],
-    11: ['Losse afbeelding'],
-    12: ['Overzicht'],
-    13: ['Ingezonden brief'],
-    14: ['Fictie'],
-    15: ['Essay'],
-    16: ['Mededeling krant (rectificatie)'],
-    17: ['Profiel/portret/necrologie'],
-    18: ['Moppen/spreuken/puzzels/weetjes']
+genres = [
+    'Nieuwsbericht',
+    'Interview',
+    'Reportage/feature',
+    'Verslag',
+    'Opiniestuk',
+    'Recensie',
+    'Achtergrond/Nieuwsanalyse',
+    'Column',
+    'Hoofdredactioneel commentaar',
+    'Service',
+    'Losse afbeelding',
+    'Overzicht',
+    'Ingezonden brief',
+    'Fictie',
+    'Essay',
+    'Mededeling krant (rectificatie)',
+    'Profiel/portret/necrologie',
+    'Moppen/spreuken/puzzels/weetjes',
+    'Unlabelled',
+]
 
-}
+genre_labels = [
+    'Nieuwsbericht',
+    'Interview',
+    'Reportage/feature',
+    'Verslag',
+    'Opiniestuk',
+    'Recensie',
+    'Achtergrond',
+    'Column',
+    'HR commentaar',
+    'Service',
+    'Afbeelding',
+    'Overzicht',
+    'Brief',
+    'Fictie',
+    'Essay',
+    'Rectificatie',
+    'Profiel',
+    'Moppen',
+    'Unlabelled',
+]
 
-genres_labels = {
-    'Unlabelled': -1,
-    'Nieuwsbericht': 1,
-    'Interview': 2,
-    'Reportage/feature': 3,
-    'Verslag': 4,
-    'Opiniestuk': 5,
-    'Recensie': 6,
-    'Achtergrond': 7,
-    'Column': 8,
-    'HR commentaar': 9,
-    'Service': 10,
-    'Afbeelding': 11,
-    'Overzicht': 12,
-    'Brief': 13,
-    'Fictie': 14,
-    'Essay': 15,
-    'Rectificatie': 16,
-    'Profiel': 17,
-    'Moppen': 18
-}
+genre_codes = [
+    'NIE',
+    'INT',
+    'REP',
+    'VER',
+    'OPI',
+    'REC',
+    'ACH',
+    'COL',
+    'HOO',
+    'SER',
+    'LOS',
+    'OVE',
+    'ING',
+    'FIC',
+    'ESS',
+    'MED',
+    'PRO',
+    'MOP',
+    'UNL',
+]
 
-genres_labels_inverse = {v: k for k, v in genres_labels.iteritems()}
-
-
-genre_codebook = {
-    'UNL' : -1,
-    'NIE' : 1,
-    'INT' : 2,
-    'REP' : 3,
-    'VER' : 4,
-    'OPI' : 5,
-    'REC' : 6,
-    'ACH' : 7,
-    'COL' : 8,
-    'HOO' : 9,
-    'SER' : 10,
-    'LOS' : 11,
-    'OVE' : 12,
-    'ING' : 13,
-    'FIC' : 14,
-    'ESS' : 15,
-    'MED' : 16,
-    'PRO' : 17,
-    'MOP' : 18
-}
-
-
-genre_codebook_friendly = { code: genres_labels_inverse[num] for code, num in genre_codebook.iteritems() }
+genre_code_unlabeled = 'UNL'
 
 pronouns_1 = [
     'ik',
