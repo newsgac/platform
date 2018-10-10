@@ -22,14 +22,14 @@ mongo_database_name = 'newsgacdev'
 
 frog_hostname = 'frog'
 frog_port = 12345
-rabbitmq_url = 'amqp://%s:%s@rabbit//' % (environ['RABBITMQ_DEFAULT_USER'], environ['RABBITMQ_DEFAULT_PASS'])
+redis_url = 'redis://localhost:6379/0'
 
 if environment in [Env.local, Env.test]:
     flask_port = 5050
     celery_eager = False
     mongo_host = 'localhost'
     frog_hostname = 'localhost'
-    rabbitmq_url = 'amqp://%s:%s@localhost//' % (environ['RABBITMQ_DEFAULT_USER'], environ['RABBITMQ_DEFAULT_PASS'])
+    redis_url = 'redis://localhost:6379/0'
 
 if environment == Env.test:
     mongo_database_name = 'newsgactest'

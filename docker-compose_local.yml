@@ -7,12 +7,10 @@ services:
         env_file:
             - .env.localdocker
 
-    rabbit:
+    redis:
         ports:
-            - "4369:4369"
-            - "5671:5671"
-            - "5672:5672"
-            - "5673:5673"
+            - "6379:6379"
+            - "6380:6380"
         env_file:
             - .env.localdocker
 
@@ -31,6 +29,11 @@ services:
         env_file:
             - .env.localdocker
         command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A celery_tasks.celery_app worker -l info --concurrency 1 -n worker1@%h" ]
+
+    flower:
+        ports:
+          - "5555:5555"
+        entrypoint: ["sh", "-c", "cd /newsgac && ls && celery flower --broker=amqp://newsgac:1234@localhost:5672/"]
 
     web:
         volumes:

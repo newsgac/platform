@@ -12,15 +12,15 @@ services:
         networks:
             - newsgac-net
 
-    rabbit:
-        hostname: rabbit
-        image: rabbitmq:latest
-        environment:
-            - RABBITMQ_DEFAULT_USER=newsgac
-            - RABBITMQ_DEFAULT_PASS=1234
+    redis:
+        hostname: redis
+        image: redis:latest
+#        environment:
+#            - redisMQ_DEFAULT_USER=newsgac
+#            - redisMQ_DEFAULT_PASS=1234
         restart: on-failure
-        volumes:
-            - ../rabbitmq:/var/lib/rabbitmq
+#        volumes:
+#            - ../redismq:/var/lib/redismq
         networks:
             - newsgac-net
 
@@ -29,16 +29,23 @@ services:
             context: ./newsgac
             dockerfile: Dockerfile_celery
         links:
-            - rabbit
+            - redis
             - database
             - frog
         depends_on:
-            - rabbit
+            - redis
             - database
             - frog
         restart: on-failure
         networks:
             - newsgac-net
+
+    flower:
+        image: mher/flower:latest
+        volumes:
+            - ./newsgac:/newsgac
+        links:
+            - redis
 
     database:
         hostname: mongo
@@ -52,7 +59,7 @@ services:
             dockerfile: Dockerfile_flask
         links:
             - worker
-            - rabbit
+            - redis
             - database
             - frog
         depends_on:
@@ -64,4 +71,4 @@ services:
             - newsgac-net
             
 volumes:
-    rabbitmq:
+    redismq:

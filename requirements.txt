@@ -59,3 +59,4 @@ billiard==3.5.0.2
 pandas==0.22.0
 xgboost==0.72.1
 gunicorn==19.9.0
+redis==2.10.6

@@ -125,7 +125,7 @@ def new_pipeline_save():
     try:
         pipeline.save()
         task = run_pipeline_task.delay(str(pipeline._id))
-        pipeline.task = task.task
+        pipeline.task_id = task.task_id
         pipeline.save()
         return Response(
             model_to_json(pipeline),
