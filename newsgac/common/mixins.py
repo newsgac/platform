@@ -1,6 +1,8 @@
 from datetime import datetime
 
+import gridfs
 from pymodm import DateTimeField, EmbeddedDocumentField
+from pymodm.connection import _get_db
 
 from common.fields import ObjectField
 from newsgac.common.utils import model_to_dict
@@ -21,22 +23,36 @@ class CreatedUpdated(object):
 
 
 class DeleteObjectsMixin(object):
+    # Use this mixin on model classes that have ObjectFields,
+    # So they get cleaned up when the model is deleted.
+    # it recursively deletes ObjectFields on EmbeddedDocuments also
     def delete(self):
-        object_paths = []
+        db = _get_db()
+        fs = gridfs.GridFS(db)
+
+        object_field_paths = []
         def delete_objects_in_field(field, path):
             if isinstance(field, ObjectField):
-                object_paths.append(path + [field.attname])
+                object_field_paths.append(path + [field.attname])
             if isinstance(field, EmbeddedDocumentField):
                 for sub_field in field.related_model._mongometa.get_fields():
                     delete_objects_in_field(sub_field, path + [field.attname])
         for field in self._mongometa.get_fields():
             delete_objects_in_field(field, [])
 
-        # todo: delete files from object_paths
-        pass
+        # delete grid fs files from object_paths
+        raw_document = db[self._mongometa.collection_name].find_one({'_id': self.pk})
+        for path in object_field_paths:
+            current = raw_document
+            for path_part in path:
+                current = current[path_part]
+            fs.delete(current)
+        super(DeleteObjectsMixin, self).delete()
 
 
 class ParametersMixin(object):
+    # Parameters represent user configurable settings (of nlp_tools or machine learners)
+    # class should have a `parameters` field that is an EmbeddedDocument
     def set_default_parameters(self):
         fields = self.__class__.parameter_fields()
         self.parameters = {
@@ -50,12 +66,11 @@ class ParametersMixin(object):
 
     @classmethod
     def parameter_dict(cls):
-        # create a json serializable dict of the subclass definition
+        # create a json serializable dict of the parameters definition of this class
         def map_field(field):
             result_field_dict = {'type': field.__class__.__name__}
             field_dict = field.__dict__
             if isinstance(field, EmbeddedDocumentField):
-                field_dict = field.__dict__
                 result_field_dict['model'] = map(map_field, field.related_model._mongometa.get_fields())
                 result_field_dict['attname'] = field_dict['attname']
                 result_field_dict['description'] = field_dict['description']

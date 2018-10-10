@@ -2,11 +2,9 @@ from __future__ import division
 
 import numpy as np
 from newsgac.database import DATABASE
-from sklearn.metrics import confusion_matrix
 import pipelines.data_engineering.utils as DataUtils
 # from newsgac.models.data_sources.data_source_old import DataSource
 # import newsgac.models.data_sources.constants as DataSourceConstants
-from sklearn import metrics
 from lime.lime_text import LimeTextExplainer
 from lime.lime_tabular import LimeTabularExplainer
 from sklearn.pipeline import make_pipeline
@@ -15,45 +13,6 @@ from pipelines.data_engineering.preprocessing import Preprocessor, process_raw_t
 # np.random.seed(42)
 
 __author__ = 'abilgin'
-
-class Result(object):
-
-    def __init__(self, y_test, y_pred):
-        self.y_test = y_test
-        self.y_pred = y_pred
-
-        #TODO: DEBUG here to see whether genre names and confusion matrix match
-        self.confusion_matrix = confusion_matrix(self.y_test, self.y_pred, labels=DataUtils.genre_codes)
-        print self.confusion_matrix
-
-        self.precision_weighted = format(metrics.precision_score(self.y_test, self.y_pred, average='weighted'), '.2f')
-        self.precision_micro = format(metrics.precision_score(self.y_test, self.y_pred, average='micro'), '.2f')
-        self.precision_macro = format(metrics.precision_score(self.y_test, self.y_pred, average='macro'), '.2f')
-
-        self.recall_weighted =format(metrics.recall_score(self.y_test, self.y_pred, average='weighted'), '.2f')
-        self.recall_micro =format(metrics.recall_score(self.y_test, self.y_pred, average='micro'), '.2f')
-        self.recall_macro =format(metrics.recall_score(self.y_test, self.y_pred, average='macro'), '.2f')
-
-        self.fmeasure_weighted = format(metrics.f1_score(self.y_test, self.y_pred, average='weighted'), '.2f')
-        self.fmeasure_micro = format(metrics.f1_score(self.y_test, self.y_pred, average='micro'), '.2f')
-        self.fmeasure_macro = format(metrics.f1_score(self.y_test, self.y_pred, average='macro'), '.2f')
-
-        self.cohens_kappa = format(metrics.cohen_kappa_score(self.y_test, self.y_pred), '.2f')
-
-        self.accuracy = 0
-        self.std = 0
-
-        np.set_printoptions(precision=2)
-
-    def get_confusion_matrix(self):
-        return self.confusion_matrix
-
-    @staticmethod
-    def normalise_confusion_matrix(cm):
-        sum = cm.sum(axis=1)[:, np.newaxis]
-        temp = cm.astype('float')
-        # return cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
 
 
 class Explanation():

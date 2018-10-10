@@ -24,6 +24,14 @@ class PasswordField(pymodm.fields.CharField):
 
 
 class ObjectField(pymodm.fields.MongoBaseField):
+
+    def is_blank(self, value):
+        return value is None
+
+    # def validate(self, value):
+    #      and not self.blank:
+    #         raise ValidationError('must not be blank (was: %r)' % value)
+
     def to_mongo(self, value):
         fs = gridfs.GridFS(_get_db())
         return fs.put(dill.dumps(value))

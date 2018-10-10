@@ -1,6 +1,6 @@
 from pandas import DataFrame
 
-from pipelines.data_engineering.postprocessing import Result
+from learners.models.learner import Result
 from bokeh.models import (
     ColumnDataSource,
     LabelSet,

@@ -1,7 +1,7 @@
 from pymodm import MongoModel, fields
 
 from newsgac.caches.models import Cache
-from newsgac.common.mixins import CreatedUpdated
+from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 from newsgac.data_sources.models import DataSource
 from newsgac.learners import LearnerSVC
 from newsgac.learners.models.learner import Learner
@@ -11,7 +11,7 @@ from newsgac.users.models import User
 from newsgac.tasks.models import TrackedTask
 
 
-class Pipeline(CreatedUpdated, MongoModel):
+class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     user = fields.ReferenceField(User, required=True)
     display_title = fields.CharField(required=True)
     created = fields.DateTimeField()

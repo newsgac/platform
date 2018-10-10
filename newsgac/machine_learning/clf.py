@@ -28,7 +28,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
-from newsgac.pipelines.data_engineering.postprocessing import Result
+from learners.models.learner import Result
 from newsgac.database import DATABASE
 import numpy as np
 

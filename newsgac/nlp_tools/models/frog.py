@@ -47,7 +47,7 @@ class Frog(NlpTool):
         for article in articles:
             article_features = {
                 k: v for k,v in
-                get_frog_features(article['text']).iteritems()
+                get_frog_features(article).iteritems()
                 if extract_features_dict[k]
             }
             features.append(OrderedDict(sorted(article_features.items(), key=lambda t: t[0])))
