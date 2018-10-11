@@ -10,6 +10,7 @@ import config
 from common.utils import split_chunks, split_long_sentences
 from nlp_tools.models.frog_extract_features import get_frog_features
 from nlp_tools.models.frog_features import feature_descriptions, features
+from tasks.progress import report_progress
 from .nlp_tool import NlpTool
 
 
@@ -44,7 +45,8 @@ class Frog(NlpTool):
     def get_features(self, articles):
         extract_features_dict = self.parameters.features.to_son().to_dict()
         features = []
-        for article in articles:
+        for idx, article in enumerate(articles):
+            report_progress('frog', float(idx) / len(articles))
             article_features = {
                 k: v for k,v in
                 get_frog_features(article).iteritems()

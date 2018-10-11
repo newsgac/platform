@@ -1,12 +1,11 @@
-import sys
-import os.path
+import uuid
 
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 from flask import session
 from celery import Celery, Task
-from newsgac import config
 from kombu.serialization import register
+
+from newsgac import config
+from newsgac.tasks.models import TrackedTask, Status
 from newsgac.common.json_encoder import _dumps, _loads
 
 
@@ -14,9 +13,29 @@ register('myjson', _dumps, _loads, content_type='application/x-myjson', content_
 
 
 class CeleryTrackedTask(Task):
-
     def apply_async(self, args=None, kwargs=None, **options):
-        return super(CeleryTrackedTask, self).apply_async(args, kwargs, headers={'user_email': session['email']}, **options)
+        task_id = options.pop('task_id', str(uuid.uuid4()))
+        task = TrackedTask(
+            _id=task_id,
+            name=self.name,
+            status=Status.QUEUED,
+            task_args=args or [],
+            task_kwargs=kwargs or {},
+            backend='celery',
+            result={}
+        )
+        try:
+            task.save()
+        except Exception as e:
+            raise
+        task_eager_result = super(CeleryTrackedTask, self).apply_async(args, kwargs, task_id=task_id, headers={'user_email': session['email']}, **options)
+
+        # task.refresh_from_db()
+        # task.children = task_eager_result.children or []
+        # task.parent = task_eager_result.parent
+        # task.save()
+        task_eager_result.task = task
+        return task_eager_result
 
 
 celery_app = Celery(
@@ -36,8 +55,8 @@ celery_app.conf.broker_connection_timeout = 1
 celery_app.conf.task_always_eager = config.celery_eager
 celery_app.conf.task_ignore_result = False
 celery_app.conf.task_track_started = True
-celery_app.conf.result_backend = config.redis_url
-# celery_app.conf.result_backend = 'newsgac.tasks.celery_mongo_result_backend.ExtendedMongoBackend'
+# celery_app.conf.result_backend = config.redis_url
+celery_app.conf.result_backend = 'newsgac.tasks.celery_mongo_result_backend.ExtendedMongoBackend'
 celery_app.conf.accept_content = ['myjson']
 celery_app.conf.task_serializer = 'myjson'
 celery_app.conf.result_serializer = 'myjson'

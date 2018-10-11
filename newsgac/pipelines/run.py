@@ -11,11 +11,11 @@ from newsgac.caches.models import Cache
 from newsgac.common.json_encoder import _dumps
 from parallel_with_progress import ParallelWithProgress
 
-from celery import current_task
 
 import hashlib
 
 from newsgac.pipelines.data_engineering.preprocessing import remove_stop_words, apply_lemmatization, get_clean_ocr
+from newsgac.tasks.progress import report_progress
 
 n_parallel_jobs = 8
 
@@ -74,7 +74,10 @@ def set_features(pipeline):
 
 
 def run_pipeline(pipeline):
-    current_task.update_state(state='PROCESSING', meta={'progress': 0.5})
+    # report_progress('test', .5)
+    # report_progress('test', .6)
+    # report_progress('test2', .4)
+    # current_task.update_state(state='PROCESSING', meta={'progress': 0.5})
 
     set_features(pipeline)
     features = pipeline.features.data['values']
