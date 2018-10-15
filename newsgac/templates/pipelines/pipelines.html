@@ -57,7 +57,11 @@
                         {% for pipeline in pipelines %}
 
                         <tr>
-                            <td title="{{ pipeline.json}}">{{ pipeline.display_title }}</td>
+                            <td title="{{ pipeline.json}}">
+                                <a href="{{ url_for('pipelines.visualise_results', pipeline_id=pipeline.id) }}">
+                                    {{ pipeline.display_title }}
+                                </a>
+                            </td>
                             <td>{{ pipeline.created|datetime }}</td>
                             <td>{{ pipeline.data_source.display_title }}</td>
                             <td>{{ pipeline.nlp_tool.name }}</td>

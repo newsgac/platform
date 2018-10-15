@@ -29,24 +29,38 @@
     </div>
     {% endif %}
 
-    <form role="form" action="{{ url_for('ace.ace_view') }}" method="post" id="form_ace">
+    <form role="form" action="{{ url_for('ace.new_ace_run_save') }}" method="post" id="form_ace">
         <div>
             <div class="row">
 
                 <div class="col-md-4 control-group">
-                    <label>Select pipelines to be included in comparison</label>
+                    <label>Select Data Source</label>
+                </div>
+                <div class="col-md-7">
+                    <select name="data_sources"
+                            class="selectpicker show-tick"
+                            data-width="85%"
+                            data-actions-box="true"
+                    >
+                        {% for data_source in data_sources %}
+                        {% if data_source.articles %}
+                            <option value="{{ data_source.pk }}">{{ data_source.display_title }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+
+                </div>
+                <div class="col-md-4 control-group">
+                    <label>Select Pipelines</label>
                 </div>
                 <div class="col-md-7" id="datasource_div">
-                    <select multiple name="compared_experiments" id="compared_experiments"
-                            class="selectpicker show-tick" data-width="85%" data-actions-box="true">
-                        {% for data_source in data_sources_db %}
-                        {% if data_source._id in experiment_ds_dict.keys() %}
-                            <optgroup label="{{ data_source.display_title }}" >
-                                {% for exp in experiment_ds_dict[data_source._id] %}
-                                    <option value="{{ exp._id }}">{{ exp.display_title }}</option>
-                                {% endfor %}
-                            </optgroup>
-                        {% endif %}
+                    <select multiple name="pipelines"
+                            class="selectpicker show-tick"
+                            data-width="85%"
+                            data-actions-box="true"
+                    >
+                        {% for pipeline in pipelines %}
+                            <option value="{{ pipeline.pk }}">{{ pipeline.display_title }}</option>
                         {% endfor %}
                     </select>
 

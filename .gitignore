@@ -9,3 +9,4 @@
 # project specific
 .idea
 src/test/*
+*/**/node_modules

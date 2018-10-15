@@ -8,8 +8,8 @@ This is the development repository for NEWSGAC Project.
 
 2. In terminal, navigate to newsgac_docker_dev folder.
 
-3. By default, database data will be saved to `./../data`, e.g. in a folder called `data` in the parent of this repository's directory.
-   To change this modify `docker-compose_local.yml` line 22 to a folder of your choice on your local machine.
+3. By default, database data will be saved to `./../data`, e.g. in ws folder called `data` in the parent of this repository's directory.
+   To change this modify `docker-compose_local.yml` line 22 to ws folder of your choice on your local machine.
    For example change `./../data:/data/db` to `<your_local_path>:/data/db`
 
 4. To run from command line, navigate to newsgac_docker_dev and run:
@@ -21,11 +21,11 @@ This is the development repository for NEWSGAC Project.
 
 ## Run flask web app locally
 
-You might want to run flask outside of Docker (because it is e.g. easier to attach a debugger).
+You might want to run flask outside of Docker (because it is e.g. easier to attach ws debugger).
 
 1. Follow `Setup Instructions for DOCKER` instructions so that all services are online (Mongo, RabbitMQ, FROG, celery workers).
 
-2. Set up a virtual environment and install the requirements:
+2. Set up ws virtual environment and install the requirements:
 
    ```
    pip install -r requirements.txt

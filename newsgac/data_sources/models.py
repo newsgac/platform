@@ -3,15 +3,14 @@ import operator
 
 from pymodm import MongoModel, EmbeddedMongoModel, fields
 from pymodm.errors import DoesNotExist, ValidationError
-from sklearn.model_selection import ShuffleSplit
 
 from newsgac.common.mixins import CreatedUpdated
-from newsgac.data_sources.errors import ResourceNotProcessedError, ResourceError
+from newsgac.data_sources.errors import ResourceNotProcessedError
 from newsgac.data_sources.validators import has_extension
 from newsgac.tasks.models import TrackedTask, Status
 from newsgac.users.models import User
 
-import pipelines.data_engineering.utils as DataUtils
+import data_engineering.utils as DataUtils
 
 
 class Article(EmbeddedMongoModel):
@@ -30,9 +29,6 @@ class DataSource(CreatedUpdated, MongoModel):
     articles = fields.EmbeddedDocumentListField(Article)
     task = fields.ReferenceField(TrackedTask)
 
-    train_indices = fields.ListField(fields.IntegerField())
-    test_indices = fields.ListField(fields.IntegerField())
-
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
@@ -50,28 +46,3 @@ class DataSource(CreatedUpdated, MongoModel):
             except DoesNotExist as e:
                 return
             raise ValidationError('Display title exists')
-
-
-
-    def count_labels(self):
-        if not self.status() == Status.SUCCESS:
-            raise ResourceNotProcessedError('DataSource has not been processed (yet)')
-        get_item = operator.attrgetter('label')
-        return {
-            DataUtils.genre_codebook_friendly[k]: len(list(g)) for k, g in
-            itertools.groupby(sorted(self.articles, key=get_item), get_item)
-        }
-
-
-    def process(self):
-        if self.status() in [Status.SUCCESS, Status.STARTED]:
-            raise ResourceError('Resource already processed or in progress')
-
-
-    def split_test_train(self):
-        if len(self.articles) == 0:
-            raise ValueError('DataSource has no articles (process first?)')
-        splitter = ShuffleSplit(n_splits=1, test_size=0.1, random_state=42)
-        split_result = list(splitter.split(range(len(self.articles))))
-        self.train_indices = split_result[0][0]
-        self.test_indices = split_result[0][1]

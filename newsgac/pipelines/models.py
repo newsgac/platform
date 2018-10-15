@@ -25,11 +25,10 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     learner = fields.EmbeddedDocumentField(Learner)
     task_id = fields.CharField()
 
-    # should be a dict with {
+    # should be a cached dict with {
     #   names: list of feature names (strings)
     #   values: list of feature values (list of floats)
     # }
-    # the value is recovered from cache if it has been calculated before
     features = fields.ReferenceField(Cache)
 
     @property

@@ -12,7 +12,7 @@ from newsgac.learners import LearnerNB
 from newsgac.learners.models.learner import Result
 from newsgac.caches.models import Cache
 from newsgac.common.json_encoder import _dumps
-from newsgac.pipelines.data_engineering.preprocessing import remove_stop_words, apply_lemmatization
+from data_engineering.preprocessing import remove_stop_words, apply_lemmatization
 from newsgac.tasks.progress import report_progress
 from newsgac.parallel_with_progress import ParallelWithProgress
 
@@ -81,6 +81,7 @@ def run_pipeline(pipeline):
     labels = numpy.array([article.label for article in pipeline.data_source.articles])
 
     sklSteps = []
+
     if pipeline.nlp_tool.parameters.scaling:
         sklSteps.append(('RobustScaler', RobustScaler()))
 

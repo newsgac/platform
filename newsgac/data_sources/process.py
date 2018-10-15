@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 
 from newsgac.data_sources.models import Article
-import pipelines.data_engineering.utils as DataUtils
+import data_engineering.utils as DataUtils
 
 
 def get_articles_from_file(file):
@@ -68,5 +68,4 @@ def get_articles_from_file(file):
 
 def process_data_source(data_source):
     data_source.articles = get_articles_from_file(data_source.file.file)
-    data_source.split_test_train()
     data_source.save(cascade=True)

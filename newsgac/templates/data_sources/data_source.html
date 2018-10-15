@@ -8,23 +8,6 @@
             </a>
         </h1>
 
-        Processing status: {{ data_source.status() }}
-
-        {% if data_source.status() == 'SUCCESS' %}
-            <a class="btn btn-info"
-                href="{{ url_for('data_sources.visualise_stats', data_source_id=data_source._id) }}">
-                <span class="glyphicon glyphicon-eye-open"></span> Data Analysis</a>
-            {% if data_source.training_purpose %}
-                <a class="btn btn-warning"
-                href="{{ url_for('data_sources.apply_grid_search', data_source_id=data_source._id) }}">
-                <span class="glyphicon glyphicon-search"></span> Recommend Algorithm </a>
-            {% endif %}
-        {% endif %}
-
-{#        <a class="btn btn-danger"#}
-{#               href="{{ url_for('data_sources.delete_data_source', data_source_id=data_source._id) }}">#}
-{#                <span class="glyphicon glyphicon-trash"></span> Delete</a>#}
-
     </div>
 
     {% macro row(label) -%}
@@ -42,16 +25,15 @@
         {{ data_source.description  }}
     {% endcall %}
 
-    {% if data_source.status() == 'SUCCESS' %}
-        {% call row('Number of articles:') %}
-            {{ data_source.articles | length  }}
-        {% endcall %}
+    {% if plot_div is not none %}
 
-        {% for label, count in label_count.iteritems() %}
-            {% call row(label) %}
-                {{ count }}
-            {% endcall %}
-        {% endfor %}
+    <div class="row">
+        {% if plot_div is defined %}
+            {{ plot_div|indent(4)|safe }}
+        {% else %}
+            <p>There is no data to show.</p>
+        {% endif %}
+    </div>
     {% endif %}
 
 

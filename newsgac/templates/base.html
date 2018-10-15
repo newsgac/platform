@@ -18,13 +18,11 @@
         {% for plot_script in plot_scripts %}
             {{ plot_script|indent(4)|safe }}
         {% endfor %}
-    {% elif plot_script is defined %}
+    {% elif (plot_script is defined and plot_script is not none)%}
         {{ plot_script|indent(4)|safe }}
     {% endif %}
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment.min.js"></script>
-    <script src="/static/js/tasks.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/tasks.css">
+
+
     {% for js in bokeh_js_css.js_files %}
         <script src="{{ js }}"></script>
     {% endfor %}
@@ -69,9 +67,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="url_for('experiments.user_experiments')">
+                        <a href="{{ url_for('ace.user_ace_runs') }}">
                             <span class="glyphicon glyphicon-blackboard"></span>
-                            Experiments
+                            ACE
                         </a>
                     </li>
                     <li>

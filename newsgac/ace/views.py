@@ -2,9 +2,10 @@ from __future__ import absolute_import
 from bson import ObjectId
 from bokeh.embed import components
 from bokeh.layouts import gridplot
-from flask import Blueprint, render_template, request, session, json, url_for, Response
+from flask import Blueprint, render_template, request, session, json, url_for, Response, redirect
 from pymodm.errors import ValidationError
 
+from ace.models import ACE
 from newsgac.common.back import back
 from newsgac.common.json_encoder import _dumps
 from newsgac.common.utils import model_to_json, model_to_dict
@@ -19,153 +20,44 @@ from newsgac.nlp_tools import nlp_tools, TFIDF
 from newsgac.nlp_tools.factory import create_nlp_tool
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 
-pipeline_blueprint = Blueprint('pipelines', __name__)
+ace_blueprint = Blueprint('ace', __name__)
 
 
-learners_dict = {
-    learner.tag: {
-        'name': learner.name,
-        'parameters': learner.parameter_dict(),
-        'default':  model_to_dict(learner.create())
-    }
-    for learner in learners
-}
-
-
-nlp_tools_dict = {
-    tool.tag: {
-        'name': tool.name,
-        'parameters': tool.parameter_dict(),
-    }
-    for tool in nlp_tools
-}
-
-def get_data_sources_dict():
-    return {
-        str(data_source.pk): {
-            'display_title': data_source.display_title,
-        }
-        for data_source in list(DataSource.objects.all())
-    }
-
-
-@pipeline_blueprint.route('/')
+@ace_blueprint.route('/')
 @requires_login
 @back.anchor
-def user_pipelines():
-    def map_task(task):
-        return {
-            'id': str(task.pk),
-            'name': task.name,
-            'status': task.status.value,
-            'started': task.created,
-            'progress': task.result.get('progress', {})
-        }
-
-    pipelines = [
-        {
-            'id': str(pipeline._id),
-            'created': pipeline.created,
-            'display_title': pipeline.display_title,
-            'nlp_tool': {
-                'name': pipeline.nlp_tool.__class__.name,
-            },
-            'learner': {
-                'name': pipeline.learner.__class__.name,
-            },
-            'data_source': {
-                'display_title': pipeline.data_source.display_title
-            },
-            'task': json.dumps(map_task(pipeline.task)),
-            'json': model_to_json(pipeline, indent=4)
-
-        } for pipeline in list(Pipeline.objects.all())
-    ]
-
+def user_ace_runs():
+    data_sources = list(DataSource.objects.all())
+    pipelines = list(Pipeline.objects.all())
     return render_template(
-        "pipelines/pipelines.html",
+        "ace/overview.html",
         pipelines=pipelines,
-        nlp_tools=nlp_tools_dict,
-        learners=learners_dict
+        data_sources=data_sources,
     )
 
 
-@pipeline_blueprint.route('/new/', methods=['GET'])
-@pipeline_blueprint.route('/new/<from_pipeline_id>', methods=['GET'])
+@ace_blueprint.route('/new', methods=['GET'])
 @requires_login
 @back.anchor
-def new_pipeline(from_pipeline_id=None):
-    if from_pipeline_id is not None:
-        pipeline = Pipeline.objects.get({'_id': ObjectId(from_pipeline_id)})
-        pipeline.display_title = pipeline.display_title + ' (copy)'
-        pipeline._id = None
-        pipeline.user = None
-    else:
-        pipeline = Pipeline.create()
-
-    pipeline = model_to_dict(pipeline)
-
-    pipeline.pop('_id', None)
-    pipeline.pop('user', None)
-    pipeline.pop('created', None)
-    pipeline.pop('updated', None)
-    pipeline.pop('task', None)
-
+def new_ace_run():
+    data_sources = list(DataSource.objects.all())
+    pipelines = list(Pipeline.objects.all())
     return render_template(
-        "pipelines/pipeline.html",
-        pipeline=_dumps(pipeline),
-        data_sources=json.dumps(get_data_sources_dict()),
-        nlp_tools=json.dumps(nlp_tools_dict),
-        save_url=url_for('pipelines.new_pipeline_save'),
-        pipelines_url=url_for('pipelines.user_pipelines'),
-        learners=json.dumps(learners_dict)
+        "ace/new.html",
+        pipelines=pipelines,
+        data_sources=data_sources,
     )
 
 
-@pipeline_blueprint.route('/new', methods=['POST'])
+@ace_blueprint.route('/new', methods=['POST'])
 @requires_login
-def new_pipeline_save():
-    pipeline = Pipeline(
-        user=User(email=session['email']),
-        **request.json
-    )
-
-    pipeline.nlp_tool = create_nlp_tool(request.json['nlp_tool']['_tag'], False, **request.json['nlp_tool'])
-    pipeline.learner = create_learner(request.json['learner']['_tag'], False, **request.json['learner'])
-
-    try:
-        pipeline.save()
-        task = run_pipeline_task.delay(str(pipeline._id))
-        pipeline.task_id = task.task_id
-        pipeline.save()
-        return Response(
-            model_to_json(pipeline),
-            status=201,
-            headers={
-                'content-type': 'application/json'
-            }
-        )
-
-    except ValidationError as e:
-        return Response(
-            json.dumps({'error': e.message}),
-            status=400,
-            headers={
-                'content-type': 'application/json',
-            }
-        )
-
-    except Exception as e:
-        return Response(
-            json.dumps({'error': {'serverError': [e.message]}}),
-            status=500,
-            headers={
-                'content-type': 'application/json',
-            }
-        )
+def new_ace_run_save():
+    ace = ACE(**request.form)
+    ace.save()
+    return redirect(url_for('ace.user_ace_runs'))
 
 
-@pipeline_blueprint.route('/<string:pipeline_id>/delete')
+@ace_blueprint.route('/<string:pipeline_id>/delete')
 @requires_login
 def delete_pipeline(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
@@ -174,7 +66,7 @@ def delete_pipeline(pipeline_id):
     return back.redirect()
 
 
-@pipeline_blueprint.route('/delete_all')
+@ace_blueprint.route('/delete_all')
 @requires_login
 def delete_all():
     for pipeline in list(Pipeline.objects.all()):
@@ -183,7 +75,7 @@ def delete_all():
     return back.redirect()
 
 
-@pipeline_blueprint.route('/<string:pipeline_id>/results')
+@ace_blueprint.route('/<string:pipeline_id>/results')
 @requires_login
 def visualise_results(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
@@ -208,7 +100,7 @@ def visualise_results(pipeline_id):
 
 
 
-@pipeline_blueprint.route('/<string:pipeline_id>/features')
+@ace_blueprint.route('/<string:pipeline_id>/features')
 @requires_login
 def visualise_features(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})

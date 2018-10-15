@@ -32,7 +32,6 @@
                             <th>Processed</th>
                             <th>Description</th>
                             <th>Time of creation</th>
-                            <th>Processing duration</th>
                             <th>Number of instances</th>
                         </tr>
                     </thead>
@@ -50,15 +49,7 @@
                             {% endif %}
 
                             <td>{{ data_source.description }}</td>
-                            <td>{{ data_source.created }}</td>
-                            {% if data_source.articles | length > 0 %}
-                                <td>duration here...</td>
-                            {% elif data_source.task_id %}
-                                <td>In progress</td>
-                            {% else %}
-                                <td>N/A</td>
-                            {% endif %}
-
+                            <td>{{ data_source.created | datetime }}</td>
                             <td>{{ data_source.articles|length or '?' }}</td>
                         </tr>
                         {% endfor %}

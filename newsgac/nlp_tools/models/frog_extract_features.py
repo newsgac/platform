@@ -8,7 +8,7 @@ from pynlpl.clients.frogclient import FrogClient
 import config
 from common.utils import split_long_sentences, split_chunks
 from nlp_tools.models.frog_ocr import get_clean_ocr
-import pipelines.data_engineering.utils as Utilities
+import data_engineering.utils as Utilities
 
 
 def get_sentences(text):

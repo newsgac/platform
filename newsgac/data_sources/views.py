@@ -1,23 +1,24 @@
 from __future__ import absolute_import
-
 from bson import ObjectId
 from flask import Blueprint, render_template, request, session, url_for, flash
 from pymodm.errors import ValidationError
-from werkzeug.utils import redirect
-
-from newsgac.tasks.models import TrackedTask
-# from newsgac.tasks.tasks import del_data, grid_ds
+from werkzeug.utils import redirect, secure_filename
 
 from newsgac.common.back import back
 import newsgac.users.view_decorators as user_decorators
-from werkzeug.utils import secure_filename
-import pipelines.data_engineering.utils as DataUtils
-from newsgac.pipelines.data_engineering.postprocessing import Explanation
+import newsgac.data_engineering.utils as DataUtils
+
+from newsgac.tasks.models import TrackedTask
 from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process
-from newsgac.models.experiments.factory import get_experiment_by_id
 from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
+
+
+# from newsgac.tasks.tasks import del_data, grid_ds
+# from data_engineering import Explanation
+# from newsgac.models.experiments.factory import get_experiment_by_id
+
 
 __author__ = 'abilgin'
 
@@ -66,78 +67,20 @@ def get_data_source_page(data_source_id):
     # return the data source page with the type code
 
     data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
-    label_count = None
+    script, div = None, None
     try:
-        label_count = data_source.count_labels()
+        script, div = ResultVisualiser.visualize_data_source_stats(data_source)
     except Exception:
         pass
 
     return render_template(
         'data_sources/data_source.html',
         data_source=data_source,
-        label_count=label_count
+        plot_script=script,
+        plot_div=div,
+        mimetype='text/html'
     )
 
-#todo: check
-@data_source_blueprint.route('/article/<string:article_id>')
-@user_decorators.requires_login
-def get_article_page(article_id):
-    # display the processed data source instance which is an article
-    art = DataSource.get_processed_article_by_id(article_id)
-    ## TODO: bug on adding articles to processed_data
-    return render_template('data_sources/article.html', article=art, descriptions=DataUtils.feature_descriptions)
-
-#todo: check
-@data_source_blueprint.route('/article/show/<string:article_id>', methods=['GET'])
-@user_decorators.requires_login
-def show_article_summary(article_id):
-    # display the processed data source instance which is an article
-    art = DataSource.get_processed_article_by_id(article_id)
-
-    return render_template('data_sources/article_summary.html', article_summary=art)
-
-
-#todo: check
-@data_source_blueprint.route('/explain/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
-@user_decorators.requires_login
-def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
-    # art = DataSource.get_processed_article_by_raw_text(article_text)
-    art = DataSource.get_processed_article_by_id(article_id)
-    exp = get_experiment_by_id(experiment_id)
-
-    # LIME explanations
-    e = Explanation(experiment=exp, article=art, predicted_genre=genre)
-    res = e.explain_using_text()
-
-    return render_template('data_sources/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
-
-#todo: check
-@data_source_blueprint.route('/explain_features/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>/', methods=['GET'])
-@user_decorators.requires_login
-def explain_features_for_experiment(article_id, article_num, genre, experiment_id):
-    # art = DataSource.get_processed_article_by_raw_text(article_text)
-    art = DataSource.get_processed_article_by_id(article_id)
-    exp = get_experiment_by_id(experiment_id)
-
-    # LIME explanations
-    e = Explanation(experiment=exp, article=art, predicted_genre=genre)
-    res = e.explain_using_features()
-
-    return render_template('data_sources/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
-
-
-@data_source_blueprint.route('/visualise/<string:data_source_id>')
-@user_decorators.requires_login
-def visualise_data_source(data_source_id):
-    data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
-
-    script, div = ResultVisualiser.visualize_data_source_stats(data_source)
-
-    return render_template('data_sources/data_source_stats.html',
-                           data_source=data_source,
-                           plot_script=script,
-                           plot_div=div,
-                           mimetype='text/html')
 
 # #todo: check
 # @data_source_blueprint.route('/recommend/<string:data_source_id>')

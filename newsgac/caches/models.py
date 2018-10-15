@@ -1,6 +1,6 @@
 from pymodm import MongoModel, fields
 
-from common.fields import ObjectField
+from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import CreatedUpdated
 
 

@@ -1,12 +1,11 @@
 import numpy
-import numpy as np
 from pymodm import fields, EmbeddedMongoModel
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 
 from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import ParametersMixin
-from pipelines.data_engineering import utils as DataUtils
+from data_engineering import utils as DataUtils
 
 
 class Result(EmbeddedMongoModel):
@@ -63,10 +62,4 @@ class Learner(ParametersMixin, EmbeddedMongoModel):
         model._tag = cls.tag
         return model
 
-    #
-    # @staticmethod
-    # def normalise_confusion_matrix(cm):
-    #     sum = cm.sum(axis=1)[:, np.newaxis]
-    #     temp = cm.astype('float')
-    #     # return cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    #     return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
+

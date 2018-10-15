@@ -1,6 +1,8 @@
 from pandas import DataFrame
 
-from learners.models.learner import Result
+import colorcet
+import numpy as np
+
 from bokeh.models import (
     ColumnDataSource,
     LabelSet,
@@ -12,15 +14,21 @@ from bokeh.models import (
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.layouts import gridplot
-import colorcet
-import numpy as np
-import pipelines.data_engineering.utils as DataUtils
+
 from bokeh.transform import factor_cmap
 from bokeh.palettes import Category20
+
+from data_engineering import utils as DataUtils
 
 
 __author__ = 'abilgin'
 
+
+def normalise_confusion_matrix(cm):
+    sum = cm.sum(axis=1)[:, np.newaxis]
+    temp = cm.astype('float')
+    # return cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
 
 class ResultVisualiser(object):
 
@@ -29,9 +37,9 @@ class ResultVisualiser(object):
 
     @staticmethod
     def retrieveHeatMapfromResult(normalisation_flag, result, title="", ds_param = 1):
-        confusion_matrix = result.get_confusion_matrix()
-        cm_normalised = Result.normalise_confusion_matrix(confusion_matrix)
-        genre_names = result.genre_names
+        confusion_matrix = result.confusion_matrix
+        cm_normalised = normalise_confusion_matrix(confusion_matrix)
+        genre_names = DataUtils.genre_labels
         # print title
         # print confusion_matrix
 
@@ -141,7 +149,6 @@ class ResultVisualiser(object):
 
     @staticmethod
     def retrievePlotForFeatureWeights(coefficients, experiment=None, vectorizer=None):
-
         if vectorizer == None:
             # names = DataIO.get_feature_names()
             names = [f for f in sorted(experiment.features.keys())]
