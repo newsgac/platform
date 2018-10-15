@@ -46,7 +46,7 @@ def setup_db(db):
 
 @pytest.fixture(scope="module")
 def test_user(db):
-    # creates a user 'test@test.com'
+    # creates ws user 'test@test.com'
     from newsgac.users.models import User
     user = User(email='test@test.com', password='testtesttest', name='Test', surname='User')
     user.save()

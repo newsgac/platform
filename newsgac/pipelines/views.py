@@ -52,6 +52,15 @@ def get_data_sources_dict():
 @requires_login
 @back.anchor
 def user_pipelines():
+    def map_task(task):
+        return {
+            'id': str(task.pk),
+            'name': task.name,
+            'status': task.status.value,
+            'started': task.created,
+            'progress': task.result.get('progress', {})
+        }
+
     pipelines = [
         {
             'id': str(pipeline._id),
@@ -66,6 +75,7 @@ def user_pipelines():
             'data_source': {
                 'display_title': pipeline.data_source.display_title
             },
+            'task': json.dumps(map_task(pipeline.task)),
             'json': model_to_json(pipeline, indent=4)
 
         } for pipeline in list(Pipeline.objects.all())

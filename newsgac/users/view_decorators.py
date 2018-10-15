@@ -11,7 +11,7 @@ def requires_login(f):
     def decorated_function(*args, **kwargs):
         if 'email' not in session.keys() or session['email'] is None:
             flash(Markup('You need to be logged in for this page. Please login below.'+
-                         ' Don\'t have an account? <a href="/users/register" class="alert-link">Register here.</a>'), 'warning')
+                         ' Don\'t have an account? <ws href="/users/register" class="alert-link">Register here.</ws>'), 'warning')
             return redirect(url_for('users.login_user', next=request.path))
         return f(*args, **kwargs)
 

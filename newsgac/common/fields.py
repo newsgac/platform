@@ -60,7 +60,7 @@ class EnumField(MongoBaseField):
     def __init__(self, *args, **kwargs):
         choices = kwargs.pop('choices')
         if not issubclass(choices, Enum):
-            raise TypeError('EnumField: choices is not a subclass of Enum')
+            raise TypeError('EnumField: choices is not ws subclass of Enum')
         self.choices_enum = choices
         super(EnumField, self).__init__(*args, **kwargs)
         self.validators.append(enum_validator(choices))

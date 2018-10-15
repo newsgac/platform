@@ -48,18 +48,25 @@
                             <th>Data source</th>
                             <th>NLP Tool</th>
                             <th>Learner</th>
+                            <th>Status</th>
                             <th></th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {% for pipeline in pipelines %}
+
                         <tr>
                             <td title="{{ pipeline.json}}">{{ pipeline.display_title }}</td>
                             <td>{{ pipeline.created|datetime }}</td>
                             <td>{{ pipeline.data_source.display_title }}</td>
                             <td>{{ pipeline.nlp_tool.name }}</td>
                             <td>{{ pipeline.learner.name }}</td>
+                            <td>
+                                <div class="task hidden">
+                                    {{ pipeline.task|safe }}
+                                </div>
+                            </td>
                             <td>
                                 <a class="btn btn-primary"
                                    href="{{ url_for('pipelines.new_pipeline', from_pipeline_id = pipeline.id) }}">

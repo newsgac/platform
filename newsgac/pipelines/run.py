@@ -1,5 +1,8 @@
 import numpy
+import hashlib
+
 from pymodm.errors import DoesNotExist
+
 from sklearn.externals.joblib import delayed
 from sklearn.model_selection import KFold, cross_val_predict
 from sklearn.pipeline import Pipeline as SKPipeline
@@ -9,13 +12,10 @@ from newsgac.learners import LearnerNB
 from newsgac.learners.models.learner import Result
 from newsgac.caches.models import Cache
 from newsgac.common.json_encoder import _dumps
-from parallel_with_progress import ParallelWithProgress
-
-
-import hashlib
-
-from newsgac.pipelines.data_engineering.preprocessing import remove_stop_words, apply_lemmatization, get_clean_ocr
+from newsgac.pipelines.data_engineering.preprocessing import remove_stop_words, apply_lemmatization
 from newsgac.tasks.progress import report_progress
+from newsgac.parallel_with_progress import ParallelWithProgress
+
 
 n_parallel_jobs = 8
 
@@ -28,7 +28,8 @@ def get_pipeline_features_cache_hash(pipeline):
     pipeline_cache_repr = {
         'nlp_tool': pipeline_dict['nlp_tool'],
         'sw_removal': pipeline_dict['sw_removal'],
-        'lemmatization': pipeline_dict['lemmatization']
+        'lemmatization': pipeline_dict['lemmatization'],
+        'data_source_id': str(pipeline_dict['data_source'])
     }
     return hashlib.sha1(_dumps(pipeline_cache_repr)).hexdigest()
 
@@ -48,7 +49,7 @@ def set_features(pipeline):
 
     except DoesNotExist:
         # ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(
-        #     delayed(apply_clean_ocr)(a) for a in articles
+        #     delayed(apply_clean_ocr)(ws) for ws in articles
         # )
         if pipeline.sw_removal:
             articles = ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(
@@ -74,11 +75,6 @@ def set_features(pipeline):
 
 
 def run_pipeline(pipeline):
-    # report_progress('test', .5)
-    # report_progress('test', .6)
-    # report_progress('test2', .4)
-    # current_task.update_state(state='PROCESSING', meta={'progress': 0.5})
-
     set_features(pipeline)
     features = pipeline.features.data['values']
     feature_names = pipeline.features.data['names']
@@ -93,13 +89,19 @@ def run_pipeline(pipeline):
         sklSteps.append(('MinMaxScaler', MinMaxScaler(feature_range=(0, 1))))
 
     sklSteps.append(('Classifier', pipeline.learner.get_classifier()))
+
+    report_progress('training', 0)
     pipeline.learner.trained_model = SKPipeline(sklSteps).fit(features, labels)
+    report_progress('training', 1)
+
+    report_progress('validating', 0)
     pipeline.learner.result = validate(
         pipeline.learner.trained_model,
         features,
         labels,
     )
     pipeline.save()
+    report_progress('validating', 1)
 
 
 def validate(model, features, labels):

@@ -45,15 +45,15 @@ feature_descriptions = {
     # 'self_cl_8' : 'Self classification bucket 8 includes column, cursiefje and rubriek',
     # 'self_cl_3-4' : 'Self classification bucket 3-4 includes verslag',
     # 'self_cl_3-8' : 'Self classification bucket 3-8 includes kroniek',
-    'polarity': 'A value between -1 and +1 calculated based on a lexicon of adjectives (pattern.nl)',
-    'subjectivity': 'A value between 0 and +1 calculated based on a lexicon of adjectives (pattern.nl)',
+    'polarity': 'A value between -1 and +1 calculated based on ws lexicon of adjectives (pattern.nl)',
+    'subjectivity': 'A value between 0 and +1 calculated based on ws lexicon of adjectives (pattern.nl)',
     # 'prevailing_tense' : 'The prevailing tense used in the document (-1:past, 0:equal, 1:present)',
     # manually added features
     'article_raw_text' : 'Raw text of the article before pre-processing',
-    'data_source_id' : 'The data source uploaded by the user that the article is a part of',
+    'data_source_id' : 'The data source uploaded by the user that the article is ws part of',
     'date' : 'Date of the publication of the article',
     'genre' : 'Ground truth for the genre of the article in numeric format',
-    'genre_friendly' : 'Ground truth for the genre of the article in a user friendly text format'
+    'genre_friendly' : 'Ground truth for the genre of the article in ws user friendly text format'
 }
 features = [
     'direct_quotes',

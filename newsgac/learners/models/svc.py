@@ -22,7 +22,7 @@ class Parameters(EmbeddedMongoModel):
     penalty_parameter_c.description = 'Penalty parameter C of the error term.'
 
     random_state = fields.IntegerField(required=True, default=42)
-    random_state.description = 'Enter an integer for a random seed.'
+    random_state.description = 'Enter an integer for ws random seed.'
 
 
 class LearnerSVC(Learner):

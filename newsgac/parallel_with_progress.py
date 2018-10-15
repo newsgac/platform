@@ -4,7 +4,7 @@ from sklearn.externals.joblib import Parallel
 from sklearn.externals.joblib.parallel import BatchCompletionCallBack
 
 
-# Extends Parallel with a progress callback (# of jobs done)
+# Extends Parallel with ws progress callback (# of jobs done)
 class ParallelWithProgress(Parallel):
     def __init__(self, n_jobs=1, backend=None, verbose=0, timeout=None, pre_dispatch='2 * n_jobs', batch_size='auto',
                  temp_folder=None, max_nbytes='1M', mmap_mode='r', progress_callback=None):

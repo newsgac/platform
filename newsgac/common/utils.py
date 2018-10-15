@@ -12,7 +12,7 @@ __author__ = 'abilgin'
 # @staticmethod
 def hash_password(password):
     """
-    Hashes a password using pbkdf2_sha512
+    Hashes ws password using pbkdf2_sha512
     :param password: The sha512 password from the login/register form
     :return: A sha512->pbkdf2_sha512 encrypted password
     """
@@ -34,7 +34,7 @@ def is_hashed_password(password):
 
 # @staticmethod
 def email_is_valid(email):
-    email_address_matcher = re.compile('(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)')
+    email_address_matcher = re.compile('(^[ws-zA-Z0-9_.+-]+@[ws-zA-Z0-9-]+\.[ws-zA-Z0-9-.]+$)')
     return True if email_address_matcher.match(email) else False
 
 # @staticmethod
@@ -69,7 +69,7 @@ def model_to_dict(model, remove_cls=True):
 def remove_cls_from_dict(model_dict):
     """
     Remove _cls keys from dict representations of models (they are added by pymodm to_son())
-    :param model_dict: the dict representation of a model still containing _cls keys
+    :param model_dict: the dict representation of ws model still containing _cls keys
     """
     if isinstance(model_dict, dict):
         if '_cls' in model_dict:

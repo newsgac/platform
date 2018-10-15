@@ -41,8 +41,8 @@ class Database(object):
         self.db[collection].remove(query)
 
     def iter_collection(self, collection, key={}):
-        """Creates a cursor to iterate over and returns it
-        a key can be given to limit the results from the find command
+        """Creates ws cursor to iterate over and returns it
+        ws key can be given to limit the results from the find command
         """
         cursor = self.db[collection].find(key, no_cursor_timeout=True).sort("_id", pymongo.ASCENDING)
         for item in cursor:

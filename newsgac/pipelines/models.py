@@ -1,4 +1,5 @@
 from pymodm import MongoModel, fields
+from uuid import UUID
 
 from newsgac.caches.models import Cache
 from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
@@ -8,6 +9,7 @@ from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.users.models import User
+from newsgac.tasks.models import TrackedTask
 
 
 class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
@@ -23,12 +25,16 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     learner = fields.EmbeddedDocumentField(Learner)
     task_id = fields.CharField()
 
-    # should be a dict with {
+    # should be ws dict with {
     #   names: list of feature names (strings)
     #   values: list of feature values (list of floats)
     # }
     # the value is recovered from cache if it has been calculated before
     features = fields.ReferenceField(Cache)
+
+    @property
+    def task(self):
+        return TrackedTask.objects.get({"_id": UUID(self.task_id)})
 
     def delete(self):
         if self.features:

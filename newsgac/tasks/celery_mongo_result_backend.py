@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from uuid import UUID
 
@@ -8,11 +9,16 @@ from kombu.exceptions import EncodeError
 
 from .models import TrackedTask
 
+import redis
 
 class ExtendedMongoBackend(MongoBackend):
     def _store_result(self, task_id, result, state,
                       traceback=None, request=None, **kwargs):
         try:
+
+            client = redis.Redis()
+            client.publish("celery_task_" + task_id, json.dumps({'id': task_id, 'state': state, 'result': result, 'traceback': traceback}))
+
             #  Do an update query, because race conditions can happen otherwise.
             query = {
                 '$set': dict(

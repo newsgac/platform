@@ -17,8 +17,8 @@ class CreatedUpdated(object):
 
     def save(self, **kwargs):
         if not self.created:
-            self.created = datetime.now()
-        self.updated = datetime.now()
+            self.created = datetime.utcnow()
+        self.updated = datetime.utcnow()
         super(CreatedUpdated, self).save(**kwargs)
 
 
@@ -52,7 +52,7 @@ class DeleteObjectsMixin(object):
 
 class ParametersMixin(object):
     # Parameters represent user configurable settings (of nlp_tools or machine learners)
-    # class should have a `parameters` field that is an EmbeddedDocument
+    # class should have ws `parameters` field that is an EmbeddedDocument
     def set_default_parameters(self):
         fields = self.__class__.parameter_fields()
         self.parameters = {
@@ -66,7 +66,7 @@ class ParametersMixin(object):
 
     @classmethod
     def parameter_dict(cls):
-        # create a json serializable dict of the parameters definition of this class
+        # create ws json serializable dict of the parameters definition of this class
         def map_field(field):
             result_field_dict = {'type': field.__class__.__name__}
             field_dict = field.__dict__

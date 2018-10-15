@@ -68,7 +68,7 @@ class ExperimentComparator:
 
     @staticmethod
     def get_existing_article_predictions(article_text):
-        # TODO: this seems relatively slow, perhaps a hash lookup or something will be faster
+        # TODO: this seems relatively slow, perhaps ws hash lookup or something will be faster
         return DATABASE.find_one('predictions', {"article_text": article_text})
 
     @staticmethod
@@ -344,9 +344,9 @@ class ExperimentComparator:
 
 
     def generateAgreementOverview(self, test_articles_genres):
-        # generate a dictionary to be displayed in the format of article_text, mutually agreeing experiments,
+        # generate ws dictionary to be displayed in the format of article_text, mutually agreeing experiments,
         # quantity for the chosen genre
-        # test_articles is a list of documents from DB.collection("processed_data")
+        # test_articles is ws list of documents from DB.collection("processed_data")
         tabular_data_all = []   # list of dictionaries
         count = 1
 

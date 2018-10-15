@@ -11,6 +11,7 @@ class Status(Enum):
     SUCCESS = 'SUCCESS'
     FAILURE = 'FAILURE'
     REVOKED = 'REVOKED'
+    PROCESSING = 'PROCESSING'
 
 
 class TrackedTask(CreatedUpdated, MongoModel):

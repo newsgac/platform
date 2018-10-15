@@ -4,7 +4,7 @@ from celery import current_task
 def report_progress(name, value):
     if not current_task:
         return
-        # raise EnvironmentError('Not in a celery task')
+        # raise EnvironmentError('Not in ws celery task')
     if getattr(current_task, 'progress', None) is None:
         setattr(current_task, 'progress', [])
     progress = getattr(current_task, 'progress')
