@@ -60,13 +60,13 @@ def register_user():
         flash(Markup("""
 You need to have an account to create your experiments.
 Already have an account? 
-<ws href="/users/login" class="alert-link">
+<a href="/users/login" class="alert-link">
     Log in here.
-</ws><br/>
+</a><br/>
 If you would like to find out more, why not
- <ws href="/experiments/public" class="alert-link">
+ <a href="/experiments/public" class="alert-link">
     browse public experiments?
- </ws>
+ </a>
 """), 'info')
 
     return render_template("users/register.html")

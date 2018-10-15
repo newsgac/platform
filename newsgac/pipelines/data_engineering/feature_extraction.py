@@ -19,7 +19,7 @@ stylistic features (e.g. frequency of particular punctuation), morphological fea
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
-# You should have received ws copy of the GNU General Public License
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 import re
@@ -721,6 +721,6 @@ class Article(object):
         '''
         Log Frog processing errors.
         '''
-        with open('frog_log.txt', 'ws') as f:
+        with open('frog_log.txt', 'a') as f:
             # f.write(self.url + ' | ' + message + '\n')
             f.write(message + '\n')

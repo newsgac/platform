@@ -49,7 +49,7 @@ def set_features(pipeline):
 
     except DoesNotExist:
         # ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(
-        #     delayed(apply_clean_ocr)(ws) for ws in articles
+        #     delayed(apply_clean_ocr)(a) for a in articles
         # )
         if pipeline.sw_removal:
             articles = ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(

@@ -23,7 +23,7 @@ def get_clean_ocr(ocr):
     pattern += '(' + '|'.join(closing_quote_chars) + ')($|[^\w])'
     pattern = re.compile(pattern, flags=re.UNICODE | re.DOTALL)
     clean_ocr, nr_subs = re.subn(pattern, '', ocr)
-    # this function was duplicated two-three times, but sometimes with ws space:
+    # this function was duplicated two-three times, but sometimes with a space:
     #clean_ocr, nr_subs = re.subn(pattern, ' ', ocr)
     clean_ocr = ' '.join(clean_ocr.split())
 

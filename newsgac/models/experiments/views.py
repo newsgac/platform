@@ -85,7 +85,7 @@ experiment_blueprint = Blueprint('experiments', __name__)
 #                                            ds_titles_from_db=existing_data_source_titles,
 #                                            feature_dict = manual_feature_dict)
 #         else:
-#             flash('Please choose ws data source!', 'error')
+#             flash('Please choose a data source!', 'error')
 #             return render_template('experiments/new_experiment_nb.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
 #                                    feature_dict = manual_feature_dict)
 #
@@ -126,7 +126,7 @@ experiment_blueprint = Blueprint('experiments', __name__)
 #                                            ds_titles_from_db=existing_data_source_titles,
 #                                            feature_dict = manual_feature_dict)
 #         else:
-#             flash('Please choose ws data source!', 'error')
+#             flash('Please choose a data source!', 'error')
 #             return render_template('experiments/new_experiment_mlp.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
 #                                    feature_dict = manual_feature_dict)
 #
@@ -167,7 +167,7 @@ experiment_blueprint = Blueprint('experiments', __name__)
 #                                            ds_titles_from_db=existing_data_source_titles,
 #                                            feature_dict = manual_feature_dict)
 #         else:
-#             flash('Please choose ws data source!', 'error')
+#             flash('Please choose a data source!', 'error')
 #             return render_template('experiments/new_experiment_rf.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
 #                                    feature_dict = manual_feature_dict)
 #
@@ -210,7 +210,7 @@ experiment_blueprint = Blueprint('experiments', __name__)
 #                                            ds_titles_from_db=existing_data_source_titles,
 #                                            feature_dict = manual_feature_dict)
 #         else:
-#             flash('Please choose ws data source!', 'error')
+#             flash('Please choose a data source!', 'error')
 #             return render_template('experiments/new_experiment_svc.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
 #                                    feature_dict = manual_feature_dict)
 #
@@ -252,7 +252,7 @@ experiment_blueprint = Blueprint('experiments', __name__)
 #                                            ds_titles_from_db=existing_data_source_titles,
 #                                            feature_dict = manual_feature_dict)
 #         else:
-#             flash('Please choose ws data source!', 'error')
+#             flash('Please choose a data source!', 'error')
 #             return render_template('experiments/new_experiment_xgb.html', request=request.form, ds_titles_from_db=existing_data_source_titles,
 #                                    feature_dict = manual_feature_dict)
 #

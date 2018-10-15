@@ -50,7 +50,7 @@ class Preprocessor():
                 self.scaling = DataSourceConstants.DEFAULT_SCALING
 
     def do_parallel_processing(self, documents, progress):
-        # Parallel receives ws jobs iterator, so won't know the length in advance, so we wrap progress and cache it.
+        # Parallel receives a jobs iterator, so won't know the length in advance, so we wrap progress and cache it.
         def progress_callback(num):
             if progress:
                 progress(num / float(len(documents)))

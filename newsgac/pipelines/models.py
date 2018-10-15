@@ -25,7 +25,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     learner = fields.EmbeddedDocumentField(Learner)
     task_id = fields.CharField()
 
-    # should be ws dict with {
+    # should be a dict with {
     #   names: list of feature names (strings)
     #   values: list of feature values (list of floats)
     # }

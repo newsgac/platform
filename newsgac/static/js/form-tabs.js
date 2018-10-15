@@ -1,9 +1,9 @@
 $(document).ready(function () {
     //Initialize tooltips
-    $('.nav-tabs > li ws[title]').tooltip();
+    $('.nav-tabs > li a[title]').tooltip();
 
     //Wizard
-    $('ws[data-toggle="tab"]').on('show.bs.tab', function (e) {
+    $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
 
         var $target = $(e.target);
 
@@ -28,10 +28,10 @@ $(document).ready(function () {
 });
 
 function nextTab(elem) {
-    $(elem).next().find('ws[data-toggle="tab"]').click();
+    $(elem).next().find('a[data-toggle="tab"]').click();
 }
 function prevTab(elem) {
-    $(elem).prev().find('ws[data-toggle="tab"]').click();
+    $(elem).prev().find('a[data-toggle="tab"]').click();
 }
 
 
@@ -173,7 +173,7 @@ $(document).ready(function() {
         ],
 
     initComplete: function () {
-             // Setup - add ws text input to each footer cell
+             // Setup - add a text input to each footer cell
             $('#explanations_table tfoot th').each( function () {
                 var title = $(this).text();
                 $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
@@ -207,7 +207,7 @@ $(document).ready(function() {
         ],
 
     initComplete: function () {
-             // Setup - add ws text input to each footer cell
+             // Setup - add a text input to each footer cell
             $('#combinations_table tfoot th').each( function () {
                 var title = $(this).text();
                 $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
@@ -240,7 +240,7 @@ $(document).ready(function() {
         {width: "10%", targets: 0 }, {width: "30%", targets: 1 }, {width: "20%", targets: 2},
         ],
     initComplete: function () {
-         // Setup - add ws text input to each footer cell
+         // Setup - add a text input to each footer cell
         $('#experiments_comparison_table tfoot th').each( function () {
             var title = $(this).text();
             $(this).html( '<input type="text" placeholder="Search '+title+'" />' );

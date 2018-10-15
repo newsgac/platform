@@ -16,7 +16,7 @@ from .nlp_tool import NlpTool
 
 class Features(EmbeddedMongoModel):
     # adds all features (from array + descr dict) to the Feature class as BooleanFields.
-    # todo: there must be ws cleaner way to accomplish this
+    # todo: there must be a cleaner way to accomplish this
     for feature in features:
         field = fields.BooleanField(blank=True, required=False, default=True)
         field.description = feature_descriptions[feature]
@@ -60,7 +60,7 @@ class Frog(NlpTool):
         for i in range(len(features) - 1):
             assert features[i].keys() == features[i+1].keys()
 
-        # features is ws list of ordered dicts like { [feature_name]: [feature_value] }
+        # features is a list of ordered dicts like { [feature_name]: [feature_value] }
         feature_names = features[0].keys()
         feature_values = numpy.array([numpy.array(feature.values()) for feature in features], dtype='float32')
 
