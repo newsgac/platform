@@ -25,6 +25,8 @@ frog_port = 12345
 redis_host = 'redis'
 redis_port = 6379
 
+n_parallel_jobs = 8
+pipeline_cache_dir = '/tmp/newsgac'
 
 if environment in [Env.local, Env.test]:
     flask_port = 5050

@@ -1,63 +1,37 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import hashlib
 import itertools
 
 from nltk import sent_tokenize
 from pynlpl.clients.frogclient import FrogClient
 
 from newsgac import config
+from newsgac.caches.models import Cache
 from newsgac.common.utils import split_long_sentences, split_chunks
-from newsgac.nlp_tools.models.frog_ocr import get_clean_ocr
 import newsgac.data_engineering.utils as Utilities
 
 
-def get_sentences(text):
-    return [s for s in sent_tokenize(text) if s]
+def get_frog_tokens(text):
+    cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
+    if not cache.data:
+        sentences = [s for s in sent_tokenize(text) if s]
+        sentences = split_long_sentences(sentences, 48)
+        chunks = [' '.join(chunk).encode('utf-8') for chunk in split_chunks(sentences, 10)]
 
-
-def get_frog_tokens(sentences):
-    sentences = split_long_sentences(sentences, 48)
-    chunks = [' '.join(chunk).encode('utf-8') for chunk in split_chunks(sentences, 10)]
-
-    frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
-    tokens = itertools.chain.from_iterable([frogclient.process(chunk) for chunk in chunks])
-    return [token for token in tokens if None not in token]
-
-
-def get_sentiment_features(text):
-    from pattern.nl import sentiment
-    polarity, subjectivity = sentiment(text)
-    return {
-        'polarity': polarity,
-        'subjectivity': subjectivity
-    }
+        frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
+        tokens = itertools.chain.from_iterable([frogclient.process(chunk) for chunk in chunks])
+        cache.data = [token for token in tokens if None not in token]
+        cache.save()
+    return cache.data
 
 
 def get_frog_features(text):
-    clean_ocr, nr_subs = get_clean_ocr(text)
-
-    features = get_sentiment_features(text)
-    features['direct_quotes'] = nr_subs
-
-    sentences = get_sentences(clean_ocr)
-    sentence_count = len(sentences)
-
-    tokens = get_frog_tokens(sentences)
+    features = {}
+    tokens = get_frog_tokens(text)
 
     # Word count
     token_count = len(tokens)
-
-    # Count punctuation
-    features['question_marks_perc'] = clean_ocr.count('?') / float(token_count)
-    features['exclamation_marks_perc'] = clean_ocr.count('!') / float(token_count)
-    currency_symbols = 0
-    for char in [u'$', u'€', u'£', u'ƒ']:
-        currency_symbols += clean_ocr.count(char)
-    features['currency_symbols_perc'] = currency_symbols / float(token_count)
-    features['digits_perc'] = len([c for c in clean_ocr if c.isdigit()]) / float(token_count)
-
-    features['sentences'] = sentence_count
-    features['avg_sentence_length'] = (token_count / sentence_count) if sentence_count > 0 else 0
 
     # Adjective count and percentage
     adj_count = len([t for t in tokens if t[4].startswith('ADJ')])

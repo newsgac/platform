@@ -1,111 +1,79 @@
 import numpy
-import hashlib
 
-from pymodm.errors import DoesNotExist
-
-from sklearn.externals.joblib import delayed
+from sklearn.feature_extraction import DictVectorizer
 from sklearn.model_selection import KFold, cross_val_predict
-from sklearn.pipeline import Pipeline as SKPipeline
-from sklearn.preprocessing import RobustScaler, MinMaxScaler
+from sklearn.pipeline import Pipeline as SKPipeline, FeatureUnion
+from sklearn.preprocessing import RobustScaler, MaxAbsScaler
 
 from newsgac.learners import LearnerNB
 from newsgac.learners.models.learner import Result
-from newsgac.caches.models import Cache
-from newsgac.common.json_encoder import _dumps
-from newsgac.data_engineering.preprocessing import remove_stop_words, apply_lemmatization
+from newsgac.nlp_tools import TFIDF
+from newsgac.nlp_tools.transformers import StopWordRemoval, ApplyLemmatization, CleanOCR, ExtractBasicFeatures, \
+    ExtractSentimentFeatures
 from newsgac.tasks.progress import report_progress
-from newsgac.parallel_with_progress import ParallelWithProgress
 
 
-n_parallel_jobs = 8
-
-# def apply_clean_ocr(article):
-#     article['text'] = get_clean_ocr(article['text'])
-
-
-def get_pipeline_features_cache_hash(pipeline):
-    pipeline_dict = pipeline.to_son().to_dict()
-    pipeline_cache_repr = {
-        'nlp_tool': pipeline_dict['nlp_tool'],
-        'sw_removal': pipeline_dict['sw_removal'],
-        'lemmatization': pipeline_dict['lemmatization'],
-        'data_source_id': str(pipeline_dict['data_source'])
-    }
-    return hashlib.sha1(_dumps(pipeline_cache_repr)).hexdigest()
+def dict_vectorize(transformer_name, transformer):
+    return (transformer_name, SKPipeline([
+        (transformer_name, transformer), ('DictVectorizer', DictVectorizer())
+    ]))
 
 
-def set_features(pipeline):
-    articles = [
-        article.raw_text for article in pipeline.data_source.articles
-    ]
+def get_sk_pipeline(pipeline):
+    skl_steps = [('CleanOCR', CleanOCR())]
 
-    if len(articles) == 0:
-        raise ValueError('No articles in data source')
+    if pipeline.sw_removal:
+        skl_steps.append(('StopWordRemoval', StopWordRemoval()))
 
-    pipeline_features_cache_hash = get_pipeline_features_cache_hash(pipeline)
+    if pipeline.lemmatization:
+        skl_steps.append(('Lemmatization', ApplyLemmatization()))
 
-    try:
-        pipeline.features = Cache.objects.get({'hash': pipeline_features_cache_hash})
+    if pipeline.nlp_tool:
+        feature_pipelines = []
+        if type(pipeline.nlp_tool) != TFIDF:
+            feature_pipelines = [
+                dict_vectorize('BasicFeatures', ExtractBasicFeatures()),
+                dict_vectorize('SentimentFeatures', ExtractSentimentFeatures()),
+            ]
+        feature_pipelines.append(
+            dict_vectorize(pipeline.nlp_tool.name, pipeline.nlp_tool)
+        )
+        skl_steps.append(
+            ('FeatureExtraction', FeatureUnion(feature_pipelines))
+        )
 
-    except DoesNotExist:
-        # ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(
-        #     delayed(apply_clean_ocr)(a) for a in articles
-        # )
-        if pipeline.sw_removal:
-            articles = ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(
-                delayed(remove_stop_words)(a) for a in articles
-            )
+        if pipeline.nlp_tool.parameters.scaling:
+            skl_steps.append(('RobustScaler', RobustScaler(with_centering=False)))
 
-        if pipeline.lemmatization:
-            articles = ParallelWithProgress(n_jobs=n_parallel_jobs, progress_callback=None)(
-                delayed(apply_lemmatization)(a) for a in articles
-            )
+        # NB Can't handle negative feature values.
+        if isinstance(pipeline.learner, LearnerNB):
+            skl_steps.append(('MaxAbsScaler', MaxAbsScaler()))
 
-        if pipeline.nlp_tool:
-            feature_names, features = pipeline.nlp_tool.get_features(articles)
-            pipeline.features = Cache(
-                hash=pipeline_features_cache_hash,
-                data={
-                    'names': feature_names,
-                    'values': features,
-                }
-            )
-            pipeline.features.save()
-            pipeline.save()
+    skl_steps.append(('Classifier', pipeline.learner.get_classifier()))
+    return SKPipeline(skl_steps)
 
 
 def run_pipeline(pipeline):
-    set_features(pipeline)
-    features = pipeline.features.data['values']
-    feature_names = pipeline.features.data['names']
+    texts = numpy.array([article.raw_text for article in pipeline.data_source.articles])
     labels = numpy.array([article.label for article in pipeline.data_source.articles])
 
-    sklSteps = []
-
-    if pipeline.nlp_tool.parameters.scaling:
-        sklSteps.append(('RobustScaler', RobustScaler()))
-
-    # NB Can't handle negative feature values. todo: abstract this?
-    if isinstance(pipeline.learner, LearnerNB):
-        sklSteps.append(('MinMaxScaler', MinMaxScaler(feature_range=(0, 1))))
-
-    sklSteps.append(('Classifier', pipeline.learner.get_classifier()))
+    pipeline.sk_pipeline = get_sk_pipeline(pipeline)
 
     report_progress('training', 0)
-    pipeline.learner.trained_model = SKPipeline(sklSteps).fit(features, labels)
+    pipeline.sk_pipeline.fit(texts, labels)
     report_progress('training', 1)
 
     report_progress('validating', 0)
-    pipeline.learner.result = validate(
-        pipeline.learner.trained_model,
-        features,
+    pipeline.result = validate(
+        pipeline.sk_pipeline,
+        texts,
         labels,
     )
     pipeline.save()
     report_progress('validating', 1)
 
 
-def validate(model, features, labels):
+def validate(model, X, labels):
     cv = KFold(n_splits=10, random_state=42, shuffle=True)
-    cross_val_predictions = cross_val_predict(model, features, labels, cv=cv)
+    cross_val_predictions = cross_val_predict(model, X, labels, cv=cv)
     return Result.from_prediction(labels, cross_val_predictions)

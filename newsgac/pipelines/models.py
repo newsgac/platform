@@ -1,7 +1,12 @@
-from pymodm import MongoModel, fields
+import numpy
+from pymodm import MongoModel, fields, EmbeddedMongoModel
 from uuid import UUID
 
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix
+
 from newsgac.caches.models import Cache
+from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 from newsgac.data_sources.models import DataSource
 from newsgac.learners import LearnerSVC
@@ -10,6 +15,46 @@ from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.users.models import User
 from newsgac.tasks.models import TrackedTask
+
+from newsgac.data_engineering import utils as DataUtils
+
+
+class Result(EmbeddedMongoModel):
+    accuracy = fields.FloatField()
+    cohens_kappa = fields.FloatField()
+    confusion_matrix = ObjectField()
+    fmeasure_macro = fields.FloatField()
+    fmeasure_micro = fields.FloatField()
+    fmeasure_weighted = fields.FloatField()
+    precision_macro = fields.FloatField()
+    precision_micro = fields.FloatField()
+    precision_weighted = fields.FloatField()
+    recall_macro = fields.FloatField()
+    recall_micro = fields.FloatField()
+    recall_weighted = fields.FloatField()
+    std = fields.FloatField()
+
+    @classmethod
+    def from_prediction(cls, true_labels, predicted_labels):
+        scores = numpy.array([
+            1 if true_labels[i] == predicted_labels[i] else 0 for i in range(0, len(true_labels))
+        ])
+
+        return cls(
+            confusion_matrix=confusion_matrix(true_labels, predicted_labels, labels=DataUtils.genre_codes),
+            precision_weighted=metrics.precision_score(true_labels, predicted_labels, average='weighted'),
+            precision_micro=metrics.precision_score(true_labels, predicted_labels, average='micro'),
+            precision_macro=metrics.precision_score(true_labels, predicted_labels, average='macro'),
+            recall_weighted=metrics.recall_score(true_labels, predicted_labels, average='weighted'),
+            recall_micro=metrics.recall_score(true_labels, predicted_labels, average='micro'),
+            recall_macro=metrics.recall_score(true_labels, predicted_labels, average='macro'),
+            fmeasure_weighted=metrics.f1_score(true_labels, predicted_labels, average='weighted'),
+            fmeasure_micro=metrics.f1_score(true_labels, predicted_labels, average='micro'),
+            fmeasure_macro=metrics.f1_score(true_labels, predicted_labels, average='macro'),
+            cohens_kappa=metrics.cohen_kappa_score(true_labels, predicted_labels),
+            accuracy=scores.mean(),
+            std=scores.std()
+        )
 
 
 class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
@@ -23,6 +68,8 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     lemmatization = fields.BooleanField(required=True, default=True)
     nlp_tool = fields.EmbeddedDocumentField(NlpTool, blank=True, required=True, default=TFIDF.create())
     learner = fields.EmbeddedDocumentField(Learner)
+    sk_pipeline = ObjectField()
+    result = fields.EmbeddedDocumentField(Result)
     task_id = fields.CharField()
 
     # should be a cached dict with {
