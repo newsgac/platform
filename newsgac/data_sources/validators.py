@@ -1,4 +1,4 @@
-from pymodm.errors import ValidationError, DoesNotExist
+from pymodm.errors import ValidationError
 
 # from newsgac.data_sources.models import DataSource
 

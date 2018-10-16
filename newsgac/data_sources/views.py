@@ -6,7 +6,6 @@ from werkzeug.utils import redirect, secure_filename
 
 from newsgac.common.back import back
 import newsgac.users.view_decorators as user_decorators
-import newsgac.data_engineering.utils as DataUtils
 
 from newsgac.tasks.models import TrackedTask
 from newsgac.data_sources.models import DataSource

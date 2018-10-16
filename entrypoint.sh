@@ -29,16 +29,12 @@ sys.exit(0)
 END
 }
 
-function rabbitmq_ready(){
+function redis_ready(){
 python << END
-from kombu import Connection
 import sys
-#from celery import Celery
+from redis import Redis
 try:
-    conn = Connection('amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbit//', transport_options={
-        'visibility_timeout': 1000,
-    })
-    conn.ensure_connection(max_retries=1)
+    Redis(host='redis', port=6379).ping()
 except:
     sys.exit(-1)
 sys.exit(0)
@@ -57,16 +53,16 @@ until frog_ready; do
 done &
 frog_waiter_pid=$!
 
-until rabbitmq_ready; do
-  >&2 echo "Waiting for RabbitMQ service to come online"
+until redis_ready; do
+  >&2 echo "Waiting for Redis service to come online"
   sleep 1
 done &
-rabbitmq_waiter_pid=$!
+redis_waiter_pid=$!
 
 wait ${mongo_waiter_pid}
 wait ${frog_waiter_pid}
-wait ${rabbitmq_waiter_pid}
+wait ${redis_waiter_pid}
 
->&2 echo "FROG & RabbitMQ & MongoDB are up - continuing..."
+>&2 echo "FROG & Redis & MongoDB are up - continuing..."
 
 exec "$@"

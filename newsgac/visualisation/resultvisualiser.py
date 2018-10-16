@@ -18,7 +18,7 @@ from bokeh.layouts import gridplot
 from bokeh.transform import factor_cmap
 from bokeh.palettes import Category20
 
-from data_engineering import utils as DataUtils
+from newsgac.data_engineering import utils as DataUtils
 
 
 __author__ = 'abilgin'

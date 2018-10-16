@@ -4,7 +4,7 @@ import gridfs
 from pymodm import DateTimeField, EmbeddedDocumentField
 from pymodm.connection import _get_db
 
-from common.fields import ObjectField
+from newsgac.common.fields import ObjectField
 from newsgac.common.utils import model_to_dict
 
 

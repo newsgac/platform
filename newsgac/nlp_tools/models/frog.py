@@ -1,16 +1,13 @@
 from collections import OrderedDict
 
 import numpy
-from nltk import sent_tokenize
+
 from pymodm import EmbeddedMongoModel
 from pymodm import fields
-from pynlpl.clients.frogclient import FrogClient
 
-import config
-from common.utils import split_chunks, split_long_sentences
-from nlp_tools.models.frog_extract_features import get_frog_features
-from nlp_tools.models.frog_features import feature_descriptions, features
-from tasks.progress import report_progress
+from newsgac.nlp_tools.models.frog_extract_features import get_frog_features
+from newsgac.nlp_tools.models.frog_features import feature_descriptions, features
+from newsgac.tasks.progress import report_progress
 from .nlp_tool import NlpTool
 
 

@@ -15,37 +15,9 @@ services:
     redis:
         hostname: redis
         image: redis:latest
-#        environment:
-#            - redisMQ_DEFAULT_USER=newsgac
-#            - redisMQ_DEFAULT_PASS=1234
-        restart: on-failure
-#        volumes:
-#            - ../redismq:/var/lib/redismq
-        networks:
-            - newsgac-net
-
-    worker:
-        build:
-            context: ./newsgac
-            dockerfile: Dockerfile_celery
-        links:
-            - redis
-            - database
-            - frog
-        depends_on:
-            - redis
-            - database
-            - frog
         restart: on-failure
         networks:
             - newsgac-net
-
-    flower:
-        image: mher/flower:latest
-        volumes:
-            - ./newsgac:/newsgac
-        links:
-            - redis
 
     database:
         hostname: mongo
@@ -55,8 +27,9 @@ services:
 
     web:
         build:
-            context: ./newsgac
-            dockerfile: Dockerfile_flask
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/web
         links:
             - worker
             - redis
@@ -69,6 +42,32 @@ services:
         restart: on-failure
         networks:
             - newsgac-net
-            
-volumes:
-    redismq:
+        command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "30", "--bind", "0.0.0.0:5000", "--access-logfile", "-", "--error-logfile", "-", "newsgac.app:app"]
+
+    worker:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/web
+        links:
+            - redis
+            - database
+            - frog
+        depends_on:
+            - redis
+            - database
+            - frog
+        restart: on-failure
+        networks:
+            - newsgac-net
+        command: celery -A newsgac.tasks.celery_app worker -l info --concurrency 10 -n worker1@%h
+
+    ws-celery-monitor:
+        build:
+            context: ./ws-celery-monitor
+        image: newsgac/ws-celery-monitor
+        links:
+            - redis
+        restart: on-failure
+        networks:
+            - newsgac-net

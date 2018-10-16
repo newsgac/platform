@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session, url_for, render_template, flash
+from flask import Blueprint, request, session, render_template, flash
 from werkzeug.utils import redirect
 from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError

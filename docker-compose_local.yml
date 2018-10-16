@@ -25,20 +25,22 @@ services:
     worker:
         hostname: celeryworker
         volumes:
-            - ./newsgac:/newsgac
+            - ./newsgac:/newsgac/newsgac
         env_file:
             - .env.localdocker
-        command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A celery_tasks.celery_app worker -l info --concurrency 1 -n worker1@%h" ]
-
-    flower:
-        ports:
-          - "5555:5555"
-        entrypoint: ["sh", "-c", "cd /newsgac && ls && celery flower --broker=amqp://newsgac:1234@localhost:5672/"]
+        command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 1 -n worker1@%h" ]
 
     web:
         volumes:
-            - ./newsgac:/newsgac
+            - ./newsgac:/newsgac/newsgac
         ports:
-            - "5000:5000"
+            - "5050:5000"
         env_file:
             - .env.localdocker
+        command: ["python", "newsgac/app.py"]
+        environment:
+            - PYTHONPATH=/newsgac
+
+    ws-celery-monitor:
+        ports:
+            - "8080:8080"

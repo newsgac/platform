@@ -1,6 +1,6 @@
 import pytest
 
-from data_sources.process import process_data_source
+from newsgac.data_sources.process import process_data_source
 from newsgac.data_sources.models import DataSource
 
 

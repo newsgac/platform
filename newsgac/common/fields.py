@@ -5,7 +5,6 @@ import pymodm.fields
 from pymodm.base.fields import MongoBaseField
 from pymodm.connection import _get_db
 from pymodm.errors import ValidationError
-from pymodm.files import FieldFile
 
 from newsgac.common.utils import hash_password, is_hashed_password
 

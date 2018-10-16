@@ -5,7 +5,7 @@ from flask import session
 from celery import Celery, Task
 from kombu.serialization import register
 
-from common.utils import model_to_json
+from newsgac.common.utils import model_to_json
 from newsgac import config
 from newsgac.tasks.models import TrackedTask, Status
 from newsgac.common.json_encoder import _dumps, _loads
@@ -30,7 +30,7 @@ class CeleryTrackedTask(Task):
             task.save()
         except Exception as e:
             raise
-        client = redis.Redis()
+        client = redis.Redis(host=config.redis_host, port=config.redis_port)
         client.publish("celery_task_new", model_to_json(task))
         task_eager_result = super(CeleryTrackedTask, self).apply_async(args, kwargs, task_id=task_id, headers={'user_email': session['email']}, **options)
 
@@ -50,7 +50,6 @@ celery_app = Celery(
         'newsgac.tasks',
         'newsgac.data_sources.tasks',
         'newsgac.pipelines.tasks',
-        'newsgac.tasks.tasks',
     ],
     task_cls=CeleryTrackedTask
 )

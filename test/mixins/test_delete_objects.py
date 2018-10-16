@@ -1,8 +1,8 @@
 from pymodm import MongoModel, fields, EmbeddedMongoModel
 from pymodm.connection import _get_db
 
-from common.fields import ObjectField
-from common.mixins import CreatedUpdated, DeleteObjectsMixin
+from newsgac.common.fields import ObjectField
+from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 
 
 class EmbeddedModelWithObjectField(EmbeddedMongoModel):

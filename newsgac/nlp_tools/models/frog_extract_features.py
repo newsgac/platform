@@ -5,10 +5,10 @@ import itertools
 from nltk import sent_tokenize
 from pynlpl.clients.frogclient import FrogClient
 
-import config
-from common.utils import split_long_sentences, split_chunks
-from nlp_tools.models.frog_ocr import get_clean_ocr
-import data_engineering.utils as Utilities
+from newsgac import config
+from newsgac.common.utils import split_long_sentences, split_chunks
+from newsgac.nlp_tools.models.frog_ocr import get_clean_ocr
+import newsgac.data_engineering.utils as Utilities
 
 
 def get_sentences(text):

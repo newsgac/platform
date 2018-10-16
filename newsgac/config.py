@@ -22,20 +22,21 @@ mongo_database_name = 'newsgacdev'
 
 frog_hostname = 'frog'
 frog_port = 12345
-redis_url = 'redis://localhost:6379/0'
+redis_host = 'redis'
+redis_port = 6379
+
 
 if environment in [Env.local, Env.test]:
     flask_port = 5050
     celery_eager = False
     mongo_host = 'localhost'
     frog_hostname = 'localhost'
-    redis_url = 'redis://localhost:6379/0'
+    redis_host = 'localhost'
 
 if environment == Env.test:
     mongo_database_name = 'newsgactest'
     celery_eager = True
 
 
-
-
+redis_url = 'redis://%s:%s/0' % (redis_host, redis_port)
 mongo_url = 'mongodb://%s:%s/%s' % (mongo_host, mongo_port, mongo_database_name)

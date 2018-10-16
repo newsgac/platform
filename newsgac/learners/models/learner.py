@@ -5,7 +5,7 @@ from sklearn.metrics import confusion_matrix
 
 from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import ParametersMixin
-from data_engineering import utils as DataUtils
+from newsgac.data_engineering import utils as DataUtils
 
 
 class Result(EmbeddedMongoModel):

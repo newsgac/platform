@@ -1,16 +1,10 @@
-import itertools
-import operator
-
 from pymodm import MongoModel, EmbeddedMongoModel, fields
 from pymodm.errors import DoesNotExist, ValidationError
 
 from newsgac.common.mixins import CreatedUpdated
-from newsgac.data_sources.errors import ResourceNotProcessedError
 from newsgac.data_sources.validators import has_extension
-from newsgac.tasks.models import TrackedTask, Status
+from newsgac.tasks.models import TrackedTask
 from newsgac.users.models import User
-
-import data_engineering.utils as DataUtils
 
 
 class Article(EmbeddedMongoModel):

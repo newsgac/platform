@@ -1,10 +1,10 @@
 from __future__ import absolute_import
-from flask import Blueprint, render_template, request, session, flash, json, url_for
+from flask import Blueprint, render_template, request, session, flash
 
 from pymodm.errors import ValidationError
 
 from newsgac.learners.models.learner import Learner
-from newsgac.learners import learners as learner_classes, factory
+from newsgac.learners import learners as learner_classes
 from newsgac.learners.factory import create_learner
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User

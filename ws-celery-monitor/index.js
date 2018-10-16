@@ -14,7 +14,7 @@ wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     const msg = JSON.parse(message);
     if (msg.type === 'watch_new') {
-      const sub = redis.createClient();
+      const sub = redis.createClient(6379, 'redis');
       sub.subscribe("celery_task_new");
       sub.on("message", function (channel, message) {
         ws.send(message);
@@ -23,7 +23,7 @@ wss.on('connection', function connection(ws) {
       subscriptions.push(sub);
     }
     else if (msg.type === 'watch_task') {
-      const sub = redis.createClient();
+      const sub = redis.createClient(6379, 'redis');
       sub.subscribe("celery_task_" + msg.task_id);
       sub.on("message", function (channel, message) {
         ws.send(message);

@@ -1,6 +1,6 @@
 import pytest
 
-from learners import LearnerNB
+from newsgac.learners import LearnerNB
 from newsgac.nlp_tools import Frog
 from newsgac.pipelines.models import Pipeline
 from newsgac.pipelines.run import run_pipeline

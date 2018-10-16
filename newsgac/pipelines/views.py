@@ -13,9 +13,8 @@ from newsgac.pipelines.tasks import run_pipeline_task
 from newsgac.data_sources.models import DataSource
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
-from newsgac.learners import LearnerSVC
 from newsgac.learners.factory import learners, create_learner
-from newsgac.nlp_tools import nlp_tools, TFIDF
+from newsgac.nlp_tools import nlp_tools
 from newsgac.nlp_tools.factory import create_nlp_tool
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 

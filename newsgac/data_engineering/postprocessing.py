@@ -1,14 +1,14 @@
 from __future__ import division
 
 import numpy as np
-from newsgac.database import DATABASE
-import data_engineering.utils as DataUtils
+from newsgac.database import db
+import newsgac.data_engineering.utils as DataUtils
 # from newsgac.models.data_sources.data_source_old import DataSource
 # import newsgac.models.data_sources.constants as DataSourceConstants
 from lime.lime_text import LimeTextExplainer
 from lime.lime_tabular import LimeTabularExplainer
 from sklearn.pipeline import make_pipeline
-from data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, remove_stop_words, apply_lemmatization
+from newsgac.data_engineering.preprocessing import Preprocessor, process_raw_text_for_config, get_clean_ocr, remove_stop_words, apply_lemmatization
 
 # np.random.seed(42)
 

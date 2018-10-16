@@ -1,10 +1,6 @@
 from pymodm import MongoModel, fields
-from uuid import UUID
-
-from newsgac.caches.models import Cache
 from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 from newsgac.users.models import User
-from newsgac.tasks.models import TrackedTask
 
 
 # Analyze, compare, explain
