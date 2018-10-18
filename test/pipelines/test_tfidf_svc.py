@@ -14,7 +14,5 @@ def test_run_tfidf_svc_pipeline(test_user, data_source_balanced_10):
     )
     pipeline.save()
     run_pipeline(pipeline)
-    # assert len(pipeline.features.data['values']) == len(pipeline.data_source.articles)
-    # assert len(pipeline.features.data['names']) == len(pipeline.features.data['values'][0])
     result = pipeline.sk_pipeline.predict(['Dit is een willekeurige tekst'])
     assert pipeline.sk_pipeline is not None
