@@ -8,7 +8,7 @@ from newsgac.pipelines.run import run_pipeline
 
 def test_run_frog_nb_pipeline(test_user, data_source_balanced_10):
     pipeline = Pipeline(
-        display_title='Frog SVC Balanced 10 test',
+        display_title='Frog NB Balanced 10 test',
         user=test_user,
         data_source=data_source_balanced_10,
         nlp_tool=Frog.create(),
@@ -21,10 +21,10 @@ def test_run_frog_nb_pipeline(test_user, data_source_balanced_10):
     assert pipeline.sk_pipeline is not None
 
 
-@pytest.mark.timeout(5)
+@pytest.mark.timeout(20)
 def test_second_run_uses_cache(test_user, data_source_balanced_10):
     pipeline = Pipeline(
-        display_title='Frog SVC Balanced 10 test (copy)',
+        display_title='Frog NB Balanced 10 test (copy)',
         user=test_user,
         data_source=data_source_balanced_10,
         nlp_tool=Frog.create(),

@@ -50,6 +50,7 @@ celery_app = Celery(
         'newsgac.tasks',
         'newsgac.data_sources.tasks',
         'newsgac.pipelines.tasks',
+        'newsgac.ace.tasks',
     ],
     task_cls=CeleryTrackedTask
 )

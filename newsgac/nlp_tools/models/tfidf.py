@@ -15,12 +15,10 @@ class TFIDF(NlpTool):
     tag = 'tfidf'
     parameters = fields.EmbeddedDocumentField(Parameters)
 
-    def get_features(self, articles):
-        vectorizer = TfidfVectorizer(
+    def get_feature_extractor(self):
+        return TfidfVectorizer(
             sublinear_tf=True,
             min_df=5,
             norm='l2',
             ngram_range=(1, 2)
         )
-        result = vectorizer.fit_transform(articles)
-        return vectorizer.get_feature_names(), result

@@ -44,9 +44,13 @@ class DeleteObjectsMixin(object):
         raw_document = db[self._mongometa.collection_name].find_one({'_id': self.pk})
         for path in object_field_paths:
             current = raw_document
-            for path_part in path:
-                current = current[path_part]
-            fs.delete(current)
+            try:
+                for path_part in path:
+                    current = current[path_part]
+                fs.delete(current)
+            except KeyError as e:
+                # the field is not set, so there is nothing to delete
+                pass
         super(DeleteObjectsMixin, self).delete()
 
 

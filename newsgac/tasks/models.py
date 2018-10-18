@@ -35,3 +35,11 @@ class TrackedTask(CreatedUpdated, MongoModel):
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
+    def as_dict(self):
+        return {
+            'id': str(self.pk),
+            'name': self.name,
+            'status': self.status.value,
+            'started': self.created,
+            'progress': self.result.get('progress', {})
+        }

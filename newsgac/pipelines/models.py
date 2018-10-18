@@ -13,8 +13,10 @@ from newsgac.learners import LearnerSVC
 from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
+from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
 from newsgac.users.models import User
 from newsgac.tasks.models import TrackedTask
+
 
 from newsgac.data_engineering import utils as DataUtils
 
@@ -98,3 +100,8 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
             learner=LearnerSVC.create()
         )
 
+    def get_feature_extractor(self):
+        raise NotImplementedError('Sublass should implement get_feature_extractor')
+
+    def get_sk_pipeline(self):
+        return get_sk_pipeline(self.sw_removal, self.lemmatization, self.nlp_tool, self.learner)

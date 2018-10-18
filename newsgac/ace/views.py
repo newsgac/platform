@@ -2,23 +2,17 @@ from __future__ import absolute_import
 from bson import ObjectId
 from bokeh.embed import components
 from bokeh.layouts import gridplot
-from flask import Blueprint, render_template, request, url_for, redirect
-from pymodm.errors import ValidationError
+from flask import Blueprint, render_template, request, url_for, redirect, session, json
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
-from newsgac.common.json_encoder import _dumps
-from newsgac.common.utils import model_to_json, model_to_dict
 from newsgac.pipelines.models import Pipeline
-from newsgac.pipelines.tasks import run_pipeline_task
 from newsgac.data_sources.models import DataSource
-from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
-from newsgac.learners import LearnerSVC
-from newsgac.learners.factory import learners, create_learner
-from newsgac.nlp_tools import nlp_tools, TFIDF
-from newsgac.nlp_tools.factory import create_nlp_tool
+from newsgac.users.view_decorators import requires_login
+from newsgac.visualisation.comparison import PipelineComparator
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
+from newsgac.ace.tasks import run_ace
 
 ace_blueprint = Blueprint('ace', __name__)
 
@@ -26,7 +20,34 @@ ace_blueprint = Blueprint('ace', __name__)
 @ace_blueprint.route('/')
 @requires_login
 @back.anchor
-def user_ace_runs():
+def overview():
+    aces = [
+        {
+            'id': str(ace._id),
+            'created': ace.created,
+            'display_title': ace.display_title,
+            'data_source': {
+                'display_title': ace.data_source.display_title
+            },
+            'task': json.dumps(ace.task.as_dict()),
+
+        } for ace in list(ACE.objects.all())
+    ]
+
+    data_sources = list(DataSource.objects.all())
+    pipelines = list(Pipeline.objects.all())
+    return render_template(
+        "ace/overview.html",
+        aces=aces,
+        pipelines=pipelines,
+        data_sources=data_sources,
+    )
+
+
+@ace_blueprint.route('/new', methods=['GET'])
+@requires_login
+@back.anchor
+def new():
     data_sources = list(DataSource.objects.all())
     pipelines = list(Pipeline.objects.all())
     return render_template(
@@ -36,32 +57,39 @@ def user_ace_runs():
     )
 
 
-@ace_blueprint.route('/new', methods=['GET'])
-@requires_login
-@back.anchor
-def new_ace_run():
-    data_sources = list(DataSource.objects.all())
-    pipelines = list(Pipeline.objects.all())
-    return render_template(
-        "ace/new.html",
-        pipelines=pipelines,
-        data_sources=data_sources,
-    )
-
-
 @ace_blueprint.route('/new', methods=['POST'])
 @requires_login
-def new_ace_run_save():
-    ace = ACE(**request.form)
+def new_save():
+    ace = ACE()
+    ace.data_source = DataSource.objects.get({'_id': ObjectId(request.form['data_source'])})
+    ace.pipelines = [Pipeline.objects.get({'_id': ObjectId(pipeline_id)}) for pipeline_id in request.form.getlist('pipelines[]')]
+    ace.user = User(email=session['email'])
+    ace.display_title = ace.data_source.display_title + ' (' + ', '.join(p.display_title for p in ace.pipelines) + ')'
     ace.save()
-    return redirect(url_for('ace.user_ace_runs'))
+    task = run_ace.delay(str(ace._id))
+    ace.task_id = task.task_id
+    ace.save()
+    return redirect(url_for('ace.overview'))
 
 
-@ace_blueprint.route('/<string:pipeline_id>/delete')
+@ace_blueprint.route('/<string:ace_id>')
 @requires_login
-def delete_pipeline(pipeline_id):
-    pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    pipeline.delete()
+def view(ace_id):
+    ace = ACE.objects.get({'_id': ObjectId(ace_id)})
+    p = PipelineComparator(ace)
+    # return json.dumps(p.generateAgreementOverview())
+    return render_template(
+        "ace/run.html",
+        ace=ace,
+    )
+    # return back.redirect()
+
+
+@ace_blueprint.route('/<string:ace_id>/delete')
+@requires_login
+def delete(ace_id):
+    ace = ACE.objects.get({'_id': ObjectId(ace_id)})
+    ace.delete()
 
     return back.redirect()
 
@@ -69,8 +97,8 @@ def delete_pipeline(pipeline_id):
 @ace_blueprint.route('/delete_all')
 @requires_login
 def delete_all():
-    for pipeline in list(Pipeline.objects.all()):
-        pipeline.delete()
+    for ace in list(ACE.objects.all()):
+        ace.delete()
 
     return back.redirect()
 

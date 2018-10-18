@@ -6,8 +6,9 @@ from sklearn.base import TransformerMixin
 
 from newsgac.nlp_tools.models.frog_extract_features import get_frog_features
 from newsgac.nlp_tools.models.frog_features import feature_descriptions, features
+from newsgac.pipelines.utils import dict_vectorize
 from newsgac.tasks.progress import report_progress
-from .nlp_tool import NlpTool
+from newsgac.nlp_tools.models.nlp_tool import NlpTool
 
 
 class Features(EmbeddedMongoModel):
@@ -33,17 +34,16 @@ class Parameters(EmbeddedMongoModel):
     features.description = 'Included features.'
 
 
-class Frog(TransformerMixin, NlpTool):
-    name = 'Frog'
-    tag = 'frog'
-    parameters = fields.EmbeddedDocumentField(Parameters)
+class FrogFeatureExtractor(TransformerMixin):
+    def __init__(self, nlp_tool):
+        self.nlp_tool = nlp_tool
 
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
         articles = X
-        extract_features_dict = self.parameters.features.to_son().to_dict()
+        extract_features_dict = self.nlp_tool.parameters.features.to_son().to_dict()
         features = []
         for idx, article in enumerate(articles):
             report_progress('frog', float(idx) / len(articles))
@@ -62,3 +62,12 @@ class Frog(TransformerMixin, NlpTool):
 
         # features is a list of ordered dicts like { [feature_name]: [feature_value] }
         return features
+
+
+class Frog(NlpTool):
+    name = 'Frog'
+    tag = 'frog'
+    parameters = fields.EmbeddedDocumentField(Parameters)
+
+    def get_feature_extractor(self):
+        return dict_vectorize('Frog', FrogFeatureExtractor(self))

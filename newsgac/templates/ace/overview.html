@@ -5,31 +5,61 @@
         <h1>Analyse - Compare - Explain Pipelines</h1>
     </div>
 
-    {% if last_runs|length > 0 %}
-    <div>
-        <h3>Previous runs:</h3>
-        <ul class="list-group">
-            {% for ace_run in last_runs %}
-                <li class="card list-group-item">
-                    <div class="card-body">
-                      <h4 class="card-title">
-                          {% if ace_run['is_processing'] %}
-                          {{ ace_run['experiments'] |map(attribute='display_title')|join(', ') }} (processing)
-                            {% else %}
-                        <a href="{{ url_for('.view_ace_run', ace_id=ace_run['id']) }}">
-                            {{ ace_run['experiments'] |map(attribute='display_title')|join(', ') }}
-                        </a>
-                            {% endif %}
-                      </h4>
-                      <p class="card-text"><small class="text-muted">{{ ace_run['created'].strftime("%d-%m-%Y at %H:%M") }}</small></p>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% if aces|length > 0 %}
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="aces_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                    <!--<caption class="text-center">DataTables</caption>-->
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Time of creation</th>
+                        <th>Data source</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for ace in aces %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('ace.view', ace_id=ace.id) }}">
+                                    {{ ace.display_title }}
+                                </a>
+                            </td>
+                            <td>{{ ace.created|datetime }}</td>
+                            <td>{{ ace.data_source.display_title }}</td>
+                            <td>
+                                <div class="task hidden">
+                                    {{ ace.task|safe }}
+                                </div>
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   data-toggle="confirmation"
+                                   data-popout="true"
+                                   data-title="This action cannot be undone. Are you sure?"
+                                   href="{{ url_for('ace.delete', ace_id = ace.id) }}"
+                                   data-btn-ok-label="Yes, delete"
+                                   data-btn-cancel-label="No, cancel"
+                                   data-original-title=""
+                                   title="">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    Delete
+                                </a>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
     {% endif %}
 
-    <form role="form" action="{{ url_for('ace.new_ace_run_save') }}" method="post" id="form_ace">
+    <form role="form" action="{{ url_for('ace.new_save') }}" method="post" id="form_ace">
         <div>
             <div class="row">
 
@@ -37,7 +67,7 @@
                     <label>Select Data Source</label>
                 </div>
                 <div class="col-md-7">
-                    <select name="data_sources"
+                    <select name="data_source"
                             class="selectpicker show-tick"
                             data-width="85%"
                             data-actions-box="true"
@@ -54,7 +84,7 @@
                     <label>Select Pipelines</label>
                 </div>
                 <div class="col-md-7" id="datasource_div">
-                    <select multiple name="pipelines"
+                    <select multiple name="pipelines[]"
                             class="selectpicker show-tick"
                             data-width="85%"
                             data-actions-box="true"

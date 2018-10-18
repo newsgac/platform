@@ -52,14 +52,6 @@ def get_data_sources_dict():
 @requires_login
 @back.anchor
 def user_pipelines():
-    def map_task(task):
-        return {
-            'id': str(task.pk),
-            'name': task.name,
-            'status': task.status.value,
-            'started': task.created,
-            'progress': task.result.get('progress', {})
-        }
 
     pipelines = [
         {
@@ -75,7 +67,7 @@ def user_pipelines():
             'data_source': {
                 'display_title': pipeline.data_source.display_title
             },
-            'task': json.dumps(map_task(pipeline.task)),
+            'task': json.dumps(pipeline.task.as_dict()),
             'json': model_to_json(pipeline, indent=4)
 
         } for pipeline in list(Pipeline.objects.all())
@@ -186,8 +178,8 @@ def delete_all():
 @requires_login
 def visualise_results(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    results_eval = pipeline.learner.result
-    results_model = pipeline.learner.result
+    results_eval = pipeline.result
+    results_model = pipeline.result
     p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
     p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
 
