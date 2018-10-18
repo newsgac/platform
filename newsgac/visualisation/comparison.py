@@ -356,7 +356,7 @@ class PipelineComparator:
             tabular_data_row["true_genre"] = article.label if article.label is not "UNL" else "N/A"
             tabular_data_row["agreed_genre_prediction"] = Counter(predictions[key]).most_common(1)[0][0]
 
-            # contains a dict with key = prediction label, value = list of pipelines with this prediction
+            # contains a dict with key = prediction label, value = list of pipeline ids with this prediction
             predicted_genres = {}
             for idx, prediction in enumerate(predictions[key]):
                 predicted_genres[prediction] = predicted_genres.get(prediction, []) + [idx]
