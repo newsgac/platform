@@ -36,7 +36,7 @@ def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
 
         # NB Can't handle negative feature values.
         if isinstance(learner, LearnerNB) and isinstance(nlp_tool, Frog):
-            skl_steps.append(('MaxAbsScaler', MinMaxScaler(feature_range=(0, 1))))
+            skl_steps.append(('MinMaxScaler', MinMaxScaler(feature_range=(0, 1))))
 
     skl_steps.append(('Classifier', learner.get_classifier()))
     return SKPipeline(skl_steps)
