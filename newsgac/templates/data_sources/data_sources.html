@@ -4,13 +4,13 @@
     {% if data_sources|length == 0 %}
         <div class="page-header">
             <h1>Data sources <small>added by you</small></h1>
-            <a class="btn btn-success" href="{{ url_for('data_sources.create_data_source') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+            <a class="btn btn-success" href="{{ url_for('data_sources.new') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
         </div>
         <p><i>There are no data sources to view.</i></p>
     {% else %}
         <div class="page-header">
             <h1>Data sources <small>added by you</small></h1>
-            <a class="btn btn-success" href="{{ url_for('data_sources.create_data_source') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+            <a class="btn btn-success" href="{{ url_for('data_sources.new') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
             {% if processed_data_sources|length > 0 %}
                 <a class="btn btn-info disabled" href="{{ url_for('data_sources.sources_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
             {% endif %}
@@ -39,7 +39,7 @@
                     <tbody>
                         {% for data_source in data_sources %}
                         <tr>
-                            <td><a href="{{ url_for('data_sources.get_data_source_page', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
+                            <td><a href="{{ url_for('data_sources.view', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
                             {% if data_source.articles | length > 0 %}
                                 <td>Yes</td>
                             {% elif data_source.task_id %}

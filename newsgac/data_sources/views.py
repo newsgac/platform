@@ -5,19 +5,12 @@ from pymodm.errors import ValidationError
 from werkzeug.utils import redirect, secure_filename
 
 from newsgac.common.back import back
-import newsgac.users.view_decorators as user_decorators
-
+from newsgac.users.view_decorators import requires_login
 from newsgac.tasks.models import TrackedTask
 from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process
 from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
-
-
-# from newsgac.tasks.tasks import del_data, grid_ds
-# from data_engineering import Explanation
-# from newsgac.models.experiments.factory import get_experiment_by_id
-
 
 __author__ = 'abilgin'
 
@@ -25,18 +18,18 @@ data_source_blueprint = Blueprint('data_sources', __name__)
 
 
 @data_source_blueprint.route('/')
-@user_decorators.requires_login
+@requires_login
 @back.anchor
-def user_data_sources():
+def overview():
     # todo: get users data sources only
     data_sources = list(DataSource.objects.values())
     return render_template("data_sources/data_sources.html", data_sources=data_sources)
 
 
 @data_source_blueprint.route('/new', methods=['GET', 'POST'])
-@user_decorators.requires_login
+@requires_login
 @back.anchor
-def create_data_source():
+def new():
     if request.method == 'POST':
         try:
             form_dict = request.form.to_dict()
@@ -53,18 +46,17 @@ def create_data_source():
             data_source.task = TrackedTask(_id=eager_task_result.id)
             data_source.save()
 
-            return redirect(url_for("data_sources.user_data_sources"))
+            return redirect(url_for("data_sources.overview"))
         except ValidationError as e:
             if 'filename' in e.message:
                 flash('The file type is not supported! Try again using the allowed file formats.', 'error')
 
     return render_template('data_sources/new_data_source.html', form=request.form)
 
-@data_source_blueprint.route('/<string:data_source_id>')
-@user_decorators.requires_login
-def get_data_source_page(data_source_id):
-    # return the data source page with the type code
 
+@data_source_blueprint.route('/<string:data_source_id>')
+@requires_login
+def view(data_source_id):
     data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
     script, div = None, None
     try:

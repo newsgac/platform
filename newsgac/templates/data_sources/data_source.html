@@ -3,7 +3,7 @@
 
     <div class="page-header">
         <h1>Data source:
-            <a href="{{ url_for('data_sources.get_data_source_page', data_source_id=data_source._id) }}">
+            <a href="{{ url_for('data_sources.view', data_source_id=data_source._id) }}">
                 <small> {{ data_source.display_title }} </small>
             </a>
         </h1>

@@ -14,12 +14,12 @@
 
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="url_for('experiments.index')">Public experiments</a></li>
+                <li><a href="{{ url_for('pipelines.overview') }}">Public pipelines</a></li>
             </ul>
             {% if session['email'] %}
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="{{ url_for('data_sources.user_data_sources') }}">
+                        <a href="{{ url_for('data_sources.overview') }}">
                             <span class="glyphicon glyphicon-hdd"></span>
                             Data
                         </a>
