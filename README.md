@@ -48,6 +48,7 @@ PYTHONPATH=. python newsgac/app.py
 ## Debugging tasks
 
 Typically tasks are executed by celery workers. If you want to debug a task you can do one of two things:
+
 1. Run a celery worker in debug mode
 2. In `config.py`, set `celery_eager` to True. This will cause celery to
    run tasks in the main thread instead of offloading it to workers.
