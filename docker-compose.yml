@@ -42,7 +42,7 @@ services:
         restart: on-failure
         networks:
             - newsgac-net
-        command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "30", "--bind", "0.0.0.0:5000", "--access-logfile", "-", "--error-logfile", "-", "newsgac.app:app"]
+        command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "30", "--bind", "0.0.0.0:5050", "--access-logfile", "-", "--error-logfile", "-", "newsgac.app:app"]
 
     worker:
         build:

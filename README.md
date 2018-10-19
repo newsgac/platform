@@ -41,7 +41,14 @@ You might want to run flask outside of Docker (because it is e.g. easier to atta
    PYTHONPATH=. python newsgac/app.py
    ```
 
-5. The local web server will be running on `http://localhost:5000`, the Docker server on `http://localhost:5000`.
+5. The local web server will be running on `http://localhost:5050`, the Docker server on `http://localhost:5050`.
+
+## Debugging tasks
+
+Typically tasks are executed by celery workers. If you want to debug a task you can do one of two things:
+1. Run a celery worker in debug mode
+2. Set `celery_eager`
+
 
 ## Running the tests
 
@@ -68,20 +75,17 @@ E.g. to create a user:
    ```
    docker-compose -f docker-compose.yml -f docker-compose_local.yml run web python
    ```
-2. Import database
+2. Import database & user model
    ```
    from newsgac import database
-   ```
-3. Import user model
-   ```
    from newsgac.users.models import User
    ```
-4. Create new user
+3. Create new user
    ```
    u = User(email='testuser@test.com', password='testtest', name='Test', surname='User')
    u.save()
    ```
-5. You can now login from the frontend as this user.
+4. You can now login from the frontend as this user.
 ## Contributors
 
 - Aysenur Bilgin (aysenur.bilgin@cwi.nl)

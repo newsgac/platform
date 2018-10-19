@@ -2,12 +2,7 @@ const redis = require("redis");
 
 const WebSocket = require('ws');
  
-const wss = new WebSocket.Server({ port: 8080 });
-
-//const sub1 = redis.createClient();
-
-//sub1.psubscribe('*');
-//sub1.on('pmessage', console.log);
+const wss = new WebSocket.Server({ port: 5051 });
 
 wss.on('connection', function connection(ws) {
   const subscriptions = [];
@@ -41,12 +36,3 @@ wss.on('connection', function connection(ws) {
   });
 });
 
-
-
-
-//sub.on("error", function (err) {
-//    console.log("Error " + err);
-//});
-
-
-//sub.publish("channel1", "test");

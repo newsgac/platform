@@ -19,7 +19,7 @@ function mitt(all) {
 }
 
 const m = mitt();
-const ws = new WebSocket(`ws://${window.location.hostname}:8080`);
+const ws = new WebSocket(`ws://${window.location.hostname}:5051`);
 
 window.initTask = (elm) => {
     const attrs = JSON.parse(elm.innerHTML);

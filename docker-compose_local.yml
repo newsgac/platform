@@ -34,7 +34,7 @@ services:
         volumes:
             - ./newsgac:/newsgac/newsgac
         ports:
-            - "5050:5000"
+            - "5050:5050"
         env_file:
             - .env.localdocker
         command: ["python", "newsgac/app.py"]
@@ -43,4 +43,4 @@ services:
 
     ws-celery-monitor:
         ports:
-            - "8080:8080"
+            - "5051:5051"

@@ -13,7 +13,7 @@ root_path = path.dirname(path.abspath(__file__))
 environment = environ['ENVIRONMENT']
 secret_key = environ['FLASK_SECRET_KEY']
 
-flask_port = 5000
+flask_port = 5050
 # celery_eager setting will evaluate tasks immediately, without using workers.
 celery_eager = False
 mongo_host = 'database'
@@ -30,7 +30,6 @@ pipeline_cache_dir = '/tmp/newsgac'
 
 if environment in [Env.local, Env.test]:
     flask_port = 5050
-    celery_eager = False
     mongo_host = 'localhost'
     frog_hostname = 'localhost'
     redis_host = 'localhost'
