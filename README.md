@@ -14,9 +14,9 @@ This is the development repository for NEWSGAC Project.
 
 4. To run from command line, navigate to newsgac_docker_dev and run:
 
-   ```
-   docker-compose -f docker-compose.yml -f docker-compose_local.yml up --build
-   ```
+```
+docker-compose -f docker-compose.yml -f docker-compose_local.yml up --build
+```
 
 
 ## Run flask web app locally
@@ -38,11 +38,9 @@ export $(cat .env.local | xargs)
 ```
 
 4. To run from command line, navigate to `newsgac_docker_dev/` and run:
-
 ```
 PYTHONPATH=. python newsgac/app.py
 ```
-
 5. The local web server will be running on `http://localhost:5050`, the Docker server on `http://localhost:5050`.
 
 ## Debugging tasks
