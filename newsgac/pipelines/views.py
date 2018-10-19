@@ -51,8 +51,7 @@ def get_data_sources_dict():
 @pipeline_blueprint.route('/')
 @requires_login
 @back.anchor
-def user_pipelines():
-
+def overview():
     pipelines = [
         {
             'id': str(pipeline._id),
@@ -85,7 +84,7 @@ def user_pipelines():
 @pipeline_blueprint.route('/new/<from_pipeline_id>', methods=['GET'])
 @requires_login
 @back.anchor
-def new_pipeline(from_pipeline_id=None):
+def new(from_pipeline_id=None):
     if from_pipeline_id is not None:
         pipeline = Pipeline.objects.get({'_id': ObjectId(from_pipeline_id)})
         pipeline.display_title = pipeline.display_title + ' (copy)'
@@ -107,15 +106,15 @@ def new_pipeline(from_pipeline_id=None):
         pipeline=_dumps(pipeline),
         data_sources=json.dumps(get_data_sources_dict()),
         nlp_tools=json.dumps(nlp_tools_dict),
-        save_url=url_for('pipelines.new_pipeline_save'),
-        pipelines_url=url_for('pipelines.user_pipelines'),
+        save_url=url_for('pipelines.new_save'),
+        pipelines_url=url_for('pipelines.overview'),
         learners=json.dumps(learners_dict)
     )
 
 
 @pipeline_blueprint.route('/new', methods=['POST'])
 @requires_login
-def new_pipeline_save():
+def new_save():
     pipeline = Pipeline(
         user=User(email=session['email']),
         **request.json
@@ -158,7 +157,7 @@ def new_pipeline_save():
 
 @pipeline_blueprint.route('/<string:pipeline_id>/delete')
 @requires_login
-def delete_pipeline(pipeline_id):
+def delete(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
     pipeline.delete()
 

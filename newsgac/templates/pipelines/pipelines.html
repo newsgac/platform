@@ -3,7 +3,7 @@
     {% if pipelines|length == 0 %}
         <div class="page-header">
             <h1>Pipeline configurations</h1>
-            <a class="btn btn-success" href="{{ url_for('pipelines.new_pipeline') }}">
+            <a class="btn btn-success" href="{{ url_for('pipelines.new') }}">
                 <span class="glyphicon glyphicon-plus "></span>
                 New
             </a>
@@ -14,7 +14,7 @@
     {% else %}
         <div class="page-header">
             <h1>Pipelines</h1>
-            <a class="btn btn-success" href="{{ url_for('pipelines.new_pipeline') }}">
+            <a class="btn btn-success" href="{{ url_for('pipelines.new') }}">
                 <span class="glyphicon glyphicon-plus "></span>
                 New
             </a>
@@ -73,7 +73,7 @@
                             </td>
                             <td>
                                 <a class="btn btn-primary"
-                                   href="{{ url_for('pipelines.new_pipeline', from_pipeline_id = pipeline.id) }}">
+                                   href="{{ url_for('pipelines.new', from_pipeline_id = pipeline.id) }}">
                                         <span class="glyphicon glyphicon-file"></span>
                                     Copy
                                 </a>
@@ -81,7 +81,7 @@
                                    data-toggle="confirmation"
                                    data-popout="true"
                                    data-title="This action cannot be undone. Are you sure?"
-                                   href="{{ url_for('pipelines.delete_pipeline', pipeline_id = pipeline.id) }}"
+                                   href="{{ url_for('pipelines.delete', pipeline_id = pipeline.id) }}"
                                    data-btn-ok-label="Yes, delete"
                                    data-btn-cancel-label="No, cancel"
                                    data-original-title=""
