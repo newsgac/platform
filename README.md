@@ -23,7 +23,7 @@ This is the development repository for NEWSGAC Project.
 
 You might want to run flask outside of Docker (because it is e.g. easier to attach a debugger).
 
-1. Follow `Setup Instructions for DOCKER` instructions so that all services are online (Mongo, RabbitMQ, FROG, celery workers).
+1. Follow `Setup Instructions for DOCKER` instructions so that all services are online (Mongo, Redis, FROG, celery workers).
 
 2. Set up a virtual environment and install the requirements:
 
@@ -42,6 +42,23 @@ You might want to run flask outside of Docker (because it is e.g. easier to atta
    ```
 
 5. The local web server will be running on `http://localhost:5000`, the Docker server on `http://localhost:5000`.
+
+## Running the tests
+
+1. Setup local (virtual) environment as when running flask locally
+
+2. Load the test env vars:
+   ```
+   export $(cat .env.test | xargs)
+   ```
+
+3. Make sure the database, Frog and redis are running (e.g. `docker-compose -f docker-compose.yml -f docker-compose_local.yml up database redis frog`
+
+4. Run tests using
+   ```
+   pytest .
+   ```
+
 
 ## Python console
 
