@@ -74,20 +74,9 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     result = fields.EmbeddedDocumentField(Result)
     task_id = fields.CharField()
 
-    # should be a cached dict with {
-    #   names: list of feature names (strings)
-    #   values: list of feature values (list of floats)
-    # }
-    features = fields.ReferenceField(Cache)
-
     @property
     def task(self):
         return TrackedTask.objects.get({"_id": UUID(self.task_id)})
-
-    def delete(self):
-        if self.features:
-            self.features.delete()
-        super(Pipeline, self).delete()
 
     @classmethod
     def create(cls):
