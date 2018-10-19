@@ -23,25 +23,27 @@ docker-compose -f docker-compose.yml -f docker-compose_local.yml up --build
 
 You might want to run flask outside of Docker (because it is e.g. easier to attach a debugger).
 
-1. Follow `Setup Instructions for DOCKER` instructions so that all services are online (Mongo, Redis, FROG, celery workers).
+* Follow `Setup Instructions for DOCKER` instructions so that all services are online (Mongo, Redis, FROG, celery workers).
 
-2. Set up a virtual environment and install the requirements:
+* Set up a virtual environment and install the requirements:
 
 ```
 pip install -r requirements.txt
 ```
 
-3. Setup the correct environmental variables (`.env.local`) e.g. by running
+* Setup the correct environmental variables (`.env.local`) e.g. by running
 
 ```
 export $(cat .env.local | xargs)
 ```
 
-4. To run from command line, navigate to `newsgac_docker_dev/` and run:
+* To run from command line, navigate to `newsgac_docker_dev/` and run:
+
 ```
 PYTHONPATH=. python newsgac/app.py
+
 ```
-5. The local web server will be running on `http://localhost:5050`, the Docker server on `http://localhost:5050`.
+* The local web server will be running on `http://localhost:5050`, the Docker server on `http://localhost:5050`.
 
 ## Debugging tasks
 
@@ -58,17 +60,17 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
 3. `docker-compose -f docker-compose.yml -f docker-compose_test.yml down`
 
 ## Running the tests (Local)
-1. Setup local (virtual) environment as when running flask locally
+* Setup local (virtual) environment as when running flask locally
 
-2. Load the test env vars:
+* Load the test env vars:
 
 ```
 export $(cat .env.test | xargs)
 ```
 
-3. Make sure the database, Frog and redis are running (e.g. `docker-compose -f docker-compose.yml -f docker-compose_local.yml up database redis frog`
+* Make sure the database, Frog and redis are running (e.g. `docker-compose -f docker-compose.yml -f docker-compose_local.yml up database redis frog`
 
-4. Run tests using
+* Run tests using
 
 ```
 pytest .
@@ -79,27 +81,27 @@ pytest .
 
 E.g. to create a user:
 
-1. Start console using docker-compose (or from you local environment using `python`):
+* Start console using docker-compose (or from you local environment using `python`):
 
 ```
 docker-compose -f docker-compose.yml -f docker-compose_local.yml run web python
 ```
 
-2. Import database & user model
+* Import database & user model
 
 ```
 from newsgac import database
 from newsgac.users.models import User
 ```
 
-3. Create new user
+* Create new user
 
 ```
 u = User(email='testuser@test.com', password='testtest', name='Test', surname='User')
 u.save()
 ```
 
-4. You can now login from the frontend as this user.
+* You can now login from the frontend as this user.
 
 ## Contributors
 
