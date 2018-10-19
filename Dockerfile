@@ -15,6 +15,8 @@ RUN ["bash", "-c", "python <<< \"import nltk; nltk.download('punkt')\""]
 
 WORKDIR /newsgac
 
+COPY test /newsgac/test
+
 ENTRYPOINT ["/newsgac/entrypoint.sh"]
 
 CMD ["echo", "You should define a command in docker-compose.yml"]

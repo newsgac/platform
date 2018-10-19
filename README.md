@@ -47,11 +47,16 @@ You might want to run flask outside of Docker (because it is e.g. easier to atta
 
 Typically tasks are executed by celery workers. If you want to debug a task you can do one of two things:
 1. Run a celery worker in debug mode
-2. Set `celery_eager`
+2. In `config.py`, set `celery_eager` to True. This will cause celery to
+   run tasks in the main thread instead of offloading it to workers.
 
 
-## Running the tests
+## Running the tests (Docker)
+1. `docker-compose -f docker-compose.yml -f docker-compose_test.yml build test`
+2. `docker-compose -f docker-compose.yml -f docker-compose_test.yml run test`
+3. `docker-compose -f docker-compose.yml -f docker-compose_test.yml down`
 
+## Running the tests (Local)
 1. Setup local (virtual) environment as when running flask locally
 
 2. Load the test env vars:
@@ -71,7 +76,7 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
 
 E.g. to create a user:
 
-1. Start console
+1. Start console using docker-compose (or from you local environment using `python`):
    ```
    docker-compose -f docker-compose.yml -f docker-compose_local.yml run web python
    ```

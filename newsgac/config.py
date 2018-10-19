@@ -5,6 +5,7 @@ class Env:
     local = 'local'
     localdocker = 'localdocker'
     test = 'test'
+    dockertest = 'dockertest'
     production = 'production'
 
 
@@ -29,12 +30,11 @@ n_parallel_jobs = 8
 pipeline_cache_dir = '/tmp/newsgac'
 
 if environment in [Env.local, Env.test]:
-    flask_port = 5050
     mongo_host = 'localhost'
     frog_hostname = 'localhost'
     redis_host = 'localhost'
 
-if environment == Env.test:
+if environment in [Env.test, Env.dockertest]:
     mongo_database_name = 'newsgactest'
     celery_eager = True
 
