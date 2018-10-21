@@ -103,6 +103,28 @@ u.save()
 
 * You can now login from the frontend as this user.
 
+## Running locally using IDE
+
+* Run Frog service from terminal (assuming that it is installed):
+
+```
+docker run -p 12345:12345 -t -i proycon/lamachine
+frog -S 12345
+```
+
+* Run mongodb using the specified data folder (this is Ays' path)
+
+```
+sudo mongod --dbpath repos/data
+```
+
+* Start redis server
+
+```
+sudo systemctl start redis
+```
+
+
 ## Contributors
 
 - Aysenur Bilgin (aysenur.bilgin@cwi.nl)

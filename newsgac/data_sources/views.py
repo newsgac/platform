@@ -57,6 +57,8 @@ def new():
 @data_source_blueprint.route('/<string:data_source_id>')
 @requires_login
 def view(data_source_id):
+    print(data_source_id)
+    print(type(data_source_id))
     data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
     script, div = None, None
     try:

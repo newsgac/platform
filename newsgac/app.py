@@ -56,7 +56,7 @@ if config.environment in [config.Env.local, config.Env.localdocker]:
 
     def time_measure():
         global last_time
-        print time.time() - last_time
+        print (time.time() - last_time)
         last_time = time.time()
 
     app.jinja_env.globals.update(time_measure=time_measure)

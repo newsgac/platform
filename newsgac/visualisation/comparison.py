@@ -285,7 +285,7 @@ class PipelineComparator:
         for pipeline in self.pipelines:
             data_source = pipeline.data_source
             prediction_results = pipeline.predict([raw_text])[0]
-            print prediction_results
+            print (prediction_results)
             plot, script, div = ResultVisualiser.visualise_sorted_probabilities_for_raw_text_prediction(prediction_results, pipeline.display_title, ds_param)
             plots.append(plot)
 
@@ -371,10 +371,10 @@ class PipelineComparator:
     def visualize_hypotheses_using_DF(df, data_title, exp_title):
 
         df = df.reset_index().rename(columns={'index': 'genre'})
-        print df
+        print (df)
         data = df.to_dict(orient='list')
         idx = df['genre'].tolist()
-        print data
+        print (data)
         source = ColumnDataSource(data=data)
 
         p = figure(x_range=idx, y_range=(0, df[["1965", "1985"]].values.max() + 5),

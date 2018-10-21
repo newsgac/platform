@@ -26,7 +26,7 @@ def get_articles_from_file(file):
             no_date = True
 
         if not reg_res:
-            print line
+            print (line)
 
         groups = reg_res.groups()
         article.label = groups[0].rstrip()
@@ -60,8 +60,8 @@ def get_articles_from_file(file):
             else:
                 duplicate_count += 1
 
-    print "Found ", other_count, " other genre in documents.."
-    print "Found ", duplicate_count, " duplicate(s) in documents.."
+    print( "Found ", other_count, " other genre in documents..")
+    print("Found ", duplicate_count, " duplicate(s) in documents..")
 
     return articles
 
