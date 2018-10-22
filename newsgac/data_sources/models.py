@@ -26,6 +26,11 @@ class DataSource(CreatedUpdated, MongoModel):
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
+    def delete(self):
+        if self.file:
+            self.file.delete()
+        super(self, DataSource).delete()
+
     def status(self):
         if self.task:
             return self.task.status
