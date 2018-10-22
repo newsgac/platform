@@ -14,7 +14,7 @@ def get_articles_from_file(file):
         article = Article()
 
         line = line.rstrip()
-
+        line = line.decode('utf8')
         # groups = re.search(r'^__label__(.{3}.+)DATE\=([\0-9]+) ((?s).*)$', line).groups()
         # groups = re.search(r'^__label__(.{3}.+)DATE\=([\0-9]+[^&]) ((?s).*)$', line).groups()
         reg_res = re.search(r'^__label__(.{3}.+)DATE\=(\d{1,}\/\d{1,}\/\d{2,}) ((?s).*)$', line)
@@ -52,7 +52,7 @@ def get_articles_from_file(file):
             article.year = year
             date_str_corr = day + "/" + month + "/" + year
             article.date = datetime.strptime(date_str_corr, "%d/%m/%Y")
-            article.raw_text = groups[2].rstrip().decode('utf-8')
+            article.raw_text = groups[2].rstrip()
 
 
             if article.raw_text not in map(lambda a: a.raw_text, articles):

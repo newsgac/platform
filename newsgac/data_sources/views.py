@@ -5,6 +5,7 @@ from pymodm.errors import ValidationError
 from werkzeug.utils import redirect, secure_filename
 
 from newsgac.common.back import back
+from newsgac.pipelines.models import Pipeline
 from newsgac.users.view_decorators import requires_login
 from newsgac.tasks.models import TrackedTask
 from newsgac.data_sources.models import DataSource
@@ -91,21 +92,21 @@ def view(data_source_id):
 #     return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
 #                            feature_reduction=feature_reduction)
 
-# #todo: check
-# @data_source_blueprint.route('/delete/<string:data_source_id>')
-# @user_decorators.requires_login
-# def delete_data_source(data_source_id):
-#
-#     existing_experiments = Experiment.get_any_user_experiments_using_data_id(user_email=session['email'], ds_id=data_source_id)
-#     ds = DataSource.get_by_id(data_source_id)
-#     if len(existing_experiments) > 0:
-#         error = "There are existing experiments using this data source ("+ str(ds.display_title)+ "). Please delete the experiments connected with this data source first!"
-#         flash(error, 'error')
-#         return redirect((url_for('experiments.user_experiments')))
-#
-#     task = del_data.delay(data_source_id)
-#     time.sleep(0.5)
-#     return back.redirect()
+#todo: write test for this
+@data_source_blueprint.route('/<string:data_source_id>/delete')
+@requires_login
+def delete(data_source_id):
+    data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
+    pipelines_using_data_source = list(Pipeline.objects.raw({'data_source': data_source.pk}))
+
+    if len(pipelines_using_data_source) > 0:
+        error = "There are existing pipelines using this data source ("+ \
+                str(data_source.display_title)+ "). Please delete the pipelines connected with this data source first!"
+        flash(error, 'error')
+        return redirect((url_for('pipelines.overview')))
+
+    data_source.delete()
+    return back.redirect()
 #
 # #todo: check
 # @data_source_blueprint.route('/delete_all')
