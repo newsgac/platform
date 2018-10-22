@@ -29,7 +29,7 @@ class DataSource(CreatedUpdated, MongoModel):
     def delete(self):
         if self.file:
             self.file.delete()
-        super(self, DataSource).delete()
+        super(DataSource, self).delete()
 
     def status(self):
         if self.task:
