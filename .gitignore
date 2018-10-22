@@ -10,3 +10,5 @@
 .idea
 src/test/*
 */**/node_modules
+
+.ipynb_checkpoints

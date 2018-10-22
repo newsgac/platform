@@ -33,6 +33,7 @@
                             <th>Description</th>
                             <th>Time of creation</th>
                             <th>Number of instances</th>
+                            <th></th>
                         </tr>
                     </thead>
 
@@ -51,6 +52,20 @@
                             <td>{{ data_source.description }}</td>
                             <td>{{ data_source.created | datetime }}</td>
                             <td>{{ data_source.articles|length or '?' }}</td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   data-toggle="confirmation"
+                                   data-popout="true"
+                                   data-title="This action cannot be undone. Are you sure?"
+                                   href="{{ url_for('data_sources.delete', data_source_id = data_source._id) }}"
+                                   data-btn-ok-label="Yes, delete"
+                                   data-btn-cancel-label="No, cancel"
+                                   data-original-title=""
+                                   title="">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    Delete
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
