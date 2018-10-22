@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+from collections import OrderedDict
 
 import numpy
 from nltk import word_tokenize, sent_tokenize
@@ -90,7 +91,8 @@ class ExtractBasicFeatures(TransformerMixin):
 
     @staticmethod
     def transform_text(text):
-        features = {}
+        features = OrderedDict()
+
         word_tokens = [w for w in word_tokenize(text) if w]
         sentence_tokens = [s for s in sent_tokenize(text) if s]
         word_token_count = len(word_tokens)
@@ -106,13 +108,27 @@ class ExtractBasicFeatures(TransformerMixin):
 
         features['sentences'] = len(sentence_tokens)
         features['avg_sentence_length'] = (word_token_count / float(sentence_token_count)) if sentence_token_count > 0 else 0
-        return features
+
+        return numpy.array([value for idx, value in features.iteritems()])
+
+        # return features
 
     def transform(self, X):
-        return [ExtractBasicFeatures.transform_text(text) for text in X]
+        return numpy.array([ExtractBasicFeatures.transform_text(text) for text in X])
 
     def get_params(self, deep=False):
         return {}
+
+    @staticmethod
+    def get_feature_names():
+        return [
+            'question_marks_perc',
+            'exclamation_marks_perc',
+            'currency_symbols_perc',
+            'digits_perc',
+            'sentences',
+            'avg_sentence_length',
+        ]
 
 
 class ExtractSentimentFeatures(TransformerMixin):
@@ -123,17 +139,23 @@ class ExtractSentimentFeatures(TransformerMixin):
     def transform_text(text):
         from pattern.nl import sentiment
         polarity, subjectivity = sentiment(text)
-        return {
-            'polarity': polarity,
-            'subjectivity': subjectivity
-        }
+        return numpy.array([
+            polarity,
+            subjectivity
+        ])
 
     def transform(self, X):
-        return [ExtractSentimentFeatures.transform_text(text) for text in X]
+        return numpy.array([ExtractSentimentFeatures.transform_text(text) for text in X])
 
     def get_params(self, deep=False):
         return {}
 
+    @staticmethod
+    def get_feature_names():
+        return [
+            'polarity',
+            'subjectivity'
+        ]
 
 class StopWordRemoval(TransformerMixin):
     def fit(self, X, y=None):

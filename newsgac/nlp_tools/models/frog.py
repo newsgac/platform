@@ -1,9 +1,11 @@
 from collections import OrderedDict
 
+import numpy
 from pymodm import EmbeddedMongoModel
 from pymodm import fields
 from sklearn.base import TransformerMixin
 
+from newsgac.common.utils import model_to_dict
 from newsgac.nlp_tools.models.frog_extract_features import get_frog_features
 from newsgac.nlp_tools.models.frog_features import feature_descriptions, features
 from newsgac.pipelines.utils import dict_vectorize
@@ -61,7 +63,11 @@ class FrogFeatureExtractor(TransformerMixin):
             assert features[i].keys() == features[i+1].keys()
 
         # features is a list of ordered dicts like { [feature_name]: [feature_value] }
-        return features
+        return numpy.array([f.values() for f in features])
+
+    def get_feature_names(self):
+        features_dict = model_to_dict(self.nlp_tool.parameters.features)
+        return sorted(features_dict.keys())
 
 
 class Frog(NlpTool):
@@ -70,4 +76,4 @@ class Frog(NlpTool):
     parameters = fields.EmbeddedDocumentField(Parameters)
 
     def get_feature_extractor(self):
-        return dict_vectorize('Frog', FrogFeatureExtractor(self))
+        return FrogFeatureExtractor(self)

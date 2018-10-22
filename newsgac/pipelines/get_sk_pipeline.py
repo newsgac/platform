@@ -11,6 +11,8 @@ from newsgac.pipelines.utils import dict_vectorize
 def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
     skl_steps = [('CleanOCR', CleanOCR())]
 
+    feature_names = []
+
     if sw_removal:
         skl_steps.append(('StopWordRemoval', StopWordRemoval()))
 
@@ -21,9 +23,13 @@ def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
         feature_pipelines = []
         if type(nlp_tool) != TFIDF:
             feature_pipelines = [
-                ('BasicFeatures', dict_vectorize('BasicFeatures', ExtractBasicFeatures())),
-                ('SentimentFeatures', dict_vectorize('SentimentFeatures', ExtractSentimentFeatures())),
+                ('BasicFeatures', ExtractBasicFeatures()),
+                ('SentimentFeatures', ExtractSentimentFeatures()),
             ]
+
+            feature_names += ExtractBasicFeatures.get_feature_names()
+            feature_names += ExtractSentimentFeatures.get_feature_names()
+
         feature_pipelines.append(
             (nlp_tool.name, nlp_tool.get_feature_extractor())
         )
