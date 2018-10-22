@@ -8,8 +8,8 @@ from pymodm.connection import _get_db
 
 @pytest.fixture
 def client():
+    flask_app.testing = True
     _client = flask_app.test_client()
-
     def login(username='test@test.com', password='testtesttest'):
         return _client.post('/users/login', data=dict(
             identifier=username,
@@ -29,6 +29,7 @@ def client():
 def app():
     app_context = flask_app.test_request_context()
     app_context.push()
+    flask_app.testing = True
     yield flask_app
 
 
