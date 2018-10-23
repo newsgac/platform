@@ -6,6 +6,8 @@ from flask import Blueprint, render_template, request, url_for, redirect, sessio
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
+from newsgac.common.utils import model_to_json, model_to_dict
+from newsgac.data_engineering.utils import genre_codes, genre_labels
 from newsgac.pipelines.models import Pipeline
 from newsgac.data_sources.models import DataSource
 from newsgac.users.models import User
@@ -76,13 +78,22 @@ def new_save():
 @requires_login
 def view(ace_id):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
-    p = PipelineComparator(ace)
-    # return json.dumps(p.generateAgreementOverview())
+
+    pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
+    articles = [{
+        'raw_text': article.raw_text.encode('utf-8'),
+        'predictions': [p.encode('utf-8') for p in ace.predictions[idx]],
+        'label': article.label.encode('utf-8'),
+    } for idx, article in enumerate(ace.data_source.articles)]
+
     return render_template(
         "ace/run.html",
-        ace=ace,
+        # ace=ace,
+        # genre_codes=genre_codes,
+        # genre_labels=genre_labels,
+        pipelines=pipelines,
+        articles=articles
     )
-    # return back.redirect()
 
 
 @ace_blueprint.route('/<string:ace_id>/delete')

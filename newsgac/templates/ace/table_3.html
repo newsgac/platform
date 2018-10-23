@@ -1,0 +1,45 @@
+<table id="experiments_comparison_table" cellspacing="0" class="table table-bordered table-hover display" width="100%">
+    <tfoot>
+        <tr>
+            <th>Article #</th>
+            <th>Mutually Agreeing <br/>Pipelines</th>
+            <th>Prevailing Genre <br/>(prediction)</th>
+            <th>True Genre</th>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+    $(document).ready(function() {
+        const mostCommon = arr => _.head(
+            _(arr)
+              .countBy()
+              .entries()
+              .maxBy('[1]')
+        );
+
+        const data = [];
+        articles.forEach((article, articleKey) => {
+            const mostCommonPrediction = mostCommon(article.predictions);
+            const agreeingPipelineKeys = Object.keys(_.pickBy(article.predictions, p => p===mostCommonPrediction));
+            data.push([
+                `<span title="${article.raw_text}">${articleKey}</span>`,
+                pipelines.filter((p, i) => agreeingPipelineKeys.indexOf(i.toString()) !== -1).map(pipeline => pipeline.display_title).join(', '),
+                mostCommonPrediction,
+                article.label,
+            ]);
+        });
+        $('#experiments_comparison_table').DataTable( {
+            data,
+            columns: [
+                { title: "Article #" },
+                { title: "Mutually Agreeing <br/>Pipelines" },
+                { title: "Prevailing Genre <br/>(prediction)" },
+                { title: "True Genre" },
+            ],
+            initComplete: addSearchFields,
+            stateSave: false,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        } );
+    });
+</script>

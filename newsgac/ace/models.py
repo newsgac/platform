@@ -16,7 +16,7 @@ class ACE(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     display_title = fields.CharField(required=True)
     data_source = fields.ReferenceField(DataSource)
     pipelines = fields.ListField(fields.ReferenceField(Pipeline))
-    data = ObjectField()
+    predictions = ObjectField()
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 

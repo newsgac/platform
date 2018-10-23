@@ -2,6 +2,7 @@
 from flask import Flask, render_template
 from newsgac import config
 from newsgac.common.json_encoder import _JSONEncoder
+from newsgac.data_engineering.utils import genre_codes, genre_labels
 from newsgac.users.views import user_blueprint
 from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
@@ -49,6 +50,9 @@ def _format_datetime(date):
 def _format_dict_string(dict_val):
     return ', '.join("%s=%s" % (key, val) for (key, val) in dict_val.iteritems() if key != '_cls')
 
+@app.template_filter('code_to_label')
+def _code_to_label(code):
+    return genre_labels[genre_codes.index(code)]
 
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time

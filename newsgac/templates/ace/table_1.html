@@ -1,0 +1,41 @@
+<table id="explanations_table" cellspacing="0" class="table table-bordered table-hover display" width="100%">
+    <tfoot>
+        <tr>
+            <th>Article #</th>
+            <th>Pipeline</th>
+            <th>Predicted Genre</th>
+            <th>Text Explanation</th>
+            <th>Feature Explanation</th>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+    $(document).ready(function() {
+        const data = [];
+        articles.forEach((article, articleKey) => {
+            pipelines.forEach((pipeline, pipelineKey) => {
+               data.push([
+                `<span title="${article.raw_text}">${articleKey}</span>`,
+                pipeline.display_title,
+                article.predictions[pipelineKey],
+                '<a>some link</a>',
+                ''
+               ]);
+            });
+        });
+        $('#explanations_table').DataTable( {
+            data,
+            columns: [
+                { title: "Article #" },
+                { title: "Pipeline" },
+                { title: "Predicted Genre" },
+                { title: "Text Explanation" },
+                { title: "Feature Explanation" },
+            ],
+            initComplete: addSearchFields,
+            stateSave: false,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        } );
+    });
+</script>

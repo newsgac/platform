@@ -331,22 +331,31 @@ class PipelineComparator:
     #     print "Total unique articles : ", len(test_articles_genres)
     #     return test_articles_genres
 
-    def generateAgreementOverview(self):
-        import time
-        # generate a dictionary to be displayed in the format of article_text, mutually agreeing pipelines,
-        # quantity for the chosen genre
-        # test_articles is a list of documents from DB.collection("processed_data")
-        tabular_data_all = []   # list of dictionaries
-
+    @staticmethod
+    def get_predictions(articles, pipelines):
         # todo: parallelize
         # pipeline predictions are (hopefully) already parallelized for multiple articles at the same time
         # we could still paralellize multiple pipelines
         predictions = []
-        for idx, pipeline in enumerate(self.ace.pipelines):
-            predictions.append(pipeline.sk_pipeline.predict([article.raw_text for article in self.ace.data_source.articles]))
-            report_progress('ace', (idx + 1) / float(len(self.ace.pipelines)))
-        predictions = numpy.array(predictions).transpose()
+        for idx, pipeline in enumerate(pipelines):
+            predictions.append(
+                pipeline.sk_pipeline.predict([article.raw_text for article in articles]))
+            report_progress('ace', (idx + 1) / float(len(pipelines)))
         # transpose so first axis is now article e.g. predictions[0][1] is article 0, pipeline 1
+        return numpy.array(predictions).transpose()
+
+    def generateAgreementOverview(self):
+        tabular_data_all = []   # list of dictionaries
+
+        predictions = self.get_predictions(self.ace.date_source.articles, self.ace.pipelines)
+
+
+        articles = [{
+            'raw_text': article.raw_text,
+            'label': article.label,
+            'predictions': predictions[idx]
+
+        } for idx, article in enumerate(self.ace.data_source.articles)]
 
         for key, article in enumerate(self.ace.data_source.articles):
             tabular_data_row = {}
