@@ -20,6 +20,7 @@ class DataSource(CreatedUpdated, MongoModel):
     display_title = fields.CharField(required=True)
     description = fields.CharField(required=True)
     file = fields.FileField(required=True)
+    training_purpose = fields.BooleanField(required=True, default=False)
     articles = fields.EmbeddedDocumentListField(Article)
     task = fields.ReferenceField(TrackedTask)
 

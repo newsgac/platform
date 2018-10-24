@@ -8,10 +8,10 @@ Prioritized:
     - LIME Tabular and Text (Ays and Tom)
     - Add different explainers as column (Ays)
     
-    b) Set-based agreement table
+    b) Set-based agreement table (Done)
     - Optimization (Tom)
     
-    c) Article-based agreement table
+    c) Article-based agreement table (Done)
     - Optimization (Tom)
     
 2 - Grid search (GS)
@@ -34,3 +34,6 @@ Prioritized:
 
 6 - Implement tests (Tom :))
     
+    
+Questions from Ays for Tom:
+1 - Where is the scaling checkbox in the code for the pipeline? I could not find it.

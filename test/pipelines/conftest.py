@@ -1,6 +1,6 @@
 import pytest
 
-from newsgac.data_sources.process import process_data_source
+from newsgac.data_sources.process import upload_data_source
 from newsgac.data_sources.models import DataSource
 
 
@@ -15,7 +15,7 @@ def data_source_balanced_10(test_user, dataset_balanced_10):
         file=dataset_balanced_10
     )
     data_source.save()
-    process_data_source(data_source)
+    upload_data_source(data_source)
     return data_source
 
 

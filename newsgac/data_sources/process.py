@@ -66,6 +66,6 @@ def get_articles_from_file(file):
     return articles
 
 
-def process_data_source(data_source):
+def upload_data_source(data_source):
     data_source.articles = get_articles_from_file(data_source.file.file)
     data_source.save(cascade=True)

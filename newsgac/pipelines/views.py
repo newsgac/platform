@@ -44,7 +44,8 @@ def get_data_sources_dict():
         str(data_source.pk): {
             'display_title': data_source.display_title,
         }
-        for data_source in list(DataSource.objects.all())
+        # for data_source in list(DataSource.objects.all())
+        for data_source in list(DataSource.objects.raw({'training_purpose': True}))
     }
 
 
