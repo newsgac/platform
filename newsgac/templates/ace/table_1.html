@@ -15,13 +15,22 @@
         const data = [];
         articles.forEach((article, articleKey) => {
             pipelines.forEach((pipeline, pipelineKey) => {
-               data.push([
-                `<span title="${article.raw_text}">${articleKey}</span>`,
-                pipeline.display_title,
-                article.predictions[pipelineKey],
-                '<a href={{ url_for('pipelines.explain_article_lime', pipeline = pipeline, article = article)}} > Click for explanation </a>',
-                ''
-               ]);
+                const limeURLTemplate = "{{ url_for(
+                    'pipelines.explain_article_lime',
+                    pipeline_id='pipeline_id',
+                    article_number='article_number'
+                )}}";
+                const limeURL = limeURLTemplate
+                    .replace('pipeline_id', pipeline._id)
+                    .replace('article_number', articleKey);
+
+                data.push([
+                 `<span title="${article.raw_text}">${articleKey}</span>`,
+                 pipeline.display_title,
+                 article.predictions[pipelineKey],
+                 `<a href="${limeURL}" > Click for explanation </a>`,
+                 ''
+                ]);
             });
         });
         $('#explanations_table').DataTable( {

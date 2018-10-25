@@ -42,8 +42,8 @@ def get_frog_features(text):
     token_count = len(tokens)
 
     # Numbers
-    num_count = len([t for t in tokens if t[4].startswith('TW')])
-    features['number_perc'] = (num_count / float(token_count)) if float(token_count) > 0 else 0
+    # num_count = len([t for t in tokens if t[4].startswith('TW')])
+    # features['number_perc'] = (num_count / float(token_count)) if float(token_count) > 0 else 0
 
     # Adjective count and percentage
     adj_count = len([t for t in tokens if t[4].startswith('ADJ')])
@@ -107,11 +107,4 @@ def get_frog_features(text):
 
     features['unique_named_entities'] = (len(unique_ne_strings) /
                                          float(len(named_entities))) if len(named_entities) else 0
-
-
-    polarity, subjectivity = sentiment(text)
-    features['polarity'] = polarity
-    features['subjectivity'] = subjectivity
-
-
     return features
