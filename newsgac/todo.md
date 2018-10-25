@@ -1,6 +1,6 @@
 # TODO list
 
-Prioritized:
+## Priorities
 
 1 - ACE
 
@@ -35,5 +35,7 @@ Prioritized:
 6 - Implement tests (Tom :))
     
     
-Questions from Ays for Tom:
-1 - Where is the scaling checkbox in the code for the pipeline? I could not find it.
+## Potential improvements
+
+1 - Progress bars are lost when pipeline page is refreshed
+    

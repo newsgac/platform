@@ -4,7 +4,7 @@
             <th>Article #</th>
             <th>Pipeline</th>
             <th>Predicted Genre</th>
-            <th>Text Explanation</th>
+            <th>Explanation</th>
             <th>Feature Explanation</th>
         </tr>
     </tfoot>
@@ -19,7 +19,7 @@
                 `<span title="${article.raw_text}">${articleKey}</span>`,
                 pipeline.display_title,
                 article.predictions[pipelineKey],
-                '<a>some link</a>',
+                '<a href={{ url_for('pipelines.explain_article_lime', pipeline = pipeline, article = article)}} > Click for explanation </a>',
                 ''
                ]);
             });

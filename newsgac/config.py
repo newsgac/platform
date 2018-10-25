@@ -16,7 +16,7 @@ secret_key = environ['FLASK_SECRET_KEY']
 
 flask_port = 5050
 # celery_eager setting will evaluate tasks immediately, without using workers.
-celery_eager = False
+celery_eager = True
 mongo_host = 'database'
 mongo_port = 27017
 mongo_database_name = 'newsgacdev'

@@ -36,7 +36,8 @@ def overview():
         } for ace in list(ACE.objects.all())
     ]
 
-    data_sources = list(DataSource.objects.all())
+    # data_sources = list(DataSource.objects.all())
+    data_sources = list(DataSource.objects.raw({'training_purpose': False}))
     pipelines = list(Pipeline.objects.all())
     return render_template(
         "ace/overview.html",
