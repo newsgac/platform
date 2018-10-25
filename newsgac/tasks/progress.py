@@ -1,10 +1,31 @@
+import redis
 from celery import current_task
+from flask import json
 
+from newsgac import config
 
+task_id = None
 def report_progress(name, value):
+    if task_id:
+        client = redis.Redis(host=config.redis_host, port=config.redis_port)
+        client.publish("celery_task_" + task_id,
+            json.dumps({
+                'id': task_id,
+                'state': 'PROCESSING',
+                'result': {
+                    'progress': [{
+                        'name': name,
+                        'progress': value
+                    }]
+                },
+                'traceback': None
+            })
+        )
+        return
+
     if not current_task:
         return
-        # raise EnvironmentError('Not in a celery task')
+
     if getattr(current_task, 'progress', None) is None:
         setattr(current_task, 'progress', [])
     progress = getattr(current_task, 'progress')

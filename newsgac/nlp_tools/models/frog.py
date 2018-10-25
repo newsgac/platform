@@ -1,3 +1,4 @@
+import hashlib
 from collections import OrderedDict
 
 import numpy
@@ -11,7 +12,6 @@ from newsgac.nlp_tools.models.frog_features import feature_descriptions, feature
 from newsgac.pipelines.utils import dict_vectorize
 from newsgac.tasks.progress import report_progress
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
-
 
 class Features(EmbeddedMongoModel):
     # adds all features (from array + descr dict) to the Feature class as BooleanFields.
@@ -63,7 +63,8 @@ class FrogFeatureExtractor(TransformerMixin):
             assert features[i].keys() == features[i+1].keys()
 
         # features is a list of ordered dicts like { [feature_name]: [feature_value] }
-        return numpy.array([f.values() for f in features])
+        return_value = numpy.array([f.values() for f in features])
+        return return_value
 
     def get_feature_names(self):
         features_dict = model_to_dict(self.nlp_tool.parameters.features)

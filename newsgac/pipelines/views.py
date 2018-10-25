@@ -4,16 +4,14 @@ from bokeh.embed import components
 from bokeh.layouts import gridplot
 from flask import Blueprint, render_template, request, session, json, url_for, Response
 from lime.lime_tabular import LimeTabularExplainer
-from lime.lime_text import LimeTextExplainer
 from pymodm.errors import ValidationError
 
 from newsgac.common.back import back
 from newsgac.common.json_encoder import _dumps
 from newsgac.common.utils import model_to_json, model_to_dict
-from newsgac.data_engineering import utils
-from newsgac.data_engineering.utils import genre_codes, genre_labels
+from newsgac.learners import GridSearch
 from newsgac.pipelines.models import Pipeline
-from newsgac.pipelines.tasks import run_pipeline_task
+from newsgac.pipelines.tasks import run_pipeline_task, run_grid_search_task
 from newsgac.data_sources.models import DataSource
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
@@ -130,7 +128,10 @@ def new_save():
 
     try:
         pipeline.save()
-        task = run_pipeline_task.delay(str(pipeline._id))
+        if isinstance(pipeline.learner, GridSearch):
+            task = run_grid_search_task.delay(str(pipeline._id))
+        else:
+            task = run_pipeline_task.delay(str(pipeline._id))
         pipeline.task_id = task.task_id
         pipeline.save()
         return Response(
