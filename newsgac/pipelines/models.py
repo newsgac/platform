@@ -74,7 +74,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     result = fields.EmbeddedDocumentField(Result)
     task_id = fields.CharField()
 
-    grid_search_result = fields.ListField(fields.DictField())
+    grid_search_result = ObjectField()
 
 
     @property

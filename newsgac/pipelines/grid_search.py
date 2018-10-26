@@ -21,6 +21,8 @@ def run_grid_search(pipeline):
     texts = numpy.array([article.raw_text for article in pipeline.data_source.articles])
     labels = numpy.array([article.label for article in pipeline.data_source.articles])
 
+    pipeline.grid_search_result = {}
+
     for learner in learners:
         if learner in param_space:
             report_progress('gridsearch/%s' % learner.tag, 0)
@@ -34,6 +36,12 @@ def run_grid_search(pipeline):
             print(search.best_params_)
             report_progress('gridsearch/%s' % learner.tag, 1)
 
+            pipeline.grid_search_result[learner.tag] = {
+                'full': search.cv_results_,
+                'best': search.best_params_
+            }
+
+    pipeline.save()
 
 
 
