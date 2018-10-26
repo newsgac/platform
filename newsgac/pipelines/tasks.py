@@ -26,24 +26,25 @@ def run_grid_search_task(self, pipeline_id):
     # current_process()._authkey = 'randomKey'
     # current_process()._daemonic = False
     # current_process()._tempdir = '/tmp'
-    # pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    # run_grid_search(pipeline)
-    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-    (stdoutdata, stderrdata) = process.communicate("""
-import newsgac.database
-from newsgac.pipelines.tasks import run_grid_search_task_impl
-from newsgac.tasks import progress
-progress.task_id = '%s'
-run_grid_search_task_impl('%s')
-""" % (current_task.request.id, pipeline_id))
-
-    exit_code = process.wait()
-
-    print(exit_code)
-    print(stderrdata)
-    print(stdoutdata)
-
+     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
+     run_grid_search(pipeline)
     # current_process().daemon = True
+
+#     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+#     (stdoutdata, stderrdata) = process.communicate("""
+# import newsgac.database
+# from newsgac.pipelines.tasks import run_grid_search_task_impl
+# from newsgac.tasks import progress
+# progress.task_id = '%s'
+# run_grid_search_task_impl('%s')
+# """ % (current_task.request.id, pipeline_id))
+#
+#     exit_code = process.wait()
+#
+#     print(exit_code)
+#     print(stderrdata)
+#     print(stdoutdata)
+
 
 #
 # @celery_app.task(bind=True, trail=True)
