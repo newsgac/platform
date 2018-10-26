@@ -3,7 +3,7 @@
 
     <div class="page-header">
         <h1>Results for Pipeline:
-            <a href="url_for('pipe.get_pipeline_page', pipeline_id = pipeline._id)">
+            <a href="{{ url_for('pipeline.visualise_results', pipeline_id = str(pipeline._id)) }}">
                 <small> {{ pipeline.display_title }} </small>
             </a>
         </h1>
