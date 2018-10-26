@@ -16,11 +16,13 @@
         articles.forEach((article, articleKey) => {
             pipelines.forEach((pipeline, pipelineKey) => {
                 const limeURLTemplate = "{{ url_for(
-                    'pipelines.explain_article_lime',
+                    'ace.explain_article_lime',
+                    ace_id='ace_id',
                     pipeline_id='pipeline_id',
                     article_number='article_number'
                 )}}";
                 const limeURL = limeURLTemplate
+                    .replace('ace_id', ace_id)
                     .replace('pipeline_id', pipeline._id)
                     .replace('article_number', articleKey);
 
