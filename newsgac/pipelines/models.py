@@ -74,6 +74,9 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     result = fields.EmbeddedDocumentField(Result)
     task_id = fields.CharField()
 
+    grid_search_result = ObjectField()
+
+
     @property
     def task(self):
         return TrackedTask.objects.get({"_id": UUID(self.task_id)})

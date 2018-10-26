@@ -3,6 +3,7 @@ from bson import ObjectId
 from bokeh.embed import components
 from bokeh.layouts import gridplot
 from flask import Blueprint, render_template, request, url_for, redirect, session, json
+from lime.lime_tabular import LimeTabularExplainer
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
@@ -92,6 +93,7 @@ def view(ace_id):
         # ace=ace,
         # genre_codes=genre_codes,
         # genre_labels=genre_labels,
+        ace_id=ace_id,
         pipelines=pipelines,
         articles=articles
     )
@@ -115,109 +117,50 @@ def delete_all():
     return back.redirect()
 
 
-@ace_blueprint.route('/<string:pipeline_id>/results')
+# article number is an integer, but you should leave string here so that we can
+# generate a url template that can be used dynamically from Javascript
+@ace_blueprint.route('/<string:ace_id>/explain_features_lime/<string:pipeline_id>/<string:article_number>')
 @requires_login
-def visualise_results(pipeline_id):
-    pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    results_eval = pipeline.learner.result
-    results_model = pipeline.learner.result
-    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
-    p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
-
-    plots = []
-    plots.append(p)
-    plots.append(p_mod)
-    overview_layout = gridplot(plots, ncols=2)
-    script, div = components(overview_layout)
-
-    return render_template('pipelines/results.html',
-                           pipeline=pipeline,
-                           results_eval=results_eval,
-                           results_model=results_model,
-                           plot_script=script,
-                           plot_div=div,
-                           mimetype='text/html')
-
-
-
-@ace_blueprint.route('/<string:pipeline_id>/features')
-@requires_login
-def visualise_features(pipeline_id):
+def explain_article_lime(ace_id, pipeline_id, article_number):
+    ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
 
-    p, script, div = ResultVisualiser.visualize_df_feature_importance(
-        pipeline.learner.get_features_weights(),
-        pipeline.display_title
+    skp = pipeline.sk_pipeline
+
+    # model == learner
+    model = skp.steps.pop()[1]
+    feature_extractor = skp
+    feature_names = skp.named_steps['FeatureExtraction'].get_feature_names()
+
+    # calculate feature vectors:
+    v = feature_extractor.transform([a.raw_text for a in pipeline.data_source.articles])
+
+    if v.__class__.__name__ == 'csr_matrix':
+        v = v.toarray()
+
+    explainer = LimeTabularExplainer(
+        training_data=v,
+        feature_names=feature_names,
+        class_names=model.classes_
     )
 
-    # if type(pipeline.learner) == LearnerSVC:
-    #     f_weights = pipeline.learner.get_features_weights()
-    #     if 'tf-idf' in type(pipeline.nlp_tool) == TFIDF:
-    #         vectorizer = DATABASE.load_object(ds.vectorizer_handler)
-    #         p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
-    #                                                                         vectorizer=vectorizer)
-    #     else:
-    #         p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
-    #                                                                         pipeline=pipeline)
-    # elif pipeline.type == "RF":
-    #     f_weights_df = pipeline.get_features_weights()
-    #     p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, pipeline.display_title)
-    # elif pipeline.type == "XGB":
-    #     f_weights_df = pipeline.get_features_weights()
-    #     p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, pipeline.display_title)
+    article_number = int(article_number)
+    article = ace.data_source.articles[article_number]
+    article_features = feature_extractor.transform([article.raw_text]).toarray()[0]
+    prediction = model.predict([article_features])[0]
 
-    if script is not None:
-        return render_template('pipelines/features.html',
-                               pipeline=pipeline,
-                               plot_script=script, plot_div=div,
-                               mimetype='text/html')
+    exp = explainer.explain_instance(
+        data_row=article_features,
+        predict_fn=model.predict_proba,
+        #num_features=24,
+        num_samples=3000
+    )
 
-    return render_template('pipelines/features.html', pipeline=pipeline)
-
-
-# @pipeline_blueprint.route('/explain/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
-# @user_decorators.requires_login
-# def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
-#     # art = DataSource.get_processed_article_by_raw_text(article_text)
-#     art = DataSource.get_processed_article_by_id(article_id)
-#     exp = get_experiment_by_id(experiment_id)
-#
-#     # LIME explanations
-#     e = Explanation(experiment=exp, article=art, predicted_genre=genre)
-#     res = e.explain_using_text()
-#
-#     return render_template('pipelines/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
-#
-# @pipeline_blueprint.route('/explain_features/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>/', methods=['GET'])
-# @user_decorators.requires_login
-# def explain_features_for_experiment(article_id, article_num, genre, experiment_id):
-#     # art = DataSource.get_processed_article_by_raw_text(article_text)
-#     art = DataSource.get_processed_article_by_id(article_id)
-#     exp = get_experiment_by_id(experiment_id)
-#
-#     # LIME explanations
-#     e = Explanation(experiment=exp, article=art, predicted_genre=genre)
-#     res = e.explain_using_features()
-#
-#     return render_template('pipelines/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
-#
-#
-
-#
-# @pipeline_blueprint.route('/recommend/<string:pipeline_id>')
-# @user_decorators.requires_login
-# def apply_grid_search(pipeline_id):
-#     ds = DataSource.get_by_id(pipeline_id)
-#
-#     task = grid_ds.delay(pipeline_id)
-#     task.wait()
-#
-#     if len(task.result) > 1:
-#         report_per_score = task.result[0][0]
-#         feature_reduction = task.result[0][1]
-#
-#     return render_template('pipelines/recommendation.html', pipeline = ds, report_per_score = report_per_score,
-#                            feature_reduction=feature_reduction)
-#
-
-
+    return render_template(
+        'pipelines/explain_lime.html',
+        pipeline=pipeline,
+        article=article,
+        prediction=prediction,
+        exp_html=exp.as_html(),
+        article_number=article_number,
+    )

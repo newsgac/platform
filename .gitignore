@@ -12,3 +12,8 @@ src/test/*
 */**/node_modules
 
 .ipynb_checkpoints
+
+data
+hub_notebooks
+dist
+build

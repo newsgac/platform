@@ -1,6 +1,5 @@
 from passlib.hash import pbkdf2_sha512
 import re
-from dateutil import tz
 from itertools import chain, combinations
 
 from newsgac.common.json_encoder import _dumps
@@ -41,14 +40,6 @@ def str_to_bool(s):
          return True
     elif s.lower == 'false':
          return False
-
-# @staticmethod
-def get_local_display_time(timestamp):
-    from_zone = tz.tzutc()
-    to_zone = tz.tzlocal()
-    utc = timestamp.replace(tzinfo=from_zone)
-    # Convert time zone
-    return utc.astimezone(to_zone)
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"

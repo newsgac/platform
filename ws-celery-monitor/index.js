@@ -13,7 +13,7 @@ wss.on('connection', function connection(ws) {
       sub.subscribe("celery_task_new");
       sub.on("message", function (channel, message) {
         ws.send(message);
-        console.log("sub channel " + channel + ": " + JSON.stringify(JSON.parse(message), null, 4));
+        // console.log("sub channel " + channel + ": " + JSON.stringify(JSON.parse(message), null, 4));
       });
       subscriptions.push(sub);
     }
@@ -22,16 +22,16 @@ wss.on('connection', function connection(ws) {
       sub.subscribe("celery_task_" + msg.task_id);
       sub.on("message", function (channel, message) {
         ws.send(message);
-        console.log("sub channel " + channel + ": " + JSON.stringify(JSON.parse(message), null, 4));
+        // console.log("sub channel " + channel + ": " + JSON.stringify(JSON.parse(message), null, 4));
       });
       subscriptions.push(sub);
     } else {
       console.warn('receiving unknown message');
     }
-    console.log('received: %s', message);
+    // console.log('received: %s', message);
   });
   ws.on('close', () => {
-    console.log('closing');
+    // console.log('closing');
     subscriptions.forEach(sub => sub.quit());
   });
 });

@@ -12,9 +12,14 @@ from newsgac import config
 from newsgac.caches.models import Cache
 from newsgac.common.utils import split_long_sentences, split_chunks
 import newsgac.data_engineering.utils as Utilities
+from newsgac import database
 
-
+local_cache = {}
 def get_frog_tokens(text):
+    cache_hash = hashlib.sha1(text.encode('utf-8')).hexdigest()
+    if cache_hash in local_cache:
+        return local_cache[cache_hash]
+
     cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
     if not cache.data:
         sentences = [s for s in sent_tokenize(text) if s]
@@ -26,6 +31,8 @@ def get_frog_tokens(text):
         cache.data = [token for token in tokens if None not in token]
 
         cache.save()
+
+    local_cache[cache_hash] = cache.data
     return cache.data
 
 
