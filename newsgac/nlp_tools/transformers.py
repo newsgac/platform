@@ -25,6 +25,8 @@ class CleanOCR(TransformerMixin):
     def transform_text(text):
         for char in CleanOCR.unwanted_chars:
             text = text.replace(char, '')
+        # TODO: find a better fix for this
+        text = re.sub(u"(\u201e|\u201d|\u2014|\xeb|\xfc|\xe9|\xef|\xe8)", "", text)
         return ' '.join(text.split())
 
     def transform(self, X):

@@ -17,13 +17,13 @@
 2 - Grid search (GS)
 
     a) Grid search to be integrated in the new pipeline page (Tom)
-    b) Optional selection run grid search and keep the output of four scorers somewhere (Tom)
+    b) Optional selection run grid search and keep the output of four scorers somewhere (Tom) (Done)
     c) Workout pre-defined lists per learner (Ays)
     d) Configure the pipeline using the optimized hyper-parameters from the GS (Ays and Tom)
     
 3 - Hypothesis testing
 
-    a) Distinction between test and train dataset (Tom)
+    a) Distinction between test and train dataset (Tom) (Done)
     b) Integrate in the page (Ays)
     
 4 - Investigate parallelization (Tom)
