@@ -8,6 +8,9 @@ from newsgac.data_sources.models import DataSource
 from newsgac.pipelines.models import Pipeline
 from newsgac.tasks.models import TrackedTask
 from newsgac.users.models import User
+import spacy
+
+DUTCH_NLP = spacy.load('nl_core_news_sm')
 
 
 # Analyze, compare, explain

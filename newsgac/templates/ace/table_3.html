@@ -23,7 +23,7 @@
             const mostCommonPrediction = mostCommon(article.predictions);
             const agreeingPipelineKeys = Object.keys(_.pickBy(article.predictions, p => p===mostCommonPrediction));
             data.push([
-                `<span title="${article.raw_text}">${articleKey}</span>`,
+                `<span title="${article.raw_text}">${articleKey+1}</span>`,
                 pipelines.filter((p, i) => agreeingPipelineKeys.indexOf(i.toString()) !== -1).map(pipeline => pipeline.display_title).join(', '),
                 mostCommonPrediction,
                 article.label,

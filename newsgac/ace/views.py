@@ -3,9 +3,8 @@ from bson import ObjectId
 from bokeh.embed import components
 from bokeh.layouts import gridplot
 from flask import Blueprint, render_template, request, url_for, redirect, session, json
-from lime.lime_tabular import LimeTabularExplainer
 
-from newsgac.ace.models import ACE
+from newsgac.ace.models import ACE, DUTCH_NLP
 from newsgac.common.back import back
 from newsgac.common.utils import model_to_json, model_to_dict
 from newsgac.data_engineering.utils import genre_codes, genre_labels
@@ -16,6 +15,16 @@ from newsgac.users.view_decorators import requires_login
 from newsgac.visualisation.comparison import PipelineComparator
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 from newsgac.ace.tasks import run_ace
+
+from anchor import anchor_tabular
+from anchor import anchor_text
+from lime.lime_tabular import LimeTabularExplainer
+from lime.lime_text import LimeTextExplainer
+from sklearn.model_selection import train_test_split
+
+from copy import deepcopy
+import numpy as np
+from newsgac.nlp_tools.transformers import ExtractQuotes, RemoveQuotes
 
 ace_blueprint = Blueprint('ace', __name__)
 
@@ -121,46 +130,80 @@ def delete_all():
 # generate a url template that can be used dynamically from Javascript
 @ace_blueprint.route('/<string:ace_id>/explain_features_lime/<string:pipeline_id>/<string:article_number>')
 @requires_login
-def explain_article_lime(ace_id, pipeline_id, article_number):
+def explain_article(ace_id, pipeline_id, article_number):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
 
-    skp = pipeline.sk_pipeline
-
-    # model == learner
-    model = skp.steps.pop()[1]
-    feature_extractor = skp
-    feature_names = skp.named_steps['FeatureExtraction'].get_feature_names()
-
-    # calculate feature vectors:
-    v = feature_extractor.transform([a.raw_text for a in pipeline.data_source.articles])
-
-    if v.__class__.__name__ == 'csr_matrix':
-        v = v.toarray()
-
-    explainer = LimeTabularExplainer(
-        training_data=v,
-        feature_names=feature_names,
-        class_names=model.classes_
-    )
-
     article_number = int(article_number)
     article = ace.data_source.articles[article_number]
-    article_features = feature_extractor.transform([article.raw_text]).toarray()[0]
-    prediction = model.predict([article_features])[0]
 
-    exp = explainer.explain_instance(
-        data_row=article_features,
-        predict_fn=model.predict_proba,
-        #num_features=24,
-        num_samples=3000
-    )
+    prediction = pipeline.sk_pipeline.predict([article.raw_text])[0]
+
+    # do not modify pipeline.sk_pipeline
+    skp = deepcopy(pipeline.sk_pipeline)
+    model = skp.steps.pop()[1]
+
+    class_names = np.array(model.classes_).tolist()
+    class_idx = []
+    for i, clss in enumerate(class_names):
+        class_idx.append(i)
+
+    if pipeline.nlp_tool.name == 'TF-IDF':
+        exp_lime = LimeTextExplainer(class_names=class_names)
+        exp_anchor = anchor_text.AnchorText(DUTCH_NLP, class_names=class_names,
+                                                 use_unk_distribution=False)
+
+        exp_from_lime = exp_lime.explain_instance(
+            article.raw_text,
+            pipeline.sk_pipeline.predict_proba,
+            labels=class_idx,
+            # num_features=24,
+            # num_samples=3000
+        )
+
+        # need to send clean ocr to anchor
+        # TODO: applying a dirty fix right now, we need to look into encoding/decoding changes made in transformers.py
+        clean_text = skp.steps[0][1].transform([article.raw_text])[0]
+        # clean_text = RemoveQuotes().transform([clean_text])[0]
+        # TODO: Caveat: needed to change library code in anchor replace the following lines in anchor_text.py line 98
+        # line 98 --> exp['prediction'] = int(self.class_names.index(exp['prediction']))
+        # line 99 (original line to be commented out and replaced with the one above) --> exp['prediction'] = int(exp['prediction'])
+        exp_from_anchor = exp_anchor.explain_instance(clean_text, pipeline.sk_pipeline.predict, use_proba=True)
+    else:
+        feature_extractor = skp
+        feature_names = skp.named_steps['FeatureExtraction'].get_feature_names()
+
+        # calculate feature vectors for explanators
+        data = feature_extractor.transform([a.raw_text for a in pipeline.data_source.articles])
+        labels = [a.label for a in pipeline.data_source.articles]
+        exp_lime = LimeTabularExplainer(training_data=data, feature_names=feature_names,
+                                            class_names=class_names)
+        exp_anchor = anchor_tabular.AnchorTabularExplainer(data=data, feature_names=feature_names,
+                                                               class_names=class_names)
+        # TODO: check with hold-out-dataset
+        # anchor needs validation data
+        X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.5, random_state=42)
+        exp_anchor.fit(train_data=X_train, train_labels=y_train, validation_data=X_test,
+                           validation_labels=y_test)
+
+        article_features = feature_extractor.transform([article.raw_text]).toarray()[0]
+        # TODO: check the order of features with feature_names
+        exp_from_lime = exp_lime.explain_instance(
+            article_features,
+            model.predict_proba,
+            labels=class_idx,
+            #num_features=24,
+            # num_samples=3000
+        )
+
+        exp_from_anchor = exp_anchor.explain_instance(article_features, model.predict_proba)
 
     return render_template(
-        'pipelines/explain_lime.html',
+        'pipelines/explain.html',
         pipeline=pipeline,
         article=article,
         prediction=prediction,
-        exp_html=exp.as_html(),
+        exp1_html=exp_from_lime.as_html(labels=[list(class_names).index(prediction)]),
+        exp2_html=exp_from_anchor.as_html(),
         article_number=article_number,
     )

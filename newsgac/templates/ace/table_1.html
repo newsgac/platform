@@ -4,8 +4,8 @@
             <th>Article #</th>
             <th>Pipeline</th>
             <th>Predicted Genre</th>
+            <th>True Genre</th>
             <th>Explanation</th>
-            <th>Feature Explanation</th>
         </tr>
     </tfoot>
 </table>
@@ -16,7 +16,7 @@
         articles.forEach((article, articleKey) => {
             pipelines.forEach((pipeline, pipelineKey) => {
                 const limeURLTemplate = "{{ url_for(
-                    'ace.explain_article_lime',
+                    'ace.explain_article',
                     ace_id='ace_id',
                     pipeline_id='pipeline_id',
                     article_number='article_number'
@@ -24,14 +24,14 @@
                 const limeURL = limeURLTemplate
                     .replace('ace_id', ace_id)
                     .replace('pipeline_id', pipeline._id)
-                    .replace('article_number', articleKey);
+                    .replace('article_number', articleKey+1);
 
                 data.push([
-                 `<span title="${article.raw_text}">${articleKey}</span>`,
+                 `<span title="${article.raw_text}">${articleKey+1}</span>`,
                  pipeline.display_title,
                  article.predictions[pipelineKey],
+                 article.label,
                  `<a href="${limeURL}" target="_blank" > Click for explanation </a>`,
-                 ''
                 ]);
             });
         });
@@ -41,8 +41,8 @@
                 { title: "Article #" },
                 { title: "Pipeline" },
                 { title: "Predicted Genre" },
-                { title: "Text Explanation" },
-                { title: "Feature Explanation" },
+                { title: "True Genre" },
+                { title: "Explanation" },
             ],
             initComplete: addSearchFields,
             stateSave: false,
