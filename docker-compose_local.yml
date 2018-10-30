@@ -32,7 +32,7 @@ services:
 
     frogworker:
         <<: *worker-base
-        command: celery -A newsgac.tasks.celery_app worker -l info --concurrency 2 -n frogworker@%h -Q frog
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog
 
     web:
         volumes:

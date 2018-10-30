@@ -52,7 +52,6 @@ class FrogFeatureExtractor(TransformerMixin):
         frog_tokens = group(frog_process.s(text) for text in X)().get()
 
         for tokens in frog_tokens:
-            print(tokens)
             article_features = {
                 k: v for k, v in
                 get_frog_features(tokens).iteritems()

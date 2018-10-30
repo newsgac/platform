@@ -30,7 +30,6 @@ def setup_frog_conn(sender, signal, **kwargs):
 def frog_process(text):
     global frogclient
     cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
-    cache.data = None
     if not cache.data:
         sentences = [s for s in sent_tokenize(text) if s]
         sentences = split_long_sentences(sentences, 250)

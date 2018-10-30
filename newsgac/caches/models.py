@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pymodm import MongoModel, fields
-from pymodm.errors import DoesNotExist
+from pymodm.errors import DoesNotExist, MultipleObjectsReturned
 from pymongo import IndexModel
 
 from newsgac.common.fields import ObjectField
@@ -21,12 +21,13 @@ class Cache(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     @classmethod
     def get_or_new(cls, hash):
         try:
-            cache = cls.objects.get({'hash': hash})
+            cache = cls.objects.raw({'hash': hash})[0]
             cache.last_accessed = datetime.utcnow()
             cache.save()
             return cache
         except DoesNotExist:
             return cls(hash=hash)
+
 
     def delete(self):
         ObjectField.delete(self.hash)

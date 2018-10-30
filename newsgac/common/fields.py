@@ -42,10 +42,11 @@ class ObjectField(pymodm.fields.MongoBaseField):
         return super(ObjectField, self).to_python(value)
 
     @staticmethod
-    def delete(hash):
-        data_ref = _get_db()['cache'].find_one({'hash': hash})['data']
-        fs = gridfs.GridFS(_get_db())
-        fs.delete(data_ref)
+    def delete(hash, db_name='cache'):
+        data_ref = _get_db()[db_name].find_one({'hash': hash}).get('data', None)
+        if data_ref:
+            fs = gridfs.GridFS(_get_db())
+            fs.delete(data_ref)
 
 
 def enum_validator(enum):

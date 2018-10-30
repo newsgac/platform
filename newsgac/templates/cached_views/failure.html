@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from "task.html" import task %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Your request has failed :(</h1>
+    </div>
+
+    <div class="alert">
+        {{ task(cache.task) }}
+    </div>
+
+{% endblock %}
