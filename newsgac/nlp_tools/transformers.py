@@ -6,11 +6,10 @@ from collections import OrderedDict
 import numpy
 from nltk import word_tokenize, sent_tokenize
 from sklearn.base import TransformerMixin
-from sklearn.externals.joblib import delayed
+from sklearn.externals.joblib import delayed, Parallel
 
 from newsgac import config
 from newsgac.data_engineering.preprocessing import remove_stop_words, apply_lemmatization
-from newsgac.parallel_with_progress import ParallelWithProgress
 
 
 class CleanOCR(TransformerMixin):
@@ -168,7 +167,7 @@ class StopWordRemoval(TransformerMixin):
         return self
 
     def transform(self, X):
-        return ParallelWithProgress(n_jobs=config.n_parallel_jobs, progress_callback=None)(
+        return Parallel(n_jobs=config.n_parallel_jobs)(
             delayed(remove_stop_words)(a) for a in X
         )
 
@@ -181,7 +180,7 @@ class ApplyLemmatization(TransformerMixin):
         return self
 
     def transform(self, X):
-        return ParallelWithProgress(n_jobs=config.n_parallel_jobs, progress_callback=None)(
+        return Parallel(n_jobs=config.n_parallel_jobs)(
             delayed(apply_lemmatization)(a) for a in X
         )
 

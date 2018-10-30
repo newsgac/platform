@@ -1,0 +1,10 @@
+{% macro task(task) %}
+    {% if task.status|string == 'Status.FAILURE' %}
+        <div title="{{ task.trace }}">{{ task.status }}</div>
+    {% else %}
+        <div>{{ task.status }}</div>
+    {% endif %}
+    {% if task.end %}
+        <span>duration: {{ task.end - task.start }}</span>
+    {% endif %}
+{% endmacro %}

@@ -6,7 +6,7 @@ from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 
 from newsgac.caches.models import Cache
-from newsgac.common.fields import ObjectField
+from newsgac.common.fields import ObjectField, EnumField
 from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 from newsgac.data_sources.models import DataSource
 from newsgac.learners import LearnerSVC
@@ -15,8 +15,7 @@ from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
 from newsgac.users.models import User
-from newsgac.tasks.models import TrackedTask
-
+from newsgac.tasks.models import TrackedTask, Status
 
 from newsgac.data_engineering import utils as DataUtils
 
@@ -76,10 +75,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     task_id = fields.CharField()
     grid_search_result = ObjectField()
 
-
-    @property
-    def task(self):
-        return TrackedTask.objects.get({"_id": UUID(self.task_id)})
+    task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
 
     @classmethod
     def create(cls):
