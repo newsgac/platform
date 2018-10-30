@@ -11,7 +11,6 @@ import uuid
 
 from collections import defaultdict, Counter
 from newsgac import database
-from newsgac.tasks.progress import report_progress
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 # from newsgac.models.data_sources.data_source_old import DataSource
 
@@ -340,7 +339,6 @@ class PipelineComparator:
         for idx, pipeline in enumerate(pipelines):
             predictions.append(
                 pipeline.sk_pipeline.predict([article.raw_text for article in articles]))
-            report_progress('ace', (idx + 1) / float(len(pipelines)))
         # transpose so first axis is now article e.g. predictions[0][1] is article 0, pipeline 1
         return numpy.array(predictions).transpose()
 

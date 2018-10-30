@@ -2,6 +2,9 @@ FROM python:2.7
 
 MAINTAINER abilgin
 
+RUN groupadd -g 999 flask && \
+    useradd -r -u 999 -g flask flask
+
 RUN mkdir /newsgac
 
 COPY requirements.txt /newsgac/requirements.txt

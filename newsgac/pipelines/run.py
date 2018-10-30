@@ -3,7 +3,6 @@ import numpy
 from sklearn.model_selection import KFold, cross_val_predict
 
 from newsgac.pipelines.models import Result
-from newsgac.tasks.progress import report_progress
 
 
 def run_pipeline(pipeline):
@@ -12,18 +11,14 @@ def run_pipeline(pipeline):
 
     pipeline.sk_pipeline = pipeline.get_sk_pipeline()
 
-    report_progress('training', 0)
     pipeline.sk_pipeline.fit(texts, labels)
-    report_progress('training', 1)
 
-    report_progress('validating', 0)
     pipeline.result = validate(
         pipeline.sk_pipeline,
         texts,
         labels,
     )
     pipeline.save()
-    report_progress('validating', 1)
 
 
 def validate(model, X, labels):

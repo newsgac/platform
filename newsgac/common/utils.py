@@ -81,13 +81,14 @@ def split_chunks(l, n):
         yield l[i:i + n]
 
 
-def split_long_sentences(sentences, max_tokens=48):
+def split_long_sentences(sentences, max_tokens=450):
     new_sentences = []
 
     for sentence in sentences:
         words = sentence.split(' ')
 
         while len(words) > max_tokens:
+            print("WARNING: sentence found with > %s tokens" % str(max_tokens))
             new_sentences.append(' '.join(words[:max_tokens]) + '.')
             words = words[max_tokens:]
 

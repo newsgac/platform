@@ -4,7 +4,6 @@ from sklearn.model_selection import GridSearchCV
 from newsgac import config
 from newsgac.learners import learners, GridSearch, LearnerSVC, LearnerNB
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
-from newsgac.tasks.progress import report_progress
 
 param_space = {
     LearnerSVC: {
@@ -25,7 +24,6 @@ def run_grid_search(pipeline):
 
     for learner in learners:
         if learner in param_space:
-            report_progress('gridsearch/%s' % learner.tag, 0)
             skp = get_sk_pipeline(pipeline.sw_removal, pipeline.lemmatization, pipeline.nlp_tool, learner.create())
             space = {
                 'Classifier__%s' % name: space for name, space in param_space[learner].iteritems()
@@ -34,7 +32,6 @@ def run_grid_search(pipeline):
             search.fit(texts, labels)
             print("Best parameter (CV score=%0.3f):" % search.best_score_)
             print(search.best_params_)
-            report_progress('gridsearch/%s' % learner.tag, 1)
 
             pipeline.grid_search_result[learner.tag] = {
                 'full': search.cv_results_,

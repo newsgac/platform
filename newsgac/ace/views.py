@@ -7,6 +7,7 @@ from lime.lime_tabular import LimeTabularExplainer
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
+from newsgac.common.cached_view import cached_view
 from newsgac.common.utils import model_to_json, model_to_dict
 from newsgac.data_engineering.utils import genre_codes, genre_labels
 from newsgac.pipelines.models import Pipeline
@@ -15,7 +16,7 @@ from newsgac.users.models import User
 from newsgac.users.view_decorators import requires_login
 from newsgac.visualisation.comparison import PipelineComparator
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
-from newsgac.ace.tasks import run_ace
+from newsgac.ace.tasks import run_ace, explain_article_lime_task
 
 ace_blueprint = Blueprint('ace', __name__)
 
@@ -32,7 +33,7 @@ def overview():
             'data_source': {
                 'display_title': ace.data_source.display_title
             },
-            'task': json.dumps(ace.task.as_dict()),
+            'task': ace.task,
 
         } for ace in list(ACE.objects.all())
     ]
@@ -121,46 +122,11 @@ def delete_all():
 # generate a url template that can be used dynamically from Javascript
 @ace_blueprint.route('/<string:ace_id>/explain_features_lime/<string:pipeline_id>/<string:article_number>')
 @requires_login
-def explain_article_lime(ace_id, pipeline_id, article_number):
-    ace = ACE.objects.get({'_id': ObjectId(ace_id)})
-    pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-
-    skp = pipeline.sk_pipeline
-
-    # model == learner
-    model = skp.steps.pop()[1]
-    feature_extractor = skp
-    feature_names = skp.named_steps['FeatureExtraction'].get_feature_names()
-
-    # calculate feature vectors:
-    v = feature_extractor.transform([a.raw_text for a in pipeline.data_source.articles])
-
-    if v.__class__.__name__ == 'csr_matrix':
-        v = v.toarray()
-
-    explainer = LimeTabularExplainer(
-        training_data=v,
-        feature_names=feature_names,
-        class_names=model.classes_
-    )
-
-    article_number = int(article_number)
-    article = ace.data_source.articles[article_number]
-    article_features = feature_extractor.transform([article.raw_text]).toarray()[0]
-    prediction = model.predict([article_features])[0]
-
-    exp = explainer.explain_instance(
-        data_row=article_features,
-        predict_fn=model.predict_proba,
-        #num_features=24,
-        num_samples=3000
-    )
-
-    return render_template(
-        'pipelines/explain_lime.html',
-        pipeline=pipeline,
-        article=article,
-        prediction=prediction,
-        exp_html=exp.as_html(),
-        article_number=article_number,
+def explain_article_lime(*args, **kwargs):
+    return cached_view(
+        template='pipelines/explain_lime.html',
+        view_name='explain_article_lime',
+        task=explain_article_lime_task,
+        args=args,
+        kwargs=kwargs
     )

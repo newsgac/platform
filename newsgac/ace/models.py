@@ -20,8 +20,5 @@ class ACE(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
 
-    task_id = fields.CharField()
+    task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
 
-    @property
-    def task(self):
-        return TrackedTask.objects.get({"_id": UUID(self.task_id)})

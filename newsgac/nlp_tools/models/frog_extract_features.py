@@ -1,49 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import hashlib
-import itertools
-import re
-
-from nltk import sent_tokenize
-from pynlpl.clients.frogclient import FrogClient
-from pattern.nl import sentiment
-
-from newsgac import config
-from newsgac.caches.models import Cache
-from newsgac.common.utils import split_long_sentences, split_chunks
 import newsgac.data_engineering.utils as Utilities
-from newsgac import database
-
-local_cache = {}
-def get_frog_tokens(text):
-    cache_hash = hashlib.sha1(text.encode('utf-8')).hexdigest()
-    if cache_hash in local_cache:
-        return local_cache[cache_hash]
-
-    cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
-    if not cache.data:
-        sentences = [s for s in sent_tokenize(text) if s]
-        sentences = split_long_sentences(sentences, 48)
-        chunks = [' '.join(chunk).encode('utf-8') for chunk in split_chunks(sentences, 10)]
-
-        frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
-        tokens = itertools.chain.from_iterable([frogclient.process(chunk) for chunk in chunks])
-        cache.data = [token for token in tokens if None not in token]
-
-        cache.save()
-
-    local_cache[cache_hash] = cache.data
-    return cache.data
 
 
-def get_frog_features(text):
+def get_frog_features(tokens):
     features = {}
-
-    # process quotes with frog
-
-    # process quote free text with frog
-    tokens = get_frog_tokens(text)
-    # data_dict = get_frog_tokens(quote_free_text)
 
     # Token count
     token_count = len(tokens)

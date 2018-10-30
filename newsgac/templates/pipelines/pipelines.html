@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "task.html" import task %}
 {% block content %}
     {% if pipelines|length == 0 %}
         <div class="page-header">
@@ -67,9 +68,7 @@
                             <td>{{ pipeline.nlp_tool.name }}</td>
                             <td>{{ pipeline.learner.name }}</td>
                             <td>
-                                <div class="task hidden">
-                                    {{ pipeline.task|safe }}
-                                </div>
+                                {{ task(pipeline.task) }}
                             </td>
                             <td>
                                 <a class="btn btn-primary"
