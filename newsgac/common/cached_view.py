@@ -6,9 +6,7 @@ from newsgac.tasks.models import Status
 from pymodm.errors import DoesNotExist
 
 from newsgac.cached_views.models import CachedView
-from newsgac.cached_views.tasks import save_view_task_result, save_view_task_result_error
-
-from celery import chain
+from newsgac.cached_views.tasks import save_view_task_result_error
 
 
 def cached_view(template, view_name, task, args, kwargs):
@@ -20,10 +18,8 @@ def cached_view(template, view_name, task, args, kwargs):
         cache.hash = hash
         cache.task.set_started()
         cache.save()
-        chain(
-            task.signature(args, kwargs, serializer='pickle').on_error(save_view_task_result_error.s(cache._id)),
-            save_view_task_result.s(cache._id)
-        )()
+
+        task.s(cache._id, *args, **kwargs).on_error(save_view_task_result_error.s(cache._id)).apply_async(),
 
     if cache.task.status == Status.SUCCESS:
         return render_template(template, **cache.data)

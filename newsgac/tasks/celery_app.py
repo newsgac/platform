@@ -38,7 +38,7 @@ celery_app.conf.task_track_started = True
 celery_app.conf.result_backend = config.redis_url
 celery_app.conf.accept_content = ['myjson', 'pickle']
 celery_app.conf.task_serializer = 'myjson'
-celery_app.conf.result_serializer = 'myjson'
+celery_app.conf.result_serializer = 'pickle'
 celery_app.conf.task_routes = {
     'newsgac.nlp_tools.tasks.frog_process': {'queue': 'frog'}
 }

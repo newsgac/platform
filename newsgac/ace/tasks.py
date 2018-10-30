@@ -6,6 +6,7 @@ from bson import ObjectId
 from flask import render_template
 from lime.lime_tabular import LimeTabularExplainer
 
+from newsgac.cached_views.models import CachedView
 from newsgac.pipelines import Pipeline
 from newsgac.tasks.models import Status
 
@@ -42,8 +43,8 @@ def run_ace(self, ace_id):
         raise t, v, tb
 
 
-@celery_app.task(bind=True, base=ResultTask)
-def explain_article_lime_task(self, ace_id, pipeline_id, article_number):
+@celery_app.task(bind=True)
+def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_number):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
 
@@ -78,10 +79,13 @@ def explain_article_lime_task(self, ace_id, pipeline_id, article_number):
         num_samples=3000
     )
 
-    return dict(
+    cache = CachedView.objects.get({'_id': ObjectId(view_cache_id)})
+    cache.task.set_success()
+    cache.data = dict(
         pipeline=pipeline,
         article=article,
         prediction=prediction,
         exp_html=exp.as_html(),
         article_number=article_number,
     )
+    cache.save()
