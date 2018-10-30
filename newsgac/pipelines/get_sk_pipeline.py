@@ -5,7 +5,6 @@ from newsgac.learners import LearnerNB
 from newsgac.nlp_tools import TFIDF, Frog
 from newsgac.nlp_tools.transformers import CleanOCR, StopWordRemoval, ApplyLemmatization, ExtractBasicFeatures, \
     ExtractSentimentFeatures
-from newsgac.pipelines.utils import dict_vectorize
 
 
 def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):

@@ -1,32 +1,17 @@
 from __future__ import absolute_import
 from bson import ObjectId
-from bokeh.embed import components
-from bokeh.layouts import gridplot
-from flask import Blueprint, render_template, request, url_for, redirect, session, json
+from flask import Blueprint, render_template, request, url_for, redirect, session
 
-from newsgac.ace.models import ACE, DUTCH_NLP
+from newsgac.ace.models import ACE
 from newsgac.common.back import back
 from newsgac.common.cached_view import cached_view
-from newsgac.common.utils import model_to_json, model_to_dict
+from newsgac.common.utils import model_to_dict
 from newsgac.data_engineering.utils import LABEL_DICT
 from newsgac.pipelines.models import Pipeline
 from newsgac.data_sources.models import DataSource
 from newsgac.users.models import User
 from newsgac.users.view_decorators import requires_login
-from newsgac.visualisation.comparison import PipelineComparator
-from newsgac.visualisation.resultvisualiser import ResultVisualiser
 from newsgac.ace.tasks import run_ace, explain_article_lime_task
-
-from anchor import anchor_tabular
-from anchor import anchor_text
-from lime.lime_tabular import LimeTabularExplainer
-from lime.lime_text import LimeTextExplainer
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
-
-from copy import deepcopy
-import numpy as np
-from newsgac.nlp_tools.transformers import ExtractQuotes, RemoveQuotes
 
 ace_blueprint = Blueprint('ace', __name__)
 
@@ -91,7 +76,6 @@ def new_save():
 @requires_login
 def view(ace_id):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
-
     pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
     articles = [{
         'raw_text': article.raw_text.encode('utf-8'),
@@ -133,10 +117,10 @@ def delete_all():
 # generate a url template that can be used dynamically from Javascript
 @ace_blueprint.route('/<string:ace_id>/explain_features_lime/<string:pipeline_id>/<string:article_number>')
 @requires_login
-def explain_article_lime(*args, **kwargs):
+def explain_article(*args, **kwargs):
     return cached_view(
-        template='pipelines/explain_lime.html',
-        view_name='explain_article_lime',
+        template='pipelines/explain.html',
+        view_name='explain_article',
         task=explain_article_lime_task,
         args=args,
         kwargs=kwargs
