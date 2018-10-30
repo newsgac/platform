@@ -18,6 +18,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+from sklearn import preprocessing
 
 genres = [
     'Nieuwsbericht',
@@ -86,6 +87,10 @@ genre_codes = [
 ]
 
 genre_code_unlabeled = 'UNL'
+# anchor uses integer labels
+LABEL_DICT = {0: 'ACH', 1: 'COL', 2: 'INT', 3: 'NIE', 4: 'OPI', 5: 'REC', 6: 'REP', 7: 'VER',
+              8: 'MED', 9: 'MOP', 10: 'FIC', 11: 'HOO', 12: 'OVE', 13: 'PRO', 14: 'ING',
+              15: 'ESS', 16: 'SER', 17: 'UNL', 18: 'LOS'}
 
 pronouns_1 = [
     'ik',

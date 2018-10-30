@@ -4,7 +4,7 @@
     <div class="page-header">
         <h1>Explanation for
             <a href="{{ url_for('data_sources.get_article_page', article_id = article._id) }}">
-                <small> Article {{ article_num  }} </small>
+                <small> Article {{ article_num|integer() + 1  }} </small>
             </a>
             using
             <a href="{{ url_for('experiments.get_experiment_page', experiment_id = experiment._id) }}">

@@ -98,18 +98,19 @@ class ExtractBasicFeatures(TransformerMixin):
     def transform_text(text):
         features = OrderedDict()
 
+        # TODO: these methods introduce inconsistency I think as word_tokenize may return 0
         word_tokens = [w for w in word_tokenize(text) if w]
         sentence_tokens = [s for s in sent_tokenize(text) if s]
         word_token_count = len(word_tokens)
         sentence_token_count = len(sentence_tokens)
 
-        features['question_marks_perc'] = text.count('?') / float(word_token_count)
-        features['exclamation_marks_perc'] = text.count('!') / float(word_token_count)
+        features['question_marks_perc'] = text.count('?') / float(word_token_count) if word_token_count > 0 else 0
+        features['exclamation_marks_perc'] = text.count('!') / float(word_token_count) if word_token_count > 0 else 0
         currency_symbols = 0
         for char in [u'$', u'€', u'£', u'ƒ']:
             currency_symbols += text.count(char)
-        features['currency_symbols_perc'] = currency_symbols / float(word_token_count)
-        features['digits_perc'] = len([c for c in text if c.isdigit()]) / float(word_token_count)
+        features['currency_symbols_perc'] = currency_symbols / float(word_token_count) if word_token_count > 0 else 0
+        features['digits_perc'] = len([c for c in text if c.isdigit()]) / float(word_token_count) if word_token_count > 0 else 0
 
         features['sentences'] = len(sentence_tokens)
         features['avg_sentence_length'] = (word_token_count / float(sentence_token_count)) if sentence_token_count > 0 else 0

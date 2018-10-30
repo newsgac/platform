@@ -43,7 +43,8 @@ class Result(EmbeddedMongoModel):
         ])
 
         return cls(
-            confusion_matrix=confusion_matrix(true_labels, predicted_labels, labels=DataUtils.genre_codes),
+            confusion_matrix=confusion_matrix(true_labels, predicted_labels),
+            # confusion_matrix=confusion_matrix(true_labels, predicted_labels, labels=DataUtils.genre_codes),
             precision_weighted=metrics.precision_score(true_labels, predicted_labels, average='weighted'),
             precision_micro=metrics.precision_score(true_labels, predicted_labels, average='micro'),
             precision_macro=metrics.precision_score(true_labels, predicted_labels, average='macro'),
@@ -73,7 +74,6 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     sk_pipeline = ObjectField()
     result = fields.EmbeddedDocumentField(Result)
     task_id = fields.CharField()
-
     grid_search_result = ObjectField()
 
 
