@@ -52,7 +52,8 @@ def _format_dict_string(dict_val):
 
 @app.template_filter('code_to_label')
 def _code_to_label(code):
-    return genre_labels[genre_codes.index(code)]
+    return genre_labels[code]
+
 
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time
