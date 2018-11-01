@@ -29,10 +29,12 @@ def get_articles_from_file(file):
             print (line)
 
         groups = reg_res.groups()
-        article.label = groups[0].rstrip()
-
-        if article.label not in DataUtils.genre_codes:
-            article.label = 'OTH'
+        try:
+            genre_code = groups[0].rstrip()
+            article.label = DataUtils.genre_codes.index(genre_code)
+        except ValueError:
+            print genre_code
+            article.label = DataUtils.genre_unlabeled_index
             other_count += 1
 
         if no_date:

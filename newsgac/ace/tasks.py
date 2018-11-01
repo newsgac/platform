@@ -9,7 +9,7 @@ from lime.lime_tabular import LimeTabularExplainer
 from lime.lime_text import LimeTextExplainer
 
 from newsgac.cached_views.models import CachedView
-from newsgac.data_engineering.utils import LABEL_DICT
+from newsgac.data_engineering.utils import genre_codes
 from newsgac.pipelines import Pipeline
 from newsgac.tasks.models import Status
 
@@ -67,8 +67,8 @@ def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_
     skp = deepcopy(pipeline.sk_pipeline)
     model = skp.steps.pop()[1]
 
-    used_classes = np.array(model.classes_).tolist()
-    used_class_names = np.array([LABEL_DICT[clss] for clss in used_classes]).tolist()
+    used_classes = model.classes_
+    used_class_names = [genre_codes[x] for x in used_classes]
 
     class_idx = []
     for i, clss in enumerate(used_class_names):
@@ -134,7 +134,7 @@ def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_
     cache.data = dict(
         pipeline=pipeline,
         article=article,
-        prediction=LABEL_DICT[prediction],
+        prediction=prediction,
         exp1_html=html_lime,
         exp2_html=html_anchor,
         article_number=article_number,

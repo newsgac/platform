@@ -19,7 +19,7 @@ from bokeh.transform import factor_cmap
 from bokeh.palettes import Category20
 
 from newsgac.data_engineering import utils as DataUtils
-
+from newsgac.data_engineering.utils import genre_labels
 
 __author__ = 'abilgin'
 
@@ -267,7 +267,7 @@ class ResultVisualiser(object):
         title = data_source.display_title
         articles = [{
             'year': str(article.year),
-            'label': article.label
+            'label': genre_labels[article.label]
         } for article in data_source.articles]
 
         df = DataFrame(articles)

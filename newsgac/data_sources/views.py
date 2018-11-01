@@ -7,7 +7,6 @@ from werkzeug.utils import redirect, secure_filename
 from newsgac.common.back import back
 from newsgac.pipelines.models import Pipeline
 from newsgac.users.view_decorators import requires_login
-from newsgac.tasks.models import TrackedTask
 from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process
 from newsgac.users.models import User
@@ -106,20 +105,11 @@ def delete(data_source_id):
 
     data_source.delete()
     return back.redirect()
-#
-# #todo: check
-# @data_source_blueprint.route('/delete_all')
-# @user_decorators.requires_login
-# def delete_all():
-#     existing_experiments = Experiment.get_by_user_email(session['email'])
-#     if len(existing_experiments) > 0:
-#         error = "There are existing experiments using the data sources. Please delete all the experiments first!"
-#         flash(error, 'error')
-#         return redirect((url_for('experiments.user_experiments')))
-#     data_sources = DataSource.get_by_user_email(user_email=session['email'])
-#
-#     for ds in data_sources:
-#         task = del_data.delay(ds._id)
-#
-#     time.sleep(0.5)
-#     return back.redirect()
+
+
+@data_source_blueprint.route('/delete_all')
+@requires_login
+def delete_all():
+    for data_source in DataSource.objects.all():
+        data_source.delete()
+    return back.redirect()

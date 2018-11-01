@@ -58,7 +58,7 @@
                         {% for pipeline in pipelines %}
 
                         <tr>
-                            <td title="{{ pipeline.json}}">
+                            <td>
                                 <a href="{{ url_for('pipelines.visualise_results', pipeline_id=pipeline.id) }}">
                                     {{ pipeline.display_title }}
                                 </a>

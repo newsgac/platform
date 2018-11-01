@@ -15,7 +15,7 @@ environment = environ['ENVIRONMENT']
 secret_key = environ['FLASK_SECRET_KEY']
 
 flask_port = 5050
-# celery_eager setting will evaluate tasks immediately, without using workers.
+# celery_eager == True setting will evaluate tasks immediately, without using workers.
 celery_eager = False
 mongo_host = 'database'
 mongo_port = 27017

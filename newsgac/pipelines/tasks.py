@@ -28,6 +28,8 @@ def run_pipeline_task_impl(pipeline_id):
 
 @celery_app.task(bind=True)
 def run_pipeline_task(self, pipeline_id):
+    # run_pipeline_task_impl(pipeline_id)
+
     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
     (stdoutdata, stderrdata) = process.communicate("""
 import newsgac.database

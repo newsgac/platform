@@ -29,16 +29,14 @@ genres = [
     'Recensie',
     'Achtergrond/Nieuwsanalyse',
     'Column',
-    'Hoofdredactioneel commentaar',
     'Service',
     'Losse afbeelding',
     'Overzicht',
     'Ingezonden brief',
     'Fictie',
     'Essay',
-    'Mededeling krant (rectificatie)',
-    'Profiel/portret/necrologie',
-    'Moppen/spreuken/puzzels/weetjes',
+    'Mededeling krant (rectificatie) / Moppen',
+    'Portret',
     'Unlabelled',
 ]
 
@@ -51,16 +49,14 @@ genre_labels = [
     'Recensie',
     'Achtergrond',
     'Column',
-    'HR commentaar',
     'Service',
     'Afbeelding',
     'Overzicht',
     'Brief',
     'Fictie',
     'Essay',
-    'Rectificatie',
-    'Profiel',
-    'Moppen',
+    'Mededeling',
+    'Portret',
     'Unlabelled',
 ]
 
@@ -73,7 +69,6 @@ genre_codes = [
     'REC',
     'ACH',
     'COL',
-    'HOO',
     'SER',
     'LOS',
     'OVE',
@@ -81,16 +76,13 @@ genre_codes = [
     'FIC',
     'ESS',
     'MED',
-    'PRO',
-    'MOP',
+    'POR',
     'UNL',
 ]
 
-genre_code_unlabeled = 'UNL'
-# anchor uses integer labels
-LABEL_DICT = {0: 'ACH', 1: 'COL', 2: 'INT', 3: 'NIE', 4: 'OPI', 5: 'REC', 6: 'REP', 7: 'VER',
-              8: 'MED', 9: 'MOP', 10: 'FIC', 11: 'HOO', 12: 'OVE', 13: 'PRO', 14: 'ING',
-              15: 'ESS', 16: 'SER', 17: 'UNL', 18: 'LOS'}
+assert len(genre_codes) == len(genres) == len(genre_labels)
+
+genre_unlabeled_index = len(genre_codes) - 1
 
 pronouns_1 = [
     'ik',
@@ -132,7 +124,8 @@ modal_verbs = [
     'Hoeven',
     'Lijken',
     'Kunnen',
-    'Moeten', 'Moest',
+    'Moeten',
+    'Moest',
     'Mogen',
     'Schijnen',
     'Toeschijnen',

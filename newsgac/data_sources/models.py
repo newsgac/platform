@@ -2,6 +2,7 @@ from pymodm import MongoModel, EmbeddedMongoModel, fields
 from pymodm.errors import DoesNotExist, ValidationError
 
 from newsgac.common.mixins import CreatedUpdated
+from newsgac.data_engineering.utils import genre_codes
 from newsgac.data_sources.validators import has_extension
 from newsgac.tasks.models import TrackedTask
 from newsgac.users.models import User
@@ -11,7 +12,7 @@ class Article(EmbeddedMongoModel):
     raw_text = fields.CharField()
     date = fields.DateTimeField()
     year = fields.IntegerField()
-    label = fields.CharField()
+    label = fields.IntegerField(max_value=len(genre_codes)-1)
 
 
 class DataSource(CreatedUpdated, MongoModel):

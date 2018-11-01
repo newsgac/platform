@@ -6,7 +6,6 @@ from newsgac.ace.models import ACE
 from newsgac.common.back import back
 from newsgac.common.cached_view import cached_view
 from newsgac.common.utils import model_to_dict
-from newsgac.data_engineering.utils import LABEL_DICT
 from newsgac.pipelines.models import Pipeline
 from newsgac.data_sources.models import DataSource
 from newsgac.users.models import User
@@ -79,8 +78,7 @@ def view(ace_id):
     pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
     articles = [{
         'raw_text': article.raw_text.encode('utf-8'),
-        # 'predictions': [p.encode('utf-8') for p in ace.predictions[idx]],
-        'predictions': [LABEL_DICT[p].encode('utf-8') for p in ace.predictions[idx]],
+        'predictions': [p.encode('utf-8') for p in ace.predictions[idx]],
         'label': article.label.encode('utf-8'),
     } for idx, article in enumerate(ace.data_source.articles)]
 

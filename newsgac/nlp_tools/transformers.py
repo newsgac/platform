@@ -11,18 +11,52 @@ from sklearn.externals.joblib import delayed, Parallel
 from newsgac import config
 from newsgac.data_engineering.preprocessing import remove_stop_words, apply_lemmatization
 
+unwanted_chars = {
+    u'|',
+    u'_',
+    u'=',
+    u'(',
+    u')',
+    u'[',
+    u']',
+    u'<',
+    u'>',
+    u'#',
+    u'/',
+    u'\\',
+    u'*',
+    u'~',
+    u'`',
+    u'«',
+    u'»',
+    u'®',
+    u'^',
+    u'°',
+    u'•',
+    u'★',
+    u'■',
+    u'{',
+    u'}',
+    u'™',
+    u'§',
+    u'♦',
+    u'±',
+    u'►',
+    u'и',
+    u'✓',
+    u'з',
+    u'□',
+    u'▼',
+}
+
 
 class CleanOCR(TransformerMixin):
-    unwanted_chars = [u'|', u'_', u'=', u'(', u')', u'[', u']', u'<',
-                      u'>', u'#', u'/', u'\\', u'*', u'~', u'`', u'«', u'»', u'®', u'^',
-                      u'°', u'•', u'★', u'■', u'{', u'}']
-
     def fit(self, X, y=None):
         return self
 
     @staticmethod
     def transform_text(text):
-        for char in CleanOCR.unwanted_chars:
+        for char in unwanted_chars:
             text = text.replace(char, '')
         # TODO: find a better fix for this
         text = re.sub(u"(\u201e|\u201d|\u2014|\xeb|\xfc|\xe9|\xef|\xe8)", "", text)
