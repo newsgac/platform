@@ -9,12 +9,12 @@ from lime.lime_tabular import LimeTabularExplainer
 from lime.lime_text import LimeTextExplainer
 
 from newsgac.cached_views.models import CachedView
-from newsgac.data_engineering.utils import genre_codes, genre_labels
+from newsgac.genres import genre_labels
 from newsgac.pipelines import Pipeline
 from newsgac.tasks.models import Status
 
 from newsgac.ace.models import ACE, DUTCH_NLP
-from newsgac.tasks.celery_app import celery_app, ResultTask
+from newsgac.tasks.celery_app import celery_app
 
 
 def get_predictions(articles, pipelines):

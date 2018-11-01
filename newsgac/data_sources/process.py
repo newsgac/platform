@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 
 from newsgac.data_sources.models import Article
-import newsgac.data_engineering.utils as DataUtils
+import newsgac.genres as DataUtils
 
 
 def get_articles_from_file(file):

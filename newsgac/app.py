@@ -2,7 +2,7 @@
 from flask import Flask, render_template
 from newsgac import config
 from newsgac.common.json_encoder import _JSONEncoder
-from newsgac.data_engineering.utils import genre_codes, genre_labels
+from newsgac.genres import genre_labels
 from newsgac.users.views import user_blueprint
 from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
