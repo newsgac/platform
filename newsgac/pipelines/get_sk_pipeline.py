@@ -2,12 +2,28 @@ from sklearn.pipeline import FeatureUnion, Pipeline as SKPipeline
 from sklearn.preprocessing import RobustScaler, MinMaxScaler
 
 from newsgac.learners import LearnerNB
+from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF, Frog
+from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.nlp_tools.transformers import CleanOCR, StopWordRemoval, ApplyLemmatization, ExtractBasicFeatures, \
     ExtractSentimentFeatures
 
 
 def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
+    """
+    Transform our `newsgac.pipelines.models.Pipeline` into a Scikit Learn `sklearn.pipeline.Pipeline`
+
+    :param sw_removal: If true, add stop word removal step
+    :type sw_removal: bool
+
+    :param lemmatization: If true, add lemmatization step
+    :type lemmatization: bool
+    :param nlp_tool: NlpTool to use extract features from text (Frog / TFIDF)
+    :type nlp_tool: NlpTool
+    :param learner: Learner is the classifier
+    :type learner: Learner
+    :return: Scikit Learn pipeline
+    """
     skl_steps = [('CleanOCR', CleanOCR())]
 
     feature_names = []
