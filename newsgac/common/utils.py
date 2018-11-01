@@ -6,7 +6,7 @@ from newsgac.common.json_encoder import _dumps
 
 __author__ = 'abilgin'
 
-# @staticmethod
+
 def hash_password(password):
     """
     Hashes a password using pbkdf2_sha512
@@ -15,7 +15,7 @@ def hash_password(password):
     """
     return pbkdf2_sha512.hash(password)
 
-# @staticmethod
+
 def check_hashed_password(password, hashed_password):
     """
     Checks that the password the user sent matches that of the database.
@@ -26,26 +26,9 @@ def check_hashed_password(password, hashed_password):
     """
     return pbkdf2_sha512.verify(password, hashed_password)
 
+
 def is_hashed_password(password):
     return re.search('^\$pbdkf2-sha512.*$', password) is not None
-
-# @staticmethod
-def email_is_valid(email):
-    email_address_matcher = re.compile('(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)')
-    return True if email_address_matcher.match(email) else False
-
-# @staticmethod
-def str_to_bool(s):
-    if s.lower() == 'true':
-         return True
-    elif s.lower == 'false':
-         return False
-
-def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
-    # s = list(iterable)  # allows duplicate elements
-    s = list(set(iterable))
-    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
 def model_to_dict(model, remove_cls=True):
@@ -73,12 +56,6 @@ def remove_cls_from_dict(model_dict):
 
 def model_to_json(model, **kwargs):
     return _dumps(model_to_dict(model), **kwargs)
-
-
-def split_chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    for i in xrange(0, len(l), n):
-        yield l[i:i + n]
 
 
 def split_long_sentences(sentences, max_tokens=450):

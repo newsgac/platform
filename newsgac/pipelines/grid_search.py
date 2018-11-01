@@ -2,7 +2,7 @@ import numpy
 from sklearn.model_selection import GridSearchCV
 
 from newsgac import config
-from newsgac.learners import learners, GridSearch, LearnerSVC, LearnerNB
+from newsgac.learners import learners, LearnerSVC, LearnerNB
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
 
 param_space = {
@@ -15,6 +15,7 @@ param_space = {
         'alpha': [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0],
     },
 }
+
 
 def run_grid_search(pipeline):
     texts = numpy.array([article.raw_text for article in pipeline.data_source.articles])

@@ -9,8 +9,9 @@ class Parameters(EmbeddedMongoModel):
 
 class GridSearch(Learner):
     """
-        This is not really a learner, but in fact a hacky placeholder to get choose a Grid Search
-        Instead of directly choosing a learner.
+        This is not really a learner, but in fact a hacky placeholder to get a Grid Search choice,
+        instead of directly choosing a learner. See `pipelines/grid_search.py` for the actual
+        grid search implementation
     """
     name = 'Grid Search'
     tag = 'gs'
