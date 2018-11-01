@@ -64,8 +64,3 @@ def get_articles_from_file(file):
     print("Found ", duplicate_count, " duplicate(s) in documents..")
 
     return articles
-
-
-def upload_data_source(data_source):
-    data_source.articles = get_articles_from_file(data_source.file.file)
-    data_source.save(cascade=True)

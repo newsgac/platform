@@ -41,11 +41,10 @@ def new():
             data_source.user = User(email=session['email'])
             data_source.save()
             flash('The file has been successfully uploaded.', 'success')
-
-            eager_task_result = process.delay(data_source._id)
-            data_source.refresh_from_db()
-            data_source.task = TrackedTask(_id=eager_task_result.id)
+            data_source.task.set_started()
             data_source.save()
+            process.delay(data_source._id)
+
 
             return redirect(url_for("data_sources.overview"))
         except ValidationError as e:

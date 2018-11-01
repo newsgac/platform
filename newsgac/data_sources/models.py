@@ -22,7 +22,8 @@ class DataSource(CreatedUpdated, MongoModel):
     file = fields.FileField(required=True)
     training_purpose = fields.BooleanField(required=True, default=False)
     articles = fields.EmbeddedDocumentListField(Article)
-    task = fields.ReferenceField(TrackedTask)
+
+    task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
 
     created = fields.DateTimeField()
     updated = fields.DateTimeField()
