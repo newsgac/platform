@@ -15,7 +15,7 @@ services:
         env_file:
             - .env.dockertest
         volumes:
-            - ./../data:/data/db
+            - ./data:/data/db
         restart: "no"
 
     worker:
