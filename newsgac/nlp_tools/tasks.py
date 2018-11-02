@@ -27,7 +27,7 @@ def setup_frog_conn(sender, signal, **kwargs):
             config.frog_hostname,
             config.frog_port,
             returnall=True,
-            timeout=600.0,
+            timeout=1800.0,
         )
 
 
