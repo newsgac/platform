@@ -121,7 +121,6 @@ def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_
     used_classes = model.classes_
     used_class_names = [genre_labels[x] for x in used_classes]
 
-
     lime_text_html = ''
     lime_features_html = ''
     anchor_html = ''
