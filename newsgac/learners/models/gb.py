@@ -47,7 +47,7 @@ class Parameters(EmbeddedMongoModel):
     )
     criterion.description = 'The function to measure the quality of a split.'
 
-    max_depth = fields.IntegerField(required=True, default=0)
+    max_depth = fields.IntegerField(required=True, default=3)
     max_depth.description = 'The maximum depth of the tree. If 0, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.'
 
     random_state = fields.IntegerField(required=True, default=42)
@@ -89,6 +89,11 @@ class LearnerGB(Learner):
             max_leaf_nodes=None,
             min_impurity_decrease=0.,
             min_impurity_split=None,
-            verbose=0,
             warm_start=False,
+            init=None,
+            presort='auto',
+            validation_fraction=0.1,
+            n_iter_no_change=None,
+            tol=1e-4,
+            verbose=0,
         )

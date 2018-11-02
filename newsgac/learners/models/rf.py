@@ -2,6 +2,7 @@ from pymodm import EmbeddedMongoModel
 from pymodm import fields
 from sklearn.ensemble import RandomForestClassifier
 
+from newsgac import config
 from .learner import Learner
 
 
@@ -82,6 +83,6 @@ class LearnerRF(Learner):
             oob_score=False,
             verbose=0,
             warm_start=False,
-            n_jobs=-1,
+            n_jobs=config.n_parallel_jobs,
             class_weight=None
         )
