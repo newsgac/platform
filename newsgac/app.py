@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from flask import Flask, render_template
+
 from newsgac import config
+from newsgac.common.filters import load_filters
 from newsgac.common.json_encoder import _JSONEncoder
-from newsgac.genres import genre_labels
+
 from newsgac.users.views import user_blueprint
 from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
@@ -28,32 +30,7 @@ app.register_blueprint(ace_blueprint, url_prefix="/ace")
 
 app.json_encoder = _JSONEncoder
 
-
-@app.context_processor
-def inject_bokeh_js_css():
-    from bokeh.resources import CDN
-    return dict(bokeh_js_css=CDN)
-
-
-@app.context_processor
-def inject_pymodm_fields():
-    from pymodm import fields
-    return dict(pymodm_fields=fields)
-
-
-@app.template_filter('datetime')
-def _format_datetime(date):
-    return date.strftime('%d-%m-%Y %H:%M')
-
-
-@app.template_filter('dict_string')
-def _format_dict_string(dict_val):
-    return ', '.join("%s=%s" % (key, val) for (key, val) in dict_val.iteritems() if key != '_cls')
-
-@app.template_filter('code_to_label')
-def _code_to_label(code):
-    return genre_labels[code]
-
+load_filters(app)
 
 if config.environment in [config.Env.local, config.Env.localdocker]:
     import time
