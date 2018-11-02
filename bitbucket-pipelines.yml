@@ -1,11 +1,10 @@
 image: docker:stable
 
-options:
-  docker: true
-
 pipelines:
   default:
     - step:
+        services:
+          - docker
         caches:
           - docker
         script:
@@ -14,3 +13,7 @@ pipelines:
           - docker-compose -f docker-compose.yml -f docker-compose_test.yml build test
           - docker-compose -f docker-compose.yml -f docker-compose_test.yml run test
           - docker-compose -f docker-compose.yml -f docker-compose_test.yml down
+definitions:
+  services:
+    docker:
+      memory: 4096
