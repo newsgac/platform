@@ -5,6 +5,7 @@ from newsgac.learners.models.rf import LearnerRF
 from newsgac.learners.models.gb import LearnerGB
 from newsgac.learners.models.xgb import LearnerXGB
 from newsgac.learners.models.mlp import LearnerMLP
+from newsgac.learners.models.lgbm import LearnerLGBM
 
 learners = [
     LearnerNB,
@@ -13,5 +14,6 @@ learners = [
     LearnerGB,
     LearnerXGB,
     LearnerMLP,
+    LearnerLGBM,
     GridSearch
 ]
