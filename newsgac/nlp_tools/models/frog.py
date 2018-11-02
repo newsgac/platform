@@ -1,7 +1,9 @@
 from collections import OrderedDict
 
 import numpy
-from celery import group
+from celery import group, current_task
+from celery.result import allow_join_result
+
 from pymodm import EmbeddedMongoModel
 from pymodm import fields
 from sklearn.base import TransformerMixin
@@ -48,8 +50,12 @@ class FrogFeatureExtractor(TransformerMixin):
         extract_features_dict = self.nlp_tool.parameters.features.to_son().to_dict()
         features = []
 
-        # list of frog tokens per text
-        frog_tokens = group(frog_process.s(text) for text in X)().get()
+        if current_task:
+            print("WARNING: Running parallel from inside celery task. Using dangerous allow_join_result & disable_sync_subtasks=False")
+
+        with allow_join_result():
+            # list of frog tokens per text
+            frog_tokens = group(frog_process.s(text) for text in X)().get(disable_sync_subtasks=False)
 
         for tokens in frog_tokens:
             article_features = {

@@ -64,7 +64,6 @@ run_ace_impl('%s')
     print(stdoutdata)
 
 
-
 def get_lime_text_explanation(raw_text, prediction, used_class_names, predict_proba):
     exp_lime = LimeTextExplainer(class_names=used_class_names)
     return exp_lime.explain_instance(
@@ -76,7 +75,7 @@ def get_lime_text_explanation(raw_text, prediction, used_class_names, predict_pr
     )
 
 
-def get_lime_feature_explanation(article, skp, predict_proba, training_articles, used_class_names):
+def get_lime_feature_explanation(article, prediction, skp, predict_proba, training_articles, used_class_names):
     feature_names = skp.named_steps['FeatureExtraction'].get_feature_names()
 
     # calculate feature vectors for explanators
@@ -102,7 +101,7 @@ def get_lime_feature_explanation(article, skp, predict_proba, training_articles,
     return exp_lime.explain_instance(
         article_features,
         predict_proba,
-        labels=used_class_names,
+        labels=[prediction],
         # num_features=24,
         # num_samples=3000
     )
@@ -121,23 +120,6 @@ def get_anchor_text_explanation(skp, raw_text, predict, used_class_names):
     clean_text = raw_text.encode('ascii', 'replace')
 
     return exp_anchor.explain_instance(clean_text, predict, use_proba=True)
-
-
-@celery_app.task(bind=True, trail=True)
-def run_ace(self, ace_id):
-    # run_ace_impl(ace_id)
-    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-    (stdoutdata, stderrdata) = process.communicate("""
-import newsgac.database
-from newsgac.ace.tasks import run_ace_impl
-run_ace_impl('%s')
-""" % ace_id)
-
-    exit_code = process.wait()
-
-    print(exit_code)
-    print(stderrdata)
-    print(stdoutdata)
 
 
 def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number):
@@ -178,6 +160,7 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
     else:
         lime_features_html = get_lime_feature_explanation(
             article,
+            prediction,
             skp,
             model.predict_proba,
             pipeline.data_source.articles,
