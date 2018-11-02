@@ -1,3 +1,4 @@
+import subprocess
 import sys
 from copy import deepcopy
 
@@ -29,8 +30,7 @@ def get_predictions(articles, pipelines):
     return np.array(predictions).transpose()
 
 
-@celery_app.task(bind=True, trail=True)
-def run_ace(self, ace_id):
+def run_ace_impl(ace_id):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     ace.task.set_started()
     ace.save()
@@ -44,6 +44,24 @@ def run_ace(self, ace_id):
         ace.task.set_failure(e)
         ace.save()
         raise t, v, tb
+
+
+@celery_app.task(bind=True, trail=True)
+def run_ace(self, ace_id):
+    # run_ace_impl(ace_id)
+    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+    (stdoutdata, stderrdata) = process.communicate("""
+import newsgac.database
+from newsgac.ace.tasks import run_ace_impl
+run_ace_impl('%s')
+""" % ace_id)
+
+    exit_code = process.wait()
+
+    print(exit_code)
+    print(stderrdata)
+    print(stdoutdata)
+
 
 
 def get_lime_text_explanation(raw_text, prediction, used_class_names, predict_proba):
