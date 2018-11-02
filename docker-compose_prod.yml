@@ -18,6 +18,8 @@ services:
     worker:
         env_file:
             - .env.prod
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 40 -n worker@%h
+
 
     frogworker:
         env_file:
