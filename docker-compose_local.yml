@@ -44,7 +44,3 @@ services:
         command: ["python", "newsgac/app.py"]
         environment:
             - PYTHONPATH=/newsgac
-
-    ws-celery-monitor:
-        ports:
-            - "5051:5051"

@@ -21,10 +21,10 @@ services:
     worker:
         entrypoint: ["/bin/true"]
 
-    web:
+    frogworker:
         entrypoint: ["/bin/true"]
 
-    ws-celery-monitor:
+    web:
         entrypoint: ["/bin/true"]
 
     test:

@@ -65,14 +65,3 @@ services:
             - database
             - frog
         command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 2 -n frogworker@%h -Q frog
-
-
-    ws-celery-monitor:
-        build:
-            context: ./ws-celery-monitor
-        image: newsgac/ws-celery-monitor
-        links:
-            - redis
-        restart: on-failure
-        networks:
-            - newsgac-net
