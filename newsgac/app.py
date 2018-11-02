@@ -11,6 +11,10 @@ from newsgac.pipelines.views import pipeline_blueprint
 from newsgac.tasks.views import task_blueprint
 from newsgac.ace.views import ace_blueprint
 
+from newsgac import database
+
+
+
 __author__ = 'abilgin'
 
 app = Flask(__name__)
