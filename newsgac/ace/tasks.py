@@ -150,12 +150,12 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
             pipeline.sk_pipeline.predict_proba
         ).as_html()
 
-        anchor_html = get_anchor_text_explanation(
-            skp,
-            article.raw_text,
-            pipeline.sk_pipeline.predict,
-            used_class_names
-        ).as_html()
+        # anchor_html = get_anchor_text_explanation(
+        #     skp,
+        #     article.raw_text,
+        #     pipeline.sk_pipeline.predict,
+        #     used_class_names
+        # ).as_html()
 
     else:
         lime_features_html = get_lime_feature_explanation(
