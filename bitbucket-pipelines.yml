@@ -6,6 +6,8 @@ options:
 pipelines:
   default:
     - step:
+        caches:
+          - docker
         script:
           - chmod a+x ci/dependencies.sh
           - ci/dependencies.sh
