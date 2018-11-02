@@ -23,7 +23,12 @@ def setup_worker_name(sender, signal, **kwargs):
 def setup_frog_conn(sender, signal, **kwargs):
     if worker_name.startswith('frog'):
         global frogclient
-        frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
+        frogclient = FrogClient(
+            config.frog_hostname,
+            config.frog_port,
+            returnall=True,
+            timeout=600.0,
+        )
 
 
 @celery_app.task(base=ResultTask)
