@@ -56,6 +56,7 @@ from newsgac.ace.tasks import run_ace_impl
 run_ace_impl('%s')
 """ % ace_id)
 
+
     exit_code = process.wait()
 
     print(exit_code)
@@ -122,8 +123,24 @@ def get_anchor_text_explanation(skp, raw_text, predict, used_class_names):
     return exp_anchor.explain_instance(clean_text, predict, use_proba=True)
 
 
-@celery_app.task(bind=True)
-def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_number):
+@celery_app.task(bind=True, trail=True)
+def run_ace(self, ace_id):
+    # run_ace_impl(ace_id)
+    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+    (stdoutdata, stderrdata) = process.communicate("""
+import newsgac.database
+from newsgac.ace.tasks import run_ace_impl
+run_ace_impl('%s')
+""" % ace_id)
+
+    exit_code = process.wait()
+
+    print(exit_code)
+    print(stderrdata)
+    print(stdoutdata)
+
+
+def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
 
@@ -178,3 +195,25 @@ def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_
         article_number=article_number,
     )
     cache.save()
+
+
+@celery_app.task(bind=True)
+def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_number):
+    # explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number)
+    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+    (stdoutdata, stderrdata) = process.communicate("""
+import newsgac.database
+from newsgac.ace.tasks import explain_article_lime_task_impl
+explain_article_lime_task_impl('%s', '%s', '%s', '%s')
+    """ % (view_cache_id, ace_id, pipeline_id, article_number))
+
+    exit_code = process.wait()
+    if exit_code > 0:
+        raise Exception("Subprocess exited with exit_code " + str(exit_code))
+
+    print(exit_code)
+    print(stderrdata)
+    print(stdoutdata)
+
+
+
