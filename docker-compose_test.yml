@@ -2,9 +2,7 @@ version: "3"
 
 services:
     frog:
-        env_file:
-            - .env.dockertest
-        restart: "no"
+        entrypoint: ["/bin/true"]
 
     redis:
         env_file:
@@ -40,4 +38,5 @@ services:
             - redis
         networks:
             - newsgac-net
-        command: ["pytest", "."]
+        entrypoint: /bin/sh -c
+        command: ["pytest . -m \"not frog\""]
