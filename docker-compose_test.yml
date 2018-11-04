@@ -34,8 +34,6 @@ services:
         image: newsgac/test
         depends_on:
             - database
-            - frog
-            - redis
         networks:
             - newsgac-net
         entrypoint: /bin/sh -c
