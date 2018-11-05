@@ -82,6 +82,6 @@ class LearnerLGBM(Learner):
             reg_lambda=0.0,
 
             n_jobs=config.n_parallel_jobs,
-            silent=False,
+            silent=True,
             importance_type='split',
         )

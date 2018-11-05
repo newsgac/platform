@@ -9,6 +9,7 @@ from newsgac.tasks.models import Status
 from newsgac.pipelines.grid_search import run_grid_search
 from newsgac.pipelines.models import Pipeline
 from newsgac.pipelines.run import run_pipeline
+from newsgac.learners.factory import learners, create_learner
 
 
 def run_pipeline_task_impl(pipeline_id):
@@ -58,6 +59,11 @@ def run_grid_search_task_impl(pipeline_id):
         pipeline.task.set_failure(e)
         pipeline.save()
         raise t, v, tb
+
+    # wait for grid search task to be finished
+    # TODO: these to be added to celery task after completion of grid search
+    # pipeline.learner = create_learner(None, False, **pipeline.grid_search_result['best'])
+    # run_pipeline_task.delay(str(pipeline._id))
 
 
 @celery_app.task(bind=True)

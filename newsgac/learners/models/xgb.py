@@ -61,7 +61,7 @@ class LearnerXGB(Learner):
     def get_classifier(self):
         return XGBClassifier(
             max_depth=self.transform_0_to_none(self.parameters.max_depth),
-            learning_rate=0.1,
+            learning_rate=self.parameters.learning_rate,
             n_estimators=self.parameters.n_estimators,
             silent=True,
             objective="binary:logistic",

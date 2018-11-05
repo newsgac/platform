@@ -6,6 +6,13 @@ from .learner import Learner
 
 
 class Parameters(EmbeddedMongoModel):
+    learning_rate = fields.FloatField(
+        verbose_name="Learning rate",
+        required=True,
+        default=0.1
+    )
+    learning_rate.description = 'Learning rate shrinks the contribution of each tree by its value.'
+
     n_estimators = fields.IntegerField(required=True, default=100)
     n_estimators.description = 'Number of boosting stages to perform.'
 
@@ -17,9 +24,9 @@ class Parameters(EmbeddedMongoModel):
             ('auto', 'Auto'),
             ('sqrt', 'Sqrt'),
             ('log2', 'Log2'),
-            ('none', 'same as nFeatures'),
+            # ('none', 'same as nFeatures'),
             ('.5', '50 percent'),
-            ('20', 'max 20 features'),
+            # ('20', 'max 20 features'),
         ]
     )
     max_features.description = 'The number of features to consider when looking for the best split.'
@@ -35,17 +42,17 @@ class Parameters(EmbeddedMongoModel):
     )
     loss.description = 'The function to measure the quality of a split.'
 
-    criterion = fields.CharField(
-        verbose_name="Criterion",
-        required=True,
-        default='friedman_mse',
-        choices=[
-            ('friedman_mse', 'Friedman mean squared error'),
-            ('mse', 'Mean squared error'),
-            ('mae', 'Mean absolute error'),
-        ]
-    )
-    criterion.description = 'The function to measure the quality of a split.'
+    # criterion = fields.CharField(
+    #     verbose_name="Criterion",
+    #     required=True,
+    #     default='friedman_mse',
+    #     choices=[
+    #         ('friedman_mse', 'Friedman mean squared error'),
+    #         ('mse', 'Mean squared error'),
+    #         ('mae', 'Mean absolute error'),
+    #     ]
+    # )
+    # criterion.description = 'The function to measure the quality of a split.'
 
     max_depth = fields.IntegerField(required=True, default=3)
     max_depth.description = 'The maximum depth of the tree. If 0, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.'
@@ -78,6 +85,7 @@ class LearnerGB(Learner):
 
     def get_classifier(self):
         return GradientBoostingClassifier(
+            learning_rate=self.parameters.learning_rate,
             n_estimators=self.parameters.n_estimators,
             loss=self.parameters.loss,
             max_features=self.transform_max_features(self.parameters.max_features),
