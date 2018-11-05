@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "task.html" import task %}
 {% block content %}
     {% if pipelines|length == 0 %}
         <div class="page-header">
@@ -57,7 +58,7 @@
                         {% for pipeline in pipelines %}
 
                         <tr>
-                            <td title="{{ pipeline.json}}">
+                            <td>
                                 <a href="{{ url_for('pipelines.visualise_results', pipeline_id=pipeline.id) }}">
                                     {{ pipeline.display_title }}
                                 </a>
@@ -67,9 +68,7 @@
                             <td>{{ pipeline.nlp_tool.name }}</td>
                             <td>{{ pipeline.learner.name }}</td>
                             <td>
-                                <div class="task hidden">
-                                    {{ pipeline.task|safe }}
-                                </div>
+                                {{ task(pipeline.task) }}
                             </td>
                             <td>
                                 <a class="btn btn-primary"

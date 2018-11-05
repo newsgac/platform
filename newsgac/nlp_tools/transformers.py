@@ -1,29 +1,64 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+import os
+import numpy
 from collections import OrderedDict
 
-import numpy
-from nltk import word_tokenize, sent_tokenize
 from sklearn.base import TransformerMixin
-from sklearn.externals.joblib import delayed
+from sklearn.externals.joblib import delayed, Parallel
+
+from nltk import word_tokenize, sent_tokenize
+from nltk.stem.snowball import SnowballStemmer
 
 from newsgac import config
-from newsgac.data_engineering.preprocessing import remove_stop_words, apply_lemmatization
-from newsgac.parallel_with_progress import ParallelWithProgress
+
+unwanted_chars = {
+    u'|',
+    u'_',
+    u'=',
+    u'(',
+    u')',
+    u'[',
+    u']',
+    u'<',
+    u'>',
+    u'#',
+    u'/',
+    u'\\',
+    u'*',
+    u'~',
+    u'`',
+    u'«',
+    u'»',
+    u'®',
+    u'^',
+    u'°',
+    u'•',
+    u'★',
+    u'■',
+    u'{',
+    u'}',
+    u'™',
+    u'§',
+    u'♦',
+    u'±',
+    u'►',
+    u'и',
+    u'✓',
+    u'з',
+    u'□',
+    u'▼',
+}
 
 
 class CleanOCR(TransformerMixin):
-    unwanted_chars = [u'|', u'_', u'=', u'(', u')', u'[', u']', u'<',
-                      u'>', u'#', u'/', u'\\', u'*', u'~', u'`', u'«', u'»', u'®', u'^',
-                      u'°', u'•', u'★', u'■', u'{', u'}']
-
     def fit(self, X, y=None):
         return self
 
     @staticmethod
     def transform_text(text):
-        for char in CleanOCR.unwanted_chars:
+        for char in unwanted_chars:
             text = text.replace(char, '')
         # TODO: find a better fix for this
         text = re.sub(u"(\u201e|\u201d|\u2014|\xeb|\xfc|\xe9|\xef|\xe8)", "", text)
@@ -98,18 +133,19 @@ class ExtractBasicFeatures(TransformerMixin):
     def transform_text(text):
         features = OrderedDict()
 
+        # TODO: these methods introduce inconsistency I think as word_tokenize may return 0
         word_tokens = [w for w in word_tokenize(text) if w]
         sentence_tokens = [s for s in sent_tokenize(text) if s]
         word_token_count = len(word_tokens)
         sentence_token_count = len(sentence_tokens)
 
-        features['question_marks_perc'] = text.count('?') / float(word_token_count)
-        features['exclamation_marks_perc'] = text.count('!') / float(word_token_count)
+        features['question_marks_perc'] = text.count('?') / float(word_token_count) if word_token_count > 0 else 0
+        features['exclamation_marks_perc'] = text.count('!') / float(word_token_count) if word_token_count > 0 else 0
         currency_symbols = 0
         for char in [u'$', u'€', u'£', u'ƒ']:
             currency_symbols += text.count(char)
-        features['currency_symbols_perc'] = currency_symbols / float(word_token_count)
-        features['digits_perc'] = len([c for c in text if c.isdigit()]) / float(word_token_count)
+        features['currency_symbols_perc'] = currency_symbols / float(word_token_count) if word_token_count > 0 else 0
+        features['digits_perc'] = len([c for c in text if c.isdigit()]) / float(word_token_count) if word_token_count > 0 else 0
 
         features['sentences'] = len(sentence_tokens)
         features['avg_sentence_length'] = (word_token_count / float(sentence_token_count)) if sentence_token_count > 0 else 0
@@ -162,12 +198,37 @@ class ExtractSentimentFeatures(TransformerMixin):
             'subjectivity'
         ]
 
+
+
+## STOP WORD REMOVAL
+language_filename = os.path.join(config.root_path, 'dutch_stopwords_mod.txt')
+stop_words = []
+try:
+    with open(language_filename, 'rb') as language_file:
+        stop_words = [
+            line.decode('utf-8').strip() for line in language_file.readlines()
+        ]
+except:
+    raise IOError(
+        '{0}" file is unreadable, check your installation.'.format(
+            language_filename
+        )
+    )
+
+def remove_stop_words(text):
+    pattern = re.compile(r'\b(' + r'|'.join(stop_words) + r')\b\s*')
+    reg_text = pattern.sub('', text)
+
+    return reg_text
+
+
+
 class StopWordRemoval(TransformerMixin):
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
-        return ParallelWithProgress(n_jobs=config.n_parallel_jobs, progress_callback=None)(
+        return Parallel(n_jobs=config.n_parallel_jobs)(
             delayed(remove_stop_words)(a) for a in X
         )
 
@@ -175,12 +236,19 @@ class StopWordRemoval(TransformerMixin):
         return {}
 
 
+## LEMMATIZATION
+def apply_lemmatization(text):
+    stemmer = SnowballStemmer('dutch', ignore_stopwords=False)
+    stem_text = stemmer.stem(text)
+
+    return stem_text
+
 class ApplyLemmatization(TransformerMixin):
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
-        return ParallelWithProgress(n_jobs=config.n_parallel_jobs, progress_callback=None)(
+        return Parallel(n_jobs=config.n_parallel_jobs)(
             delayed(apply_lemmatization)(a) for a in X
         )
 

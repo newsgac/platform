@@ -1,11 +1,9 @@
 import numpy
 from pymodm import MongoModel, fields, EmbeddedMongoModel
-from uuid import UUID
 
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 
-from newsgac.caches.models import Cache
 from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 from newsgac.data_sources.models import DataSource
@@ -16,9 +14,6 @@ from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
 from newsgac.users.models import User
 from newsgac.tasks.models import TrackedTask
-
-
-from newsgac.data_engineering import utils as DataUtils
 
 
 class Result(EmbeddedMongoModel):
@@ -43,7 +38,8 @@ class Result(EmbeddedMongoModel):
         ])
 
         return cls(
-            confusion_matrix=confusion_matrix(true_labels, predicted_labels, labels=DataUtils.genre_codes),
+            confusion_matrix=confusion_matrix(true_labels, predicted_labels),
+            # confusion_matrix=confusion_matrix(true_labels, predicted_labels, labels=DataUtils.genre_codes),
             precision_weighted=metrics.precision_score(true_labels, predicted_labels, average='weighted'),
             precision_micro=metrics.precision_score(true_labels, predicted_labels, average='micro'),
             precision_macro=metrics.precision_score(true_labels, predicted_labels, average='macro'),
@@ -73,13 +69,9 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     sk_pipeline = ObjectField()
     result = fields.EmbeddedDocumentField(Result)
     task_id = fields.CharField()
-
     grid_search_result = ObjectField()
 
-
-    @property
-    def task(self):
-        return TrackedTask.objects.get({"_id": UUID(self.task_id)})
+    task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
 
     @classmethod
     def create(cls):

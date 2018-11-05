@@ -1,7 +1,9 @@
-import hashlib
 from collections import OrderedDict
 
 import numpy
+from celery import group, current_task
+from celery.result import allow_join_result
+
 from pymodm import EmbeddedMongoModel
 from pymodm import fields
 from sklearn.base import TransformerMixin
@@ -9,9 +11,8 @@ from sklearn.base import TransformerMixin
 from newsgac.common.utils import model_to_dict
 from newsgac.nlp_tools.models.frog_extract_features import get_frog_features
 from newsgac.nlp_tools.models.frog_features import feature_descriptions, features
-from newsgac.pipelines.utils import dict_vectorize
-from newsgac.tasks.progress import report_progress
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
+from newsgac.nlp_tools.tasks import frog_process
 
 class Features(EmbeddedMongoModel):
     # adds all features (from array + descr dict) to the Feature class as BooleanFields.
@@ -38,6 +39,7 @@ class Parameters(EmbeddedMongoModel):
 
 class FrogFeatureExtractor(TransformerMixin):
     def __init__(self, nlp_tool):
+        # we need to know the nlp_tools parameters
         self.nlp_tool = nlp_tool
 
     def fit(self, X, y=None):
@@ -47,16 +49,21 @@ class FrogFeatureExtractor(TransformerMixin):
         articles = X
         extract_features_dict = self.nlp_tool.parameters.features.to_son().to_dict()
         features = []
-        for idx, article in enumerate(articles):
-            report_progress('frog', float(idx) / len(articles))
+
+        if current_task:
+            print("WARNING: Running parallel from inside celery task. Using dangerous allow_join_result & disable_sync_subtasks=False")
+
+        with allow_join_result():
+            # list of frog tokens per text
+            frog_tokens = group(frog_process.s(text) for text in X)().get(disable_sync_subtasks=False)
+
+        for tokens in frog_tokens:
             article_features = {
-                k: v for k,v in
-                get_frog_features(article).iteritems()
+                k: v for k, v in
+                get_frog_features(tokens).iteritems()
                 if extract_features_dict[k]
             }
             features.append(OrderedDict(sorted(article_features.items(), key=lambda t: t[0])))
-
-        report_progress('frog', 1)
 
         # assert each article has the same set of feature keys
         for i in range(len(features) - 1):

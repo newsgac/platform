@@ -18,8 +18,8 @@ from bokeh.layouts import gridplot
 from bokeh.transform import factor_cmap
 from bokeh.palettes import Category20
 
-from newsgac.data_engineering import utils as DataUtils
-
+from newsgac import genres as DataUtils
+from newsgac.genres import genre_labels
 
 __author__ = 'abilgin'
 
@@ -167,7 +167,7 @@ class ResultVisualiser(object):
                 # For classifiers using vectorizer
                 classifier = np.asarray(classifier.todense()).reshape(-1)
 
-            title =  str(DataUtils.genres[i]) + " vs " + str(DataUtils.genres[j])
+            title = str(DataUtils.genres_full[i]) + " vs " + str(DataUtils.genres_full[j])
             top_coeff_pos = np.argsort(classifier)[-top_features:]
             top_coeff_neg = np.argsort(classifier)[:top_features]
 
@@ -188,7 +188,7 @@ class ResultVisualiser(object):
                     neg_features_names.append(names[index])
 
 
-            if j == len(DataUtils.genres)-1:
+            if j == len(DataUtils.genres_full)-1:
                 i += 1
                 j = i + 1
             else:
@@ -267,7 +267,7 @@ class ResultVisualiser(object):
         title = data_source.display_title
         articles = [{
             'year': str(article.year),
-            'label': article.label
+            'label': genre_labels[article.label]
         } for article in data_source.articles]
 
         df = DataFrame(articles)

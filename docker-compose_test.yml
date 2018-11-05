@@ -2,9 +2,7 @@ version: "3"
 
 services:
     frog:
-        env_file:
-            - .env.dockertest
-        restart: "no"
+        entrypoint: ["/bin/true"]
 
     redis:
         env_file:
@@ -15,16 +13,16 @@ services:
         env_file:
             - .env.dockertest
         volumes:
-            - ./../data:/data/db
+            - ./data:/data/db
         restart: "no"
 
     worker:
         entrypoint: ["/bin/true"]
 
-    web:
+    frogworker:
         entrypoint: ["/bin/true"]
 
-    ws-celery-monitor:
+    web:
         entrypoint: ["/bin/true"]
 
     test:
@@ -36,8 +34,7 @@ services:
         image: newsgac/test
         depends_on:
             - database
-            - frog
-            - redis
         networks:
             - newsgac-net
-        command: ["pytest", "."]
+        entrypoint: /bin/sh -c
+        command: ["pytest . -m \"not frog\""]

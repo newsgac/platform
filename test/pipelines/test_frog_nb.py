@@ -6,6 +6,7 @@ from newsgac.pipelines.models import Pipeline
 from newsgac.pipelines.run import run_pipeline
 
 
+@pytest.mark.frog
 def test_run_frog_nb_pipeline(test_user, data_source_balanced_10):
     pipeline = Pipeline(
         display_title='Frog NB Balanced 10 test',
@@ -19,6 +20,7 @@ def test_run_frog_nb_pipeline(test_user, data_source_balanced_10):
     assert pipeline.sk_pipeline is not None
 
 
+@pytest.mark.frog
 @pytest.mark.timeout(20)
 def test_second_run_uses_cache(test_user, data_source_balanced_10):
     pipeline = Pipeline(

@@ -19,13 +19,18 @@ docker-compose -f docker-compose.yml -f docker-compose_local.yml up --build
 ```
 
 
-## Run flask web app locally
+## Run flask web app locally (through IDE)
 
 You might want to run flask outside of Docker (because it is e.g. easier to attach a debugger).
 
 * Follow `Setup Instructions for DOCKER` instructions so that all services are online (Mongo, Redis, FROG, celery workers).
+* Make sure the flask docker container is DOWN:
 
-* Set up a virtual environment and install the requirements:
+```
+docker-compose -f docker-compose.yml -f docker-compose_local.yml stop web
+```
+
+* Set up a virtual environment (python 2.7) and install the requirements:
 
 ```
 pip install -r requirements.txt
@@ -41,9 +46,8 @@ export $(cat .env.local | xargs)
 
 ```
 PYTHONPATH=. python newsgac/app.py
-
 ```
-* The local web server will be running on `http://localhost:5050`, the Docker server on `http://localhost:5050`.
+* The local web server will be running on `http://localhost:5050`.
 
 ## Debugging tasks
 
@@ -102,28 +106,6 @@ u.save()
 ```
 
 * You can now login from the frontend as this user.
-
-## Running locally using IDE
-
-* Run Frog service from terminal (assuming that it is installed):
-
-```
-docker run -p 12345:12345 -t -i proycon/lamachine
-frog -S 12345
-```
-
-* Run mongodb using the specified data folder (this is Ays' path)
-
-```
-sudo mongod --dbpath repos/data
-```
-
-* Start redis server
-
-```
-sudo systemctl start redis
-```
-
 
 ## Contributors
 

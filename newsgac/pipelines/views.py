@@ -69,8 +69,7 @@ def overview():
             'data_source': {
                 'display_title': pipeline.data_source.display_title
             },
-            'task': json.dumps(pipeline.task.as_dict()),
-            'json': model_to_json(pipeline, indent=4)
+            'task': pipeline.task
 
         } for pipeline in list(Pipeline.objects.all())
     ]

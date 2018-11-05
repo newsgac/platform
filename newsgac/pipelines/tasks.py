@@ -1,53 +1,82 @@
+import subprocess
+import sys
+
 from bson import ObjectId
-from celery import current_task
+
+from newsgac.tasks.celery_app import celery_app
+from newsgac.tasks.models import Status
 
 from newsgac.pipelines.grid_search import run_grid_search
-from newsgac.tasks.celery_app import celery_app
-from .models import Pipeline
-from .run import run_pipeline
-import subprocess
+from newsgac.pipelines.models import Pipeline
+from newsgac.pipelines.run import run_pipeline
+from newsgac.learners.factory import learners, create_learner
 
 
-@celery_app.task(bind=True, trail=True)
-def run_pipeline_task(self, pipeline_id):
+def run_pipeline_task_impl(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    run_pipeline(pipeline)
+    pipeline.task.set_started()
+    pipeline.save()
+    try:
+        run_pipeline(pipeline)
+        pipeline.task.set_success()
+        pipeline.save()
+    except Exception as e:
+        t, v, tb = sys.exc_info()
+        pipeline.task.status = Status.FAILURE
+        pipeline.task.set_failure(e)
+        pipeline.save()
+        raise t, v, tb
+
+@celery_app.task(bind=True)
+def run_pipeline_task(self, pipeline_id):
+    # run_pipeline_task_impl(pipeline_id)
+
+    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+    (stdoutdata, stderrdata) = process.communicate("""
+import newsgac.database
+from newsgac.pipelines.tasks import run_pipeline_task_impl
+run_pipeline_task_impl('%s')
+        """ % pipeline_id)
+
+    exit_code = process.wait()
+
+    print(exit_code)
+    print(stderrdata)
+    print(stdoutdata)
 
 
 def run_grid_search_task_impl(pipeline_id):
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    run_grid_search(pipeline)
+    pipeline.task.set_started()
+    pipeline.save()
+    try:
+        run_grid_search(pipeline)
+        pipeline.task.set_success()
+        pipeline.save()
+    except Exception as e:
+        t, v, tb = sys.exc_info()
+        pipeline.task.status = Status.FAILURE
+        pipeline.task.set_failure(e)
+        pipeline.save()
+        raise t, v, tb
 
-@celery_app.task(bind=True, trail=True)
+    # wait for grid search task to be finished
+    # TODO: these to be added to celery task after completion of grid search
+    # pipeline.learner = create_learner(None, False, **pipeline.grid_search_result['best'])
+    # run_pipeline_task.delay(str(pipeline._id))
+
+
+@celery_app.task(bind=True)
 def run_grid_search_task(self, pipeline_id):
+    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+    (stdoutdata, stderrdata) = process.communicate("""
+import newsgac.database
+from newsgac.pipelines.tasks import run_grid_search_task_impl
+run_grid_search_task_impl('%s')
+    """ % pipeline_id)
 
-    # from multiprocessing import current_process
-    # current_process().daemon = False
-    # current_process()._authkey = 'randomKey'
-    # current_process()._daemonic = False
-    # current_process()._tempdir = '/tmp'
-     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-     run_grid_search(pipeline)
-    # current_process().daemon = True
+    exit_code = process.wait()
 
-#     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-#     (stdoutdata, stderrdata) = process.communicate("""
-# import newsgac.database
-# from newsgac.pipelines.tasks import run_grid_search_task_impl
-# from newsgac.tasks import progress
-# progress.task_id = '%s'
-# run_grid_search_task_impl('%s')
-# """ % (current_task.request.id, pipeline_id))
-#
-#     exit_code = process.wait()
-#
-#     print(exit_code)
-#     print(stderrdata)
-#     print(stdoutdata)
-
-
-#
-# @celery_app.task(bind=True, trail=True)
-# def run_grid_search_task(self, pipeline_id):
-#     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-#     run_grid_search(pipeline)
+    print(exit_code)
+    print(stderrdata)
+    print(stdoutdata)

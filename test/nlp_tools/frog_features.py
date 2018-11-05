@@ -1,10 +1,12 @@
 import numpy
+import pytest
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.pipeline import Pipeline
 
 from newsgac.nlp_tools import Frog
 
 
+@pytest.mark.frog
 def test_frog_features():
     text = 'Dit is een willekeurige tekst waar wat frog features uitgehaald worden. Dit is de tweede zin.'
     frog = Frog.create()

@@ -44,30 +44,24 @@ services:
             - newsgac-net
         command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "80", "--bind", "0.0.0.0:5050", "--access-logfile", "-", "--error-logfile", "-", "newsgac.app:app"]
 
-    worker:
+    worker: &worker-base
         build:
             context: .
             dockerfile: Dockerfile
-        image: newsgac/web
-        links:
+        image: newsgac/worker
+        depends_on:
             - redis
             - database
-            - frog
+        restart: on-failure
+        networks:
+            - newsgac-net
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 10 -n worker@%h
+
+    frogworker:
+        <<: *worker-base
+        image: newsgac/frogworker
         depends_on:
             - redis
             - database
             - frog
-        restart: on-failure
-        networks:
-            - newsgac-net
-        command: celery -A newsgac.tasks.celery_app worker -l info --concurrency 10 -n worker1@%h
-
-    ws-celery-monitor:
-        build:
-            context: ./ws-celery-monitor
-        image: newsgac/ws-celery-monitor
-        links:
-            - redis
-        restart: on-failure
-        networks:
-            - newsgac-net
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 2 -n frogworker@%h -Q frog

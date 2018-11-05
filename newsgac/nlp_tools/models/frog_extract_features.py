@@ -1,91 +1,230 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import hashlib
-import itertools
-import re
+pronouns_1 = [
+    'ik',
+    'mij',
+    'me',
+    'mijn',
+    'wij',
+    'we',
+    'ons'
+]
 
-from nltk import sent_tokenize
-from pynlpl.clients.frogclient import FrogClient
-from pattern.nl import sentiment
+pronouns_2 = [
+    'jij',
+    'je',
+    'jou',
+    'jouw',
+    'jullie',
+    'u',
+    'uw'
+]
 
-from newsgac import config
-from newsgac.caches.models import Cache
-from newsgac.common.utils import split_long_sentences, split_chunks
-import newsgac.data_engineering.utils as Utilities
-from newsgac import database
+pronouns_3 = [
+    'hij',
+    'hem',
+    'zij',
+    'ze',
+    'zijn',
+    'haar',
+    'hun',
+    'hen',
+    'zich'
+]
 
-local_cache = {}
-def get_frog_tokens(text):
-    cache_hash = hashlib.sha1(text.encode('utf-8')).hexdigest()
-    if cache_hash in local_cache:
-        return local_cache[cache_hash]
+modal_verbs = [
+    'Behoeven',
+    'Blijken',
+    'Dunken',
+    'Heten',
+    'Hoeven',
+    'Lijken',
+    'Kunnen',
+    'Moeten',
+    'Moest',
+    'Mogen',
+    'Schijnen',
+    'Toeschijnen',
+    'Voorkomen',
+    'Willen',
+    'Zullen'
+]
 
-    cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
-    if not cache.data:
-        sentences = [s for s in sent_tokenize(text) if s]
-        sentences = split_long_sentences(sentences, 48)
-        chunks = [' '.join(chunk).encode('utf-8') for chunk in split_chunks(sentences, 10)]
+modal_adverbs = [
+    'Allicht',
+    'Blijkbaar',
+    'Eigenlijk',
+    'Gelukkig',
+    'Godweet',
+    'Helaas',
+    'Hoofdzakelijk',
+    'Hoogstwaarschijnlijk',
+    'Hopelijk',
+    'Jammer',
+    'Kennelijk',
+    'Misschien',
+    'Mogelijk',
+    'Natuurlijk',
+    'Ongelukkigerwijs',
+    'Ongetwijfeld',
+    'Onmogelijk',
+    'Onwaarschijnlijk',
+    'Schijnbaar',
+    'Stellig',
+    'Tevergeefs',
+    'Trouwens',
+    'Tuurlijk',
+    'Uiteraard',
+    'Vergeefs',
+    'Vermoedelijk',
+    'Waarlijk',
+    'Waarschijnlijk',
+    'Wellicht',
+    'Wieweet',
+    'Zeker',
+    'Zogenaamd',
+    'Zonder twijfel'
+]
 
-        frogclient = FrogClient(config.frog_hostname, config.frog_port, returnall=True)
-        tokens = itertools.chain.from_iterable([frogclient.process(chunk) for chunk in chunks])
-        cache.data = [token for token in tokens if None not in token]
+intensifiers = [
+    'Aanmerkelijk',
+    'Aanzienlijk',
+    'Bijna',
+    'Behoorlijk',
+    'Drastisch',
+    'Echt',
+    'Enigszins',
+    'Enorm',
+    'Erg',
+    'Extra',
+    'Flink',
+    'Gewoon',
+    'Godsgruwelijk',
+    'Hartstikke',
+    'Helemaal',
+    'Hoezeer',
+    'Nagenoeg',
+    'Nauwelijks',
+    'Nogal',
+    'Oneindig',
+    'Ongemeen',
+    'Ongeveer',
+    'Ontzettend',
+    'Onuitsprekelijk',
+    'Onwijs',
+    'Pakweg',
+    'Uitdrukkelijk',
+    'Uitermate',
+    'Uitsluitend',
+    'Voldoende',
+    'Volkomen',
+    'Volledig',
+    'Vooral',
+    'Voornamelijk',
+    'Vreselijk',
+    'Vrijwel',
+    'Welhaast',
+    'Zo',
+    'Zoveel',
+    'Zowat'
+]
 
-        cache.save()
+cogn_verbs = [
+    'Aankondigen',
+    'Aarzelen',
+    'Aannemen',
+    'Achten',
+    'Afwijzen',
+    'Afleiden',
+    'Bedenken',
+    'Bedoelen',
+    'Begrijpen',
+    'Bekennen',
+    'Beloven',
+    'Beslissen',
+    'Betreuren',
+    'Betwijfelen',
+    'Concluderen',
+    'Denken',
+    'Dreigen',
+    'Geloven',
+    'Herinneren',
+    'Herkennen',
+    'Hopen',
+    'Menen',
+    'Opmerken',
+    'Prefereren',
+    'Reageren',
+    'Realiseren',
+    'Suggereren',
+    'Uitleggen',
+    'Uitsluiten',
+    'Uitvinden',
+    'Vaststellen',
+    'Verdenken',
+    'Vergeten',
+    'Verlangen',
+    'Vermoeden',
+    'Vernemen',
+    'Veronderstellen',
+    'Vertrouwen',
+    'Verwachten',
+    'Vinden',
+    'Voelen',
+    'Voorstellen',
+    'Vragen',
+    'Vrezen',
+    'Waarschuwen',
+    'Wensen',
+    'Weten'
+]
 
-    local_cache[cache_hash] = cache.data
-    return cache.data
 
 
-def get_frog_features(text):
+def get_frog_features(tokens):
     features = {}
-
-    # process quotes with frog
-
-    # process quote free text with frog
-    tokens = get_frog_tokens(text)
-    # data_dict = get_frog_tokens(quote_free_text)
 
     # Token count
     token_count = len(tokens)
 
     # Numbers
-    # num_count = len([t for t in tokens if t[4].startswith('TW')])
-    # features['number_perc'] = (num_count / float(token_count)) if float(token_count) > 0 else 0
+    num_count = len([t for t in tokens if t[3].startswith('TW')])
+    features['number_perc'] = (num_count / float(token_count)) if float(token_count) > 0 else 0
 
     # Adjective count and percentage
-    adj_count = len([t for t in tokens if t[4].startswith('ADJ')])
+    adj_count = len([t for t in tokens if t[3].startswith('ADJ')])
     features['adjectives_perc'] = (adj_count / float(token_count)) if float(token_count) > 0 else 0
 
     # Verbs and adverbs count and percentage
-    modal_verb = [t for t in tokens if t[4].startswith('WW') and
-                  t[2].capitalize() in Utilities.modal_verbs]
+    modal_verb = [t for t in tokens if t[3].startswith('WW') and
+                  t[1].capitalize() in modal_verbs]
     modal_verb_count = len(modal_verb)
     features['modal_verbs_perc'] = (modal_verb_count / float(token_count)) if float(token_count) > 0 else 0
 
-    modal_adverb_count = len([t for t in tokens if t[4].startswith('BW')
-                              and t[2].capitalize() in Utilities.modal_adverbs])
+    modal_adverb_count = len([t for t in tokens if t[3].startswith('BW')
+                              and t[1].capitalize() in modal_adverbs])
     features['modal_adverbs_perc'] = (modal_adverb_count /
                                       float(token_count)) if float(token_count) > 0 else 0
 
-    cogn_verb_count = len([t for t in tokens if t[4].startswith('WW') and
-                           t[2].capitalize() in Utilities.cogn_verbs])
+    cogn_verb_count = len([t for t in tokens if t[3].startswith('WW') and
+                           t[1].capitalize() in cogn_verbs])
     features['cogn_verbs_perc'] = (cogn_verb_count / float(token_count)) if float(token_count) > 0 else 0
 
-    intensifier_count = len([t for t in tokens if t[2].capitalize() in
-                             Utilities.intensifiers])
+    intensifier_count = len([t for t in tokens if t[1].capitalize() in
+                             intensifiers])
     features['intensifiers_perc'] = (intensifier_count / float(token_count)) if float(token_count) > 0 else 0
 
     # Personal pronoun counts and percentages
-    pronoun_1_count = len([t for t in tokens if t[4].startswith('VNW') and
-                           t[2] in Utilities.pronouns_1])
+    pronoun_1_count = len([t for t in tokens if t[3].startswith('VNW') and
+                           t[1] in pronouns_1])
     # pronoun_1_count_wdq = pronoun_1_count + len([t for t in quote_tokens if t[4].startswith('VNW') and
     #                                             t[2] in Utilities.pronouns_1])
-    pronoun_2_count = len([t for t in tokens if t[4].startswith('VNW') and
-                           t[2] in Utilities.pronouns_2])
+    pronoun_2_count = len([t for t in tokens if t[3].startswith('VNW') and
+                           t[1] in pronouns_2])
     # pronoun_2_count_wdq = pronoun_2_count + len([t for t in quote_tokens if t[4].startswith('VNW') and
     #                                              t[2] in Utilities.pronouns_2])
-    pronoun_3_count = len([t for t in tokens if t[4].startswith('VNW') and
-                           t[2] in Utilities.pronouns_3])
+    pronoun_3_count = len([t for t in tokens if t[3].startswith('VNW') and
+                           t[1] in pronouns_3])
 
     features['pronoun_1_perc'] = (pronoun_1_count / float(token_count)) if float(token_count) > 0 else 0
     features['pronoun_2_perc'] = (pronoun_2_count / float(token_count)) if float(token_count) > 0 else 0
@@ -95,7 +234,7 @@ def get_frog_features(text):
     # features['pronoun_2_perc_wdq'] = (pronoun_2_count_wdq / float(token_count)) if float(token_count) > 0 else 0
 
     # Named entities
-    named_entities = [t for t in tokens if t[5].startswith('B')]
+    named_entities = [t for t in tokens if t[4].startswith('B')]
 
     features['named_entities_perc'] = (len(named_entities) /
                                        float(token_count)) if float(token_count) > 0 else 0

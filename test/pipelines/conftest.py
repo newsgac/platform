@@ -1,7 +1,7 @@
 import pytest
 
-from newsgac.data_sources.process import upload_data_source
 from newsgac.data_sources.models import DataSource
+from newsgac.data_sources.process import get_articles_from_file
 
 
 @pytest.fixture()
@@ -15,7 +15,7 @@ def data_source_balanced_10(test_user, dataset_balanced_10):
         file=dataset_balanced_10
     )
     data_source.save()
-    upload_data_source(data_source)
+    data_source.articles = get_articles_from_file(data_source.file.file)
     return data_source
 
 

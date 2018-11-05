@@ -22,13 +22,17 @@ services:
         volumes:
             - ./../data:/data/db
 
-    worker:
+    worker: &worker-base
         hostname: celeryworker
         volumes:
             - ./newsgac:/newsgac/newsgac
         env_file:
             - .env.localdocker
-        command: ["sh", "-c", "pip install watchdog && watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 1 -n worker1@%h" ]
+        command: ["sh", "-c", "watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 8 -n worker1@%h" ]
+
+    frogworker:
+        <<: *worker-base
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog
 
     web:
         volumes:
@@ -40,7 +44,3 @@ services:
         command: ["python", "newsgac/app.py"]
         environment:
             - PYTHONPATH=/newsgac
-
-    ws-celery-monitor:
-        ports:
-            - "5051:5051"
