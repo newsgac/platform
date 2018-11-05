@@ -38,7 +38,6 @@ services:
         image: newsgac/nginx
         depends_on:
             - web
-            - ws-celery-monitor
             - jupyterhub
         restart: on-failure
         networks:
