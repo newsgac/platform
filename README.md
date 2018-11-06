@@ -15,7 +15,7 @@ This is the development repository for NEWSGAC Project.
 4. To run from command line, navigate to newsgac_docker_dev and run:
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose_local.yml up --build
+docker-compose -f docker-compose_local.yml up --build
 ```
 
 
@@ -27,7 +27,7 @@ You might want to run flask outside of Docker (because it is e.g. easier to atta
 * Make sure the flask docker container is DOWN:
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose_local.yml stop web
+docker-compose -f docker-compose_local.yml stop web
 ```
 
 * Set up a virtual environment (python 2.7) and install the requirements:
@@ -59,9 +59,9 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
 
 
 ## Running the tests (Docker)
-1. `docker-compose -f docker-compose.yml -f docker-compose_test.yml build test`
-2. `docker-compose -f docker-compose.yml -f docker-compose_test.yml run test`
-3. `docker-compose -f docker-compose.yml -f docker-compose_test.yml down`
+1. `docker-compose -f docker-compose_test.yml build test`
+2. `docker-compose -f docker-compose_test.yml run test`
+3. `docker-compose -f docker-compose_test.yml down`
 
 ## Running the tests (Local)
 * Setup local (virtual) environment as when running flask locally
@@ -72,7 +72,7 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
 export $(cat .env.test | xargs)
 ```
 
-* Make sure the database, Frog and redis are running (e.g. `docker-compose -f docker-compose.yml -f docker-compose_local.yml up database redis frog`
+* Make sure the database, Frog and redis are running (e.g. `docker-compose -f docker-compose_local.yml up database redis frog`
 
 * Run tests using
 
@@ -88,7 +88,7 @@ E.g. to create a user:
 * Start console using docker-compose (or from you local environment using `python`):
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose_local.yml run web python
+docker-compose -f docker-compose_local.yml run web python
 ```
 
 * Import database & user model
