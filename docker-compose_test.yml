@@ -1,29 +1,20 @@
 version: "3"
 
+networks:
+    newsgac-net:
+        driver: bridge
+
 services:
-    frog:
-        entrypoint: ["/bin/true"]
-
-    redis:
-        env_file:
-            - .env.dockertest
-        restart: "no"
-
     database:
+        hostname: mongo
+        image: mongo:latest
+        networks:
+            - newsgac-net
         env_file:
             - .env.dockertest
         volumes:
             - ./data:/data/db
         restart: "no"
-
-    worker:
-        entrypoint: ["/bin/true"]
-
-    frogworker:
-        entrypoint: ["/bin/true"]
-
-    web:
-        entrypoint: ["/bin/true"]
 
     test:
         env_file:

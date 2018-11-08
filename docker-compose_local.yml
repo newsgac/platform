@@ -1,13 +1,29 @@
 version: "3"
 
+networks:
+    newsgac-net:
+        driver: bridge
+
+
+
 services:
     frog:
+        hostname: proycon/lamachine
+        image: proycon/lamachine:latest
+        command: bash -c "frog -S 12345"
+        networks:
+            - newsgac-net
         ports:
             - "12345:12345"
         env_file:
             - .env.localdocker
 
     redis:
+        hostname: redis
+        image: redis:latest
+        restart: on-failure
+        networks:
+            - newsgac-net
         ports:
             - "6379:6379"
             - "6380:6380"
@@ -15,6 +31,10 @@ services:
             - .env.localdocker
 
     database:
+        hostname: mongo
+        image: mongo:latest
+        networks:
+            - newsgac-net
         ports:
             - "27017:27017"
         env_file:
@@ -22,25 +42,57 @@ services:
         volumes:
             - ./../data:/data/db
 
-    worker: &worker-base
-        hostname: celeryworker
-        volumes:
-            - ./newsgac:/newsgac/newsgac
-        env_file:
-            - .env.localdocker
-        command: ["sh", "-c", "watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 8 -n worker1@%h" ]
-
-    frogworker:
-        <<: *worker-base
-        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog
-
     web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/web
+        links:
+            - worker
+            - redis
+            - database
+            - frog
+        depends_on:
+            - database
+            - worker
+            - frog
+        restart: on-failure
+        networks:
+            - newsgac-net
+        command: ["python", "newsgac/app.py"]
         volumes:
             - ./newsgac:/newsgac/newsgac
         ports:
             - "5050:5050"
         env_file:
             - .env.localdocker
-        command: ["python", "newsgac/app.py"]
         environment:
             - PYTHONPATH=/newsgac
+
+    worker: &worker-base
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/worker
+        depends_on:
+            - redis
+            - database
+        restart: on-failure
+        networks:
+            - newsgac-net
+        hostname: celeryworker
+        volumes:
+            - ./newsgac:/newsgac/newsgac
+        env_file:
+            - .env.localdocker
+        command: ["sh", "-c", "watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 8 -n worker1@%h" ]
+#        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 10 -n worker@%h
+
+    frogworker:
+        <<: *worker-base
+        image: newsgac/frogworker
+        depends_on:
+            - redis
+            - database
+            - frog
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog
