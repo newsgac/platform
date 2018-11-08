@@ -6,10 +6,10 @@ from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF, Frog
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.nlp_tools.transformers import CleanOCR, StopWordRemoval, ApplyLemmatization, ExtractBasicFeatures, \
-    ExtractSentimentFeatures
+    ExtractSentimentFeatures, RemoveQuotes, ExtractQuotes
 
 
-def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
+def get_sk_pipeline(sw_removal, lemmatization, quote_removal, nlp_tool, learner):
     """
     Transform our `newsgac.pipelines.models.Pipeline` into a Scikit Learn `sklearn.pipeline.Pipeline`
 
@@ -18,6 +18,9 @@ def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
 
     :param lemmatization: If true, add lemmatization step
     :type lemmatization: bool
+
+    :param quote_removal: If true, remove quotes before nlp step
+    :type quote_removal: bool
     :param nlp_tool: NlpTool to use extract features from text (Frog / TFIDF)
     :type nlp_tool: NlpTool
     :param learner: Learner is the classifier
@@ -39,15 +42,30 @@ def get_sk_pipeline(sw_removal, lemmatization, nlp_tool, learner):
         if type(nlp_tool) != TFIDF:
             feature_pipelines = [
                 ('BasicFeatures', ExtractBasicFeatures()),
+                ('QuoteFeatures', ExtractQuotes()),
                 ('SentimentFeatures', ExtractSentimentFeatures()),
             ]
 
             feature_names += ExtractBasicFeatures.get_feature_names()
+            feature_names += ExtractQuotes.get_feature_names()
             feature_names += ExtractSentimentFeatures.get_feature_names()
 
-        feature_pipelines.append(
-            (nlp_tool.name, nlp_tool.get_feature_extractor())
+        extract_steps = []
+        if quote_removal:
+            extract_steps.append(
+                ('RemoveQuotes', RemoveQuotes())
+            )
+        nlp_tool_extractor = nlp_tool.get_feature_extractor()
+        extract_steps.append(
+            (nlp_tool.name, nlp_tool_extractor)
         )
+        extract_pipeline = SKPipeline(extract_steps)
+        extract_pipeline.get_feature_names = nlp_tool_extractor.get_feature_names
+
+        feature_pipelines.append(
+            (nlp_tool.name, extract_pipeline)
+        )
+
         skl_steps.append(
             ('FeatureExtraction', FeatureUnion(feature_pipelines))
         )

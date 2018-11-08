@@ -102,7 +102,8 @@ class ExtractQuotes(TransformerMixin):
             list_nr_subs.append(numpy.array([nr_subs, percentage]))
         return numpy.array(list_nr_subs)
 
-    def get_feature_names(self):
+    @staticmethod
+    def get_feature_names():
         return ['direct_quotes',
                 'direct_quotes_perc']
 
