@@ -3,6 +3,7 @@ from time import time
 from sklearn.model_selection import GridSearchCV
 
 from newsgac import config
+from newsgac.genres import genre_codes
 from newsgac.learners import learners, LearnerSVC, LearnerNB, LearnerXGB, LearnerGB, LearnerMLP, LearnerRF, LearnerLGBM
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
 from newsgac.pipelines.utils import report
@@ -49,6 +50,9 @@ param_space = {
     #
     # },
     LearnerLGBM: {
+        'objective': ['multiclass'],
+        'num_class': [len(genre_codes)],
+        'metric': ['multi_logloss'],
         'silent': [True],
         'n_estimators': [10, 30, 50, 100, 120, 160],
         'max_depth': [-1, 0, 2, 4, 8],
