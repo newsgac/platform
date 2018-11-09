@@ -60,8 +60,7 @@ class CleanOCR(TransformerMixin):
     def transform_text(text):
         for char in unwanted_chars:
             text = text.replace(char, '')
-        # TODO: find a better fix for this
-        text = re.sub(u"(\u201e|\u201d|\u2014|\xeb|\xfc|\xe9|\xef|\xe8)", "", text)
+        # gets rid of \t \n
         return ' '.join(text.split())
 
     def transform(self, X):
@@ -84,7 +83,7 @@ class ExtractQuotes(TransformerMixin):
         closing_quote_chars = ExtractQuotes.closing_quote_chars
 
         pattern = ('(^|[^\w])(' + '|'.join(opening_quote_chars +
-                                           closing_quote_chars) + ')(\s\w|\w\w)')
+                                           closing_quote_chars) + ')(\s\w|\w\w?)')
         pattern += ('(?:(?!' + '|'.join(opening_quote_chars +
                                         ['\s' + c + '\w\w' for c in closing_quote_chars]) +
                     ').){0,1000}?')
@@ -99,13 +98,12 @@ class ExtractQuotes(TransformerMixin):
             cleaned_text, nr_subs = ExtractQuotes.transform_text(text)
             sentences = [s for s in sent_tokenize(text) if s]
             percentage = float(nr_subs) / len(sentences)
-            list_nr_subs.append(numpy.array([nr_subs, percentage]))
+            list_nr_subs.append(numpy.array([percentage]))
         return numpy.array(list_nr_subs)
 
     @staticmethod
     def get_feature_names():
-        return ['direct_quotes',
-                'direct_quotes_perc']
+        return ['direct_quotes_perc']
 
     def get_params(self, deep=False):
         return {}

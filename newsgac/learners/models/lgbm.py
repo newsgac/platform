@@ -3,6 +3,7 @@ from pymodm import fields
 from lightgbm import LGBMClassifier
 
 from newsgac import config
+from newsgac.genres import genre_codes
 from .learner import Learner
 
 
@@ -69,7 +70,9 @@ class LearnerLGBM(Learner):
             learning_rate=self.parameters.learning_rate,
 
             subsample_for_bin=200000,
-            objective=None,
+            objective='multiclass',
+            metric='multi_logloss',
+            num_class=len(genre_codes),
             class_weight=None,
             min_split_gain=0.0,
             min_child_weight=0.001,
