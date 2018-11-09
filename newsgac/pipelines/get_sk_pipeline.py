@@ -7,21 +7,17 @@ from newsgac.nlp_tools.transformers import CleanOCR, StopWordRemoval, ApplyLemma
     ExtractSentimentFeatures, RemoveQuotes, ExtractQuotes
 
 
-class NoneStepsPipeline(SklearnPipeline):
+def features_pipeline(steps, feature_names_from=None):
     """
-    Simple wrapper around sklearn.pipeline.Pipeline that removes any steps set to None,
+    Simple wrapper that creates a sklearn.pipeline.Pipeline but removes any steps set to None,
     it also allows specifying a step as the step to get the feature names from, so that
     get_feature_names can be called on this pipeline.
     """
-    def __init__(self, steps, memory=None, feature_names_from=None):
-        self.feature_names_from = feature_names_from
-        steps = [step for step in steps if step is not None]
-        super(NoneStepsPipeline, self).__init__(steps, memory)
-
-    def get_feature_names(self):
-        if self.feature_names_from:
-            return self.named_steps[self.feature_names_from].get_feature_names()
-        raise ValueError('No feature_names_from specified, cannot get feature names')
+    steps = [step for step in steps if step is not None]
+    pipeline = SklearnPipeline(steps)
+    if feature_names_from:
+        pipeline.get_feature_names = pipeline.named_steps[feature_names_from].get_feature_names
+    return pipeline
 
 
 def get_sk_pipeline(pipeline):
@@ -29,13 +25,13 @@ def get_sk_pipeline(pipeline):
     Transform our `newsgac.pipelines.models.Pipeline` into a Scikit Learn `sklearn.pipeline.Pipeline`
     """
     if type(pipeline.nlp_tool) == TFIDF:
-        return NoneStepsPipeline(
+        return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
                 ('StopWordRemoval', StopWordRemoval()) if pipeline.sw_removal else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', FeatureUnion([
-                    ('TFIDF', NoneStepsPipeline(
+                    ('TFIDF', features_pipeline(
                         steps=[
                             ('RemoveQuotes', RemoveQuotes()) if pipeline.quote_removal else None,
                             (pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())
@@ -50,7 +46,7 @@ def get_sk_pipeline(pipeline):
         )
 
     if type(pipeline.nlp_tool) == Frog:
-        return NoneStepsPipeline(
+        return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
                 ('StopWordRemoval', StopWordRemoval()) if pipeline.sw_removal else None,
@@ -58,14 +54,14 @@ def get_sk_pipeline(pipeline):
                 ('FeatureExtraction', FeatureUnion([
                     ('Basic', ExtractBasicFeatures()),
                     ('Quote', ExtractQuotes()),
-                    ('Sentiment', NoneStepsPipeline(
+                    ('Sentiment', features_pipeline(
                         steps=[
                             ('RemoveQuotes', RemoveQuotes()) if pipeline.quote_removal else None,
                             ('SentimentFeatures', ExtractSentimentFeatures())
                         ],
                         feature_names_from='SentimentFeatures'
                     )),
-                    ('Frog', NoneStepsPipeline(
+                    ('Frog', features_pipeline(
                         steps=[
                             ('RemoveQuotes', RemoveQuotes()) if pipeline.quote_removal else None,
                             (pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())
