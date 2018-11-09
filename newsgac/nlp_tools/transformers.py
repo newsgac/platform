@@ -98,13 +98,12 @@ class ExtractQuotes(TransformerMixin):
             cleaned_text, nr_subs = ExtractQuotes.transform_text(text)
             sentences = [s for s in sent_tokenize(text) if s]
             percentage = float(nr_subs) / len(sentences)
-            list_nr_subs.append(numpy.array([nr_subs, percentage]))
+            list_nr_subs.append(numpy.array([percentage]))
         return numpy.array(list_nr_subs)
 
     @staticmethod
     def get_feature_names():
-        return ['direct_quotes',
-                'direct_quotes_perc']
+        return ['direct_quotes_perc']
 
     def get_params(self, deep=False):
         return {}

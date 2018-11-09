@@ -86,7 +86,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
         )
 
     def get_feature_extractor(self):
-        raise NotImplementedError('Sublass should implement get_feature_extractor')
+        raise NotImplementedError('Subclass should implement get_feature_extractor')
 
     def get_sk_pipeline(self):
-        return get_sk_pipeline(self.sw_removal, self.lemmatization, self.quote_removal, self.nlp_tool, self.learner)
+        return get_sk_pipeline(self)
