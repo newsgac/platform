@@ -57,10 +57,10 @@ class FrogFeatureExtractor(TransformerMixin):
             # list of frog tokens per text
             frog_tokens = group(frog_process.s(text) for text in X)().get(disable_sync_subtasks=False)
 
-        for tokens in frog_tokens:
+        for article_key, tokens in enumerate(frog_tokens):
             article_features = {
                 k: v for k, v in
-                get_frog_features(tokens).iteritems()
+                get_frog_features(tokens, X[article_key]).iteritems()
                 if extract_features_dict[k]
             }
             features.append(OrderedDict(sorted(article_features.items(), key=lambda t: t[0])))

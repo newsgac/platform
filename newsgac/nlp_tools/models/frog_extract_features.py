@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from nltk import word_tokenize
+
 pronouns_1 = [
     'ik',
     'mij',
@@ -181,11 +183,12 @@ cogn_verbs = [
 
 
 
-def get_frog_features(tokens):
+def get_frog_features(tokens, text):
     features = {}
 
     # Token count
-    token_count = len(tokens)
+    # token_count = len(tokens)
+    token_count = len(word_tokenize(text))
 
     # Numbers
     num_count = len([t for t in tokens if t[3].startswith('TW')])
@@ -240,17 +243,17 @@ def get_frog_features(tokens):
                                        float(token_count)) if float(token_count) > 0 else 0
 
     # Unique named entities
-    unique_ne_strings = []
+    # unique_ne_strings = []
     ne_strings = set([t[1].lower() for t in named_entities])
-    for ne_source in ne_strings:
-        unique = True
-        for ne_target in [n for n in ne_strings if n != ne_source]:
-            if ne_target.find(ne_source) > -1:
-                unique = False
-                break
-        if unique:
-            unique_ne_strings.append(ne_source)
+    # for ne_source in ne_strings:
+    #     unique = True
+    #     for ne_target in [n for n in ne_strings if n != ne_source]:
+    #         if ne_target.find(ne_source) > -1:
+    #             unique = False
+    #             break
+    #     if unique:
+    #         unique_ne_strings.append(ne_source)
 
-    features['unique_named_entities'] = (len(unique_ne_strings) /
-                                         float(len(named_entities))) if len(named_entities) else 0
+    features['unique_named_entities_perc'] = (len(ne_strings) /
+                                         float(token_count)) if float(token_count) > 0 else 0
     return features

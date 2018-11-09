@@ -106,7 +106,7 @@ def run_grid_search(pipeline):
     # print param_grid
     # add dummy learner
     # TODO: this is ultra automated but also takes a long time, how about we put an optimized checkbox for the rest of the algortihms to do GS per alg
-    skp = get_sk_pipeline(pipeline.sw_removal, pipeline.lemmatization, pipeline.nlp_tool, learners[0].create())
+    skp = get_sk_pipeline(pipeline.sw_removal, pipeline.lemmatization, pipeline.quote_removal, pipeline.nlp_tool, learners[0].create())
     search = GridSearchCV(skp, param_grid, iid=False, cv=5, return_train_score=False, n_jobs=config.n_parallel_jobs,
                           scoring=scores[3])
     start = time()

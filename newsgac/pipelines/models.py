@@ -64,6 +64,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     data_source = fields.ReferenceField(DataSource, required=True, blank=False)
     sw_removal = fields.BooleanField(required=True, default=True)
     lemmatization = fields.BooleanField(required=True, default=False)
+    quote_removal = fields.BooleanField(required=True, default=True)
     nlp_tool = fields.EmbeddedDocumentField(NlpTool, blank=True, required=True, default=TFIDF.create())
     learner = fields.EmbeddedDocumentField(Learner)
     sk_pipeline = ObjectField()
@@ -85,7 +86,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
         )
 
     def get_feature_extractor(self):
-        raise NotImplementedError('Sublass should implement get_feature_extractor')
+        raise NotImplementedError('Subclass should implement get_feature_extractor')
 
     def get_sk_pipeline(self):
-        return get_sk_pipeline(self.sw_removal, self.lemmatization, self.nlp_tool, self.learner)
+        return get_sk_pipeline(self)
