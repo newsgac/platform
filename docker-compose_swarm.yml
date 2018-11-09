@@ -152,7 +152,7 @@ services:
 
     ngrok:
         depends_on:
-            - http
+            - nginx
         image: wernight/ngrok
         env_file:
             - .env.prod
