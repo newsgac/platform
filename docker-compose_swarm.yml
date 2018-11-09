@@ -64,6 +64,9 @@ services:
                 condition: on-failure
                 delay: 10s
                 max_attempts: 3
+            resources:
+                limits:
+                    cpus: '24'
 
 
     frogworker:
