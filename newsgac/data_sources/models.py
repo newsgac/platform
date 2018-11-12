@@ -32,6 +32,11 @@ class DataSource(CreatedUpdated, MongoModel):
     def delete(self):
         if self.file:
             self.file.delete()
+
+        from newsgac.ace import ACE
+        for ace in ACE.objects.raw({'data_source': self.pk}):
+            ace.delete()
+
         super(DataSource, self).delete()
 
     def status(self):
