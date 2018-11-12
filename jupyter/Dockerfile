@@ -22,7 +22,7 @@ COPY setup.py /newsgac/setup.py
 RUN /opt/conda/envs/py27/bin/python setup.py install
 
 RUN /opt/conda/envs/py27/bin/python -m spacy download nl_core_news_sm
-RUN ["bash", "-c", "/opt/conda/envs/py27/bin/python <<< \"import nltk; nltk.download('punkt')"]
+RUN ["bash", "-c", "/opt/conda/envs/py27/bin/python <<< \"import nltk; nltk.download('punkt')\""]
 
 COPY jupyter/entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
