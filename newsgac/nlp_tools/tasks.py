@@ -35,11 +35,11 @@ def setup_frog_conn(sender, signal, **kwargs):
 def frog_process(text):
     global frogclient
     cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
-    if not cache.data:
+    if cache.data is None:
         sentences = [s for s in sent_tokenize(text) if s]
         sentences = split_long_sentences(sentences, 250)
         tokens = frogclient.process(' '.join(sentences))
         cache.data = [token for token in tokens if None not in token]
         cache.save()
 
-    return cache.data
+    return cache.data.get()
