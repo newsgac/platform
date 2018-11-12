@@ -20,6 +20,7 @@ class TrackedTask(EmbeddedMongoModel):
     start = DateTimeField(blank=True)
     end = DateTimeField(blank=True)
     trace = fields.CharField(blank=True)
+    task_id = fields.CharField()
 
     def set_started(self):
         self.status = Status.STARTED

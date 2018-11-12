@@ -8,10 +8,11 @@ from newsgac.pipelines.models import Result
 def run_pipeline(pipeline):
     texts = numpy.array([article.raw_text for article in pipeline.data_source.articles])
     labels = numpy.array([article.label for article in pipeline.data_source.articles])
-    pipeline.sk_pipeline = pipeline.get_sk_pipeline()
-    pipeline.sk_pipeline.fit(texts, labels)
+    sk_pipeline = pipeline.get_sk_pipeline()
+    sk_pipeline.fit(texts, labels)
+    pipeline.sk_pipeline = sk_pipeline
     pipeline.result = validate(
-        pipeline.sk_pipeline,
+        sk_pipeline,
         texts,
         labels
     )

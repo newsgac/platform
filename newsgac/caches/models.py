@@ -30,5 +30,5 @@ class Cache(CreatedUpdated, DeleteObjectsMixin, MongoModel):
 
 
     def delete(self):
-        ObjectField.delete(self.hash)
+        self.data.delete()
         super(Cache, self).delete()

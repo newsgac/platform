@@ -26,31 +26,19 @@ class DeleteObjectsMixin(object):
     # Use this mixin on model classes that have ObjectFields,
     # So they get cleaned up when the model is deleted.
     # it recursively deletes ObjectFields on EmbeddedDocuments also
+    def delete_objects(self):
+        def delete_objects_in_field(instance):
+            for field in instance._mongometa.get_fields():
+                obj = getattr(instance, field.attname)
+                if obj:
+                    if isinstance(field, EmbeddedDocumentField):
+                        delete_objects_in_field(obj)
+                    if isinstance(field, ObjectField):
+                        obj.delete()
+        delete_objects_in_field(self)
+
     def delete(self):
-        db = _get_db()
-        fs = gridfs.GridFS(db)
-
-        object_field_paths = []
-        def delete_objects_in_field(field, path):
-            if isinstance(field, ObjectField):
-                object_field_paths.append(path + [field.attname])
-            if isinstance(field, EmbeddedDocumentField):
-                for sub_field in field.related_model._mongometa.get_fields():
-                    delete_objects_in_field(sub_field, path + [field.attname])
-        for field in self._mongometa.get_fields():
-            delete_objects_in_field(field, [])
-
-        # delete grid fs files from object_paths
-        raw_document = db[self._mongometa.collection_name].find_one({'_id': self.pk})
-        for path in object_field_paths:
-            current = raw_document
-            try:
-                for path_part in path:
-                    current = current[path_part]
-                fs.delete(current)
-            except KeyError as e:
-                # the field is not set, so there is nothing to delete
-                pass
+        self.delete_objects()
         super(DeleteObjectsMixin, self).delete()
 
 

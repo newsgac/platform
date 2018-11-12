@@ -43,7 +43,7 @@
                             <td><a href="{{ url_for('data_sources.view', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
                             {% if data_source.articles | length > 0 %}
                                 <td>Yes</td>
-                            {% elif data_source.task_id %}
+                            {% elif data_source.task.task_id %}
                                 <td>In progress</td>
                             {% else %}
                                 <td>No</td>

@@ -34,7 +34,7 @@ def cached_view(template, view_name, task, args, kwargs):
 
     if cache.task.status == Status.SUCCESS:
         flash(Markup('<a href="?refresh=1">This page has been cached. Click here to regenerate</a>'), 'info')
-        return render_template(template, **cache.data)
+        return render_template(template, **cache.data.get())
 
     if cache.task.status == Status.STARTED:
         return render_template(

@@ -338,7 +338,7 @@ class PipelineComparator:
         predictions = []
         for idx, pipeline in enumerate(pipelines):
             predictions.append(
-                pipeline.sk_pipeline.predict([article.raw_text for article in articles]))
+                pipeline.sk_pipeline.get().predict([article.raw_text for article in articles]))
         # transpose so first axis is now article e.g. predictions[0][1] is article 0, pipeline 1
         return numpy.array(predictions).transpose()
 

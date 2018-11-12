@@ -6,14 +6,11 @@ from sklearn.metrics import confusion_matrix
 
 from newsgac.common.fields import ObjectField
 from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
-from newsgac.data_sources.models import DataSource
 from newsgac.learners import LearnerSVC
 from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
-from newsgac.users.models import User
-from newsgac.tasks.models import TrackedTask
 
 
 class Result(EmbeddedMongoModel):
@@ -56,6 +53,10 @@ class Result(EmbeddedMongoModel):
 
 
 class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
+    from newsgac.users.models import User
+    from newsgac.data_sources.models import DataSource
+    from newsgac.tasks.models import TrackedTask
+
     user = fields.ReferenceField(User, required=True)
     display_title = fields.CharField(required=True)
     created = fields.DateTimeField()
@@ -69,7 +70,6 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     learner = fields.EmbeddedDocumentField(Learner)
     sk_pipeline = ObjectField()
     result = fields.EmbeddedDocumentField(Result)
-    task_id = fields.CharField()
     grid_search_result = ObjectField()
 
     task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
@@ -90,3 +90,11 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
 
     def get_sk_pipeline(self):
         return get_sk_pipeline(self)
+
+    def delete(self):
+        from newsgac.ace import ACE
+        # delete this pipeline from related ace runs
+        for ace in ACE.objects.raw({'pipelines': {'$in': [self.pk]}}):
+            ace.delete_pipeline(self)
+
+        super(Pipeline, self).delete()

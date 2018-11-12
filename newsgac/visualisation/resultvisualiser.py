@@ -37,7 +37,7 @@ class ResultVisualiser(object):
 
     @staticmethod
     def retrieveHeatMapfromResult(normalisation_flag, result, title="", ds_param = 1):
-        confusion_matrix = result.confusion_matrix
+        confusion_matrix = result.confusion_matrix.get()
         cm_normalised = normalise_confusion_matrix(confusion_matrix)
         genre_names = DataUtils.genre_labels
         # print title

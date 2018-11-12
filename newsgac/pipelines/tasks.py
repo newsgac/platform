@@ -9,7 +9,6 @@ from newsgac.tasks.models import Status
 from newsgac.pipelines.grid_search import run_grid_search
 from newsgac.pipelines.models import Pipeline
 from newsgac.pipelines.run import run_pipeline
-from newsgac.learners.factory import learners, create_learner
 
 
 def run_pipeline_task_impl(pipeline_id):
@@ -22,7 +21,7 @@ def run_pipeline_task_impl(pipeline_id):
         pipeline.save()
     except Exception as e:
         t, v, tb = sys.exc_info()
-        pipeline.task.status = Status.FAILURE
+        pipeline.refresh_from_db()
         pipeline.task.set_failure(e)
         pipeline.save()
         raise t, v, tb

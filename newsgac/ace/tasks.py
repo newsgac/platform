@@ -25,7 +25,7 @@ def get_predictions(articles, pipelines):
     predictions = []
     for idx, pipeline in enumerate(pipelines):
         predictions.append(
-            pipeline.sk_pipeline.predict([article.raw_text for article in articles]))
+            pipeline.sk_pipeline.get().predict([article.raw_text for article in articles]))
     # transpose so first axis is now article e.g. predictions[0][1] is article 0, pipeline 1
     return np.array(predictions).transpose()
 
@@ -129,10 +129,12 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
     article_number = int(article_number)
     article = ace.data_source.articles[article_number]
 
-    prediction = pipeline.sk_pipeline.predict([article.raw_text])[0]
+    sk_pipeline = pipeline.sk_pipeline.get()
+
+    prediction = sk_pipeline.predict([article.raw_text])[0]
 
     # do not modify pipeline.sk_pipeline
-    skp = deepcopy(pipeline.sk_pipeline)
+    skp = deepcopy(sk_pipeline)
     model = skp.steps.pop()[1]
 
     used_classes = model.classes_
@@ -147,13 +149,13 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
             article.raw_text,
             prediction,
             used_class_names,
-            pipeline.sk_pipeline.predict_proba
+            sk_pipeline.predict_proba
         ).as_html()
 
         # anchor_html = get_anchor_text_explanation(
         #     skp,
         #     article.raw_text,
-        #     pipeline.sk_pipeline.predict,
+        #     sk_pipeline.predict,
         #     used_class_names
         # ).as_html()
 

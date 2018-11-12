@@ -64,10 +64,10 @@ def new_save():
     ace.data_source = DataSource.objects.get({'_id': ObjectId(request.form['data_source'])})
     ace.pipelines = [Pipeline.objects.get({'_id': ObjectId(pipeline_id)}) for pipeline_id in request.form.getlist('pipelines[]')]
     ace.user = User(email=session['email'])
-    ace.display_title = ace.data_source.display_title + ' (' + ', '.join(p.display_title for p in ace.pipelines) + ')'
+    ace.display_title = ace.get_display_title()
     ace.save()
     task = run_ace.delay(str(ace._id))
-    ace.task_id = task.task_id
+    ace.task.task_id = task.task_id
     ace.save()
     return redirect(url_for('ace.overview'))
 
@@ -79,7 +79,7 @@ def view(ace_id):
     pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
     articles = [{
         'raw_text': article.raw_text.encode('utf-8'),
-        'predictions': [genre_codes[p] for p in ace.predictions[idx]],
+        'predictions': [genre_codes[p] for p in ace.predictions.get()[idx]],
         'label': genre_codes[article.label],
     } for idx, article in enumerate(ace.data_source.articles)]
 

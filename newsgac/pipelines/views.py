@@ -131,7 +131,7 @@ def new_save():
             task = run_grid_search_task.delay(str(pipeline._id))
         else:
             task = run_pipeline_task.delay(str(pipeline._id))
-        pipeline.task_id = task.task_id
+        pipeline.task.task_id = task.task_id
         pipeline.save()
         return Response(
             model_to_json(pipeline),
