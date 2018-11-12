@@ -1,0 +1,43 @@
+<div class="tab-pane active">
+    <div class="step33">
+        <h5><strong>Machine learning</strong></h5>
+        <hr>
+
+        <div class="row mar_ned"></div>
+            <div class="row mar_ned"></div>
+            <div class="row mar_ned"></div>
+
+            <div class="row mar_ned">
+                <div class="col-md-4">
+                    <p align="right" class="center-align-pad">
+                        <strong>Machine learning</strong>
+                        <span class="help-block"><i>The machine learning algorithm to train.</i></span>
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="btn-group">
+                        <div
+                                v-for="(value, key) in learners"
+                                @click="setLearner(key)"
+                                :class="['btn', 'btn-default', {active: model.learner._tag === key}]"
+                        >
+                            [[ value.name ]]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mar_ned"></div>
+
+            <div v-if="learnerParams.length > 0">
+                <strong>Parameters</strong>
+            </div>
+            <div v-for="param in learnerParams">
+                <parameter-field
+                    v-model="model.learner.parameters[param.attname]"
+                    :param="param"
+                ></parameter-field>
+                <div class="row mar_ned"></div>
+            </div>
+    </div>
+</div>

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Results for Pipeline:
+            <a href="{{ url_for('pipelines.visualise_results', pipeline_id = pipeline._id | string) }}">
+                <small> {{ pipeline.display_title }} </small>
+            </a>
+        </h1>
+    </div>
+
+    {% if results_eval is defined and results_model is defined %}
+
+    <div class="row text-center">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover text-center">
+            <thead>
+                <tr>
+                    <th class="text-center col-md-3">Metric</th>
+                    <th class="text-center col-md-3">Weighted</th>
+                    <th class="text-center col-md-3">Micro (Global average)</th>
+                    <th class="text-center col-md-3">Macro (Class-based average)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Precision (Evaluation)</td>
+                    <td>{{ results_eval.precision_weighted|safe }}</td>
+                    <td>{{ results_eval.precision_micro|safe }}</td>
+                    <td>{{ results_eval.precision_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td>Recall (Evaluation)</td>
+                    <td>{{ results_eval.recall_weighted|safe }}</td>
+                    <td>{{ results_eval.recall_micro|safe }}</td>
+                    <td>{{ results_eval.recall_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td>F1 Score (Evaluation)</td>
+                    <td>{{ results_eval.fmeasure_weighted|safe }}</td>
+                    <td>{{ results_eval.fmeasure_micro|safe }}</td>
+                    <td>{{ results_eval.fmeasure_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td>Precision (Model)</td>
+                    <td>{{ results_model.precision_weighted|safe }}</td>
+                    <td>{{ results_model.precision_micro|safe }}</td>
+                    <td>{{ results_model.precision_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td>Recall (Model)</td>
+                    <td>{{ results_model.recall_weighted|safe }}</td>
+                    <td>{{ results_model.recall_micro|safe }}</td>
+                    <td>{{ results_model.recall_macro|safe }}</td>
+                </tr>
+
+                <tr>
+                    <td>F1 Score (Model)</td>
+                    <td>{{ results_model.fmeasure_weighted|safe }}</td>
+                    <td>{{ results_model.fmeasure_micro|safe }}</td>
+                    <td>{{ results_model.fmeasure_macro|safe }}</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+    <br/>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>10-fold Cross Validation Accuracy (+/- Standard Deviation)</h4>
+            <span class="help-block"><i>Uses 10 consecutive folds to split the data.</i></span>
+        </div>
+        <div class="col-md-2">
+            <h4> {{ results_eval.accuracy|safe }} (+/- {{ results_eval.std|safe }}) </h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Test Accuracy</h4>
+            <span class="help-block"><i>Uses 10% of the dataset to test on unseen instances.</i></span>
+        </div>
+        <div class="col-md-2">
+            <h4> {{ results_model.accuracy|safe }} </h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Cohen's Kappa (Evaluation)</h4>
+            <span class="help-block"><i>Gives a better indicator of how the classifier performed across all instances. Accuracy can be skewed if the class distribution is similarly skewed. </i></span>
+        </div>
+        <div class="col-md-2">
+            <h4> {{ results_eval.cohens_kappa|safe }} </h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Cohen's Kappa (Model)</h4>
+            <span class="help-block"><i>Gives a better indicator of how the classifier performed across all instances. Accuracy can be skewed if the class distribution is similarly skewed. </i></span>
+        </div>
+        <div class="col-md-2">
+            <h4> {{ results_model.cohens_kappa|safe }} </h4>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <br/><br/>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Confusion Matrix for Evaluation</h4>
+
+            {% for index in range(0, results_eval.genre_names|length) %}
+                <span class="help-block">
+                    <i> {{ results_eval.confusion_matrix[0:][index] | sum }} instances for {{ results_eval.genre_names[index] }} <br/></i>
+                </span>
+            {% endfor %}
+            <span class="help-block">
+                    <i>Total : {{ results_eval.y_pred | length }} <br/></i>
+            </span>
+
+        </div>
+        <div class="col-md-6">
+            <h4>Confusion Matrix for Model</h4>
+
+            {% for index in range(0, results_model.genre_names|length) %}
+                <span class="help-block">
+                    <i> {{ results_model.confusion_matrix[0:][index] | sum }} instances for {{ results_model.genre_names[index] }} <br/></i>
+                </span>
+            {% endfor %}
+            <span class="help-block">
+                    <i>Total : {{ results_model.y_pred | length }} <br/></i>
+            </span>
+
+        </div>
+    </div>
+
+    <br/><br/>
+
+    {% if plot_div is defined %}
+    <div class="row">
+        {{ plot_div|safe }}
+
+    </div>
+    {% endif %}
+
+{% endblock %}

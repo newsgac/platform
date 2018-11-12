@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h1>Configure Pipeline</h1>
+    </div>
+    <div class="row" id="vue-root">
+        <form role="form" id="data_source_config" method="post">
+            <div class="tab-content">
+                <div class="tab-pane active">
+                    <div class="step33">
+                        <h5><strong>Title & Source</strong></h5>
+                        <hr>
+                        <div class="row mar_ned"></div>
+                        <div class="row mar_ned">
+                            <div class="col-md-3">
+                                <p align="right" class="center-align-pad">
+                                    <strong>Display title</strong>
+                                </p>
+                            </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-8">
+                                <input v-model="model.display_title"
+                                       title="Display title"
+                                       type="text"
+                                       name="display_title"
+                                />
+                                <span class="help-block">
+                                    <i>The display title of this pre-processing configuration.</i>
+                                </span>
+                            </div>
+                        </div>
+                        {% include "pipelines/data_source.html" with context %}
+                    </div>
+                </div>
+
+                {% include "pipelines/pre-processing.html" with context %}
+                {% include "pipelines/nlp.html" with context %}
+                {% include "pipelines/learning.html" with context %}
+
+                <div class="alert alert-danger" role="alert" v-if="Object.keys(errors).length > 0">
+                    <div v-for="field in errors">
+                        <strong>[[field.fieldName]]</strong>
+                        <ul>
+                            <li v-for="fieldError in field.errors">[[fieldError]]</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <ul class="list-inline pull-right">
+                    <li>
+                        <button @click="save()" type="button" class="btn btn-success">Save</button>
+                    </li>
+                </ul>
+
+                <div class="clearfix"></div>
+            </div>
+        </form>
+    </div>
+    <script>
+        const data = {
+            nlp_tools: {{ nlp_tools|safe }},
+            model: {{ pipeline|safe }},
+            learners: {{ learners|safe }},
+            data_sources: {{ data_sources|safe }},
+            saveUrl: "{{ save_url|safe }}",
+            pipelinesUrl: "{{ pipelines_url|safe }}"
+        };
+
+        {% include "pipelines/scripts.js" %}
+    </script>
+{% endblock %}

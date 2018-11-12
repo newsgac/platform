@@ -1,0 +1,52 @@
+<table id="explanations_table" cellspacing="0" class="table table-bordered table-hover display" width="100%">
+    <tfoot>
+        <tr>
+            <th>Article #</th>
+            <th>Pipeline</th>
+            <th>Predicted Genre</th>
+            <th>True Genre</th>
+            <th>Explanation</th>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+    $(document).ready(function() {
+        const data = [];
+        articles.forEach((article, articleKey) => {
+            pipelines.forEach((pipeline, pipelineKey) => {
+                const limeURLTemplate = "{{ url_for(
+                    'ace.explain_article',
+                    ace_id='ace_id',
+                    pipeline_id='pipeline_id',
+                    article_number='article_number'
+                )}}";
+                const limeURL = limeURLTemplate
+                    .replace('ace_id', ace_id)
+                    .replace('pipeline_id', pipeline._id)
+                    .replace('article_number', articleKey);
+
+                data.push([
+                 `<span title="${article.raw_text}">${articleKey+1}</span>`,
+                 pipeline.display_title,
+                 article.predictions[pipelineKey],
+                 article.label,
+                 `<a href="${limeURL}" target="_blank" > Click for explanation </a>`,
+                ]);
+            });
+        });
+        $('#explanations_table').DataTable( {
+            data,
+            columns: [
+                { title: "Article #" },
+                { title: "Pipeline" },
+                { title: "Predicted Genre" },
+                { title: "True Genre" },
+                { title: "Explanation" },
+            ],
+            initComplete: addSearchFields,
+            stateSave: false,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        } );
+    });
+</script>

@@ -1,0 +1,75 @@
+<div class="tab-pane active" role="tabpanel" id="step1">
+    <div class="step33">
+        <h5><strong>Pre-processing</strong></h5>
+        <hr>
+
+        <div class="row mar_ned"></div>
+
+        <div class="details_div_data">
+            <div class="row mar_ned">
+                <div class="col-md-3">
+                    <p align="right" class="center-align-pad">
+                        <strong>Stop-words removal</strong>
+                    </p>
+                </div>
+                <div class="col-md-1">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" checked name="sw_removal" id="sw_removal"
+                                   v-model="model.sw_removal">
+                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <span class="help-block"><i>The most common words that are not specific to the different classes are removed.</i></span>
+                </div>
+            </div>
+            <div class="row mar_ned"></div>
+
+            <div class="row mar_ned">
+                <div class="col-md-3">
+                    <p align="right" class="center-align-pad">
+                        <strong>Lemmatization</strong>
+                    </p>
+                </div>
+                <div class="col-md-1">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" checked name="lemmatization"
+                                   id="lemmatization" v-model="model.lemmatization">
+                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <span class="help-block"><i>The process of removing inflectional endings of a word in order to return the base or dictionary form, which is known as the lemma.</i></span>
+                </div>
+            </div>
+
+            <div class="row mar_ned">
+                <div class="col-md-3">
+                    <p align="right" class="center-align-pad">
+                        <strong>Remove Quotes</strong>
+                    </p>
+                </div>
+                <div class="col-md-1">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" checked name="quote_removal"
+                                   id="quote_removal" v-model="model.quote_removal">
+                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <span class="help-block"><i>Remove quotes.</i></span>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+</div>

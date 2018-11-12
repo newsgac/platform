@@ -1,29 +1,131 @@
 version: "3"
 
+networks:
+    newsgac-net:
+        driver: bridge
+
 services:
     frog:
+        hostname: proycon/lamachine
+        image: proycon/lamachine:latest
+        command: bash -c "frog -S 12345"
+        networks:
+            - newsgac-net
         env_file:
             - .env.prod
 
-    rabbit:
+    redis:
+        hostname: redis
+        image: redis:latest
+        restart: on-failure
+        networks:
+            - newsgac-net
         env_file:
             - .env.prod
 
     database:
+        hostname: mongo
+        image: mongo:latest
+        networks:
+            - newsgac-net
         env_file:
             - .env.prod
         volumes:
             - /export/scratch2/home/aysenur/newsgac_db/:/data/db
 
-    worker:
+    worker: &worker-base
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/worker
+        depends_on:
+            - redis
+            - database
+        restart: on-failure
+        networks:
+            - newsgac-net
+        hostname: celeryworker
+        volumes:
+            - ./newsgac:/newsgac/newsgac
         env_file:
             - .env.prod
+        command: celery -A newsgac.tasks.celery_app worker -l info --concurrency 40 -n worker@%h
+
+
+    frogworker:
+        <<: *worker-base
+        image: newsgac/frogworker
+        depends_on:
+            - redis
+            - database
+            - frog
+        env_file:
+            - .env.prod
+        command: celery -A newsgac.tasks.celery_app worker -l info --concurrency 3 -n frogworker@%h -Q frog
+
 
     web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/web
+        links:
+            - worker
+            - redis
+            - database
+            - frog
+        depends_on:
+            - database
+            - worker
+            - frog
+        restart: on-failure
+        networks:
+            - newsgac-net
+        command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "80", "--bind", "0.0.0.0:5050", "--access-logfile", "-", "--error-logfile", "-", "newsgac.app:app"]
         env_file:
             - .env.prod
+
+    nginx:
+        build:
+            context: nginx
+            dockerfile: Dockerfile
+        image: newsgac/nginx
+        depends_on:
+            - web
+            - jupyterhub
+        restart: on-failure
+        networks:
+            newsgac-net:
+                aliases:
+                    - nginx
+                    - http
         ports:
-            - "5050:5000"
-        command: ["gunicorn", "--workers", "10", "--max-requests", "10", "--timeout", "30", "--bind", "0.0.0.0:5000", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
+            - "5050:80"
 
 
+    jupyterhub:
+        build:
+            context: .
+            dockerfile: jupyter/Dockerfile
+        image: newsgac/jupyterhub
+        volumes:
+            - /export/scratch2/home/aysenur/hub_notebooks:/notebooks
+        depends_on:
+            - redis
+            - database
+            - worker
+            - frog
+        restart: on-failure
+        networks:
+            - newsgac-net
+        env_file:
+            - .env.prod
+
+    ngrok:
+        networks:
+            - newsgac-net
+        depends_on:
+            - nginx
+        image: wernight/ngrok
+        env_file:
+            - .env.prod

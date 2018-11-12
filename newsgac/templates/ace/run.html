@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h1>Analyse - Compare - Explain Pipelines</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            {% include('ace/table_1.html') with context %}
+        </div>
+    </div>
+
+    <br/><br/>
+
+    <div class="row">
+        <div class="col-xs-12">
+            {% include('ace/table_2.html') with context %}
+        </div>
+    </div>
+
+    <br/><br/>
+
+    <div class="row">
+        <div class="col-xs-12">
+            {% include('ace/table_3.html') with context %}
+        </div>
+    </div>
+
+    <script>
+        function addSearchFields() {
+              // Setup - add a text input to each footer cell
+             $(this).find('tfoot th').each( function () {
+                 var title = $(this).text();
+                 $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+             } );
+             this.api().columns().every( function () {
+                 var that = this;
+                 $( 'input', this.footer() ).on( 'keyup change', function () {
+                     if ( that.search() !== this.value ) {
+                         that
+                             .search( this.value )
+                             .draw();
+                     }
+                 } );
+             });
+        }
+        const articles = {{ articles|safe }};
+        const pipelines = {{ pipelines|tojson|safe }};
+        const ace_id = '{{ ace_id }}';
+    </script>
+
+{% endblock %}

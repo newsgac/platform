@@ -1,0 +1,41 @@
+<div class="tab-pane active">
+    <div class="step33">
+        <h5><strong>NLP tools</strong></h5>
+        <hr>
+
+        <div class="row mar_ned"></div>
+            <div class="row mar_ned"></div>
+            <div class="row mar_ned"></div>
+
+            <div class="row mar_ned">
+                <div class="col-md-4">
+                    <p align="right" class="center-align-pad">
+                        <strong>Natural language processing tool for feature extraction</strong>
+                        <span class="help-block"><i>The tool to be used for processing sentences. Frog and Spacy uses manually curated features whereas TF-IDF uses raw words as features.</i></span>
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="btn-group">
+                        <div
+                                v-for="(value, key) in nlp_tools"
+                                @click="setNlpTool(key)"
+                                :class="['btn', 'btn-default', {active: model.nlp_tool._tag === key}]"
+                        >
+                            [[ value.name ]]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mar_ned"></div>
+
+            <div v-for="param in nlpParams">
+                <hr>
+                <parameter-field
+                    v-model="model.nlp_tool.parameters[param.attname]"
+                    :param="param"
+                ></parameter-field>
+                <div class="row mar_ned"></div>
+            </div>
+    </div>
+</div>

@@ -1,14 +1,19 @@
-# This is a sample build configuration for Python.
-# Check our guides at https://confluence.atlassian.com/x/x4UWN for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
-image: python:3.5.1
+image: docker:stable
 
 pipelines:
   default:
     - step:
+        services:
+          - docker
         caches:
-          - pip
-        script: # Modify the commands below to build your repository.
-          - pip install -r requirements.txt
+          - docker
+        script:
+          - chmod a+x ci/dependencies.sh
+          - ci/dependencies.sh
+          - docker-compose -f docker-compose_test.yml build test
+          - docker-compose -f docker-compose_test.yml run test
+          - docker-compose -f docker-compose_test.yml down
+definitions:
+  services:
+    docker:
+      memory: 3072

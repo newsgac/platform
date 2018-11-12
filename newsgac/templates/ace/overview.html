@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "task.html" import task %}
+{% block content %}
+
+    <div class="page-header">
+        <h1>Analyse - Compare - Explain Pipelines</h1>
+    </div>
+
+    {% if aces|length > 0 %}
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="aces_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                    <!--<caption class="text-center">DataTables</caption>-->
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Time of creation</th>
+                        <th>Data source</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for ace in aces %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('ace.view', ace_id=ace.id) }}">
+                                    {{ ace.display_title }}
+                                </a>
+                            </td>
+                            <td>{{ ace.created|datetime }}</td>
+                            <td>{{ ace.data_source.display_title }}</td>
+                            <td>
+                                {{ task(ace.task) }}
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   data-toggle="confirmation"
+                                   data-popout="true"
+                                   data-title="This action cannot be undone. Are you sure?"
+                                   href="{{ url_for('ace.delete', ace_id = ace.id) }}"
+                                   data-btn-ok-label="Yes, delete"
+                                   data-btn-cancel-label="No, cancel"
+                                   data-original-title=""
+                                   title="">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    Delete
+                                </a>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    <form role="form" action="{{ url_for('ace.new_save') }}" method="post" id="form_ace">
+        <div>
+            <div class="row">
+
+                <div class="col-md-4 control-group">
+                    <label>Select Data Source</label>
+                </div>
+                <div class="col-md-7">
+                    <select name="data_source"
+                            class="selectpicker show-tick"
+                            data-width="85%"
+                            data-actions-box="true"
+                    >
+                        {% for data_source in data_sources %}
+                        {% if data_source.articles %}
+                            <option value="{{ data_source.pk }}">{{ data_source.display_title }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+
+                </div>
+                <div class="col-md-4 control-group">
+                    <label>Select Pipelines</label>
+                </div>
+                <div class="col-md-7" id="datasource_div">
+                    <select multiple name="pipelines[]"
+                            class="selectpicker show-tick"
+                            data-width="85%"
+                            data-actions-box="true"
+                    >
+                        {% for pipeline in pipelines %}
+                            <option value="{{ pipeline.pk }}">{{ pipeline.display_title }}</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+
+                <div class="col-md-1 control-group">
+                    <button type="submit" form="form_ace" class="btn btn-success">Let's go!</button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <br/><br/>
+
+{% endblock %}

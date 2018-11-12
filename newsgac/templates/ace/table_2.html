@@ -1,0 +1,66 @@
+<table id="combinations_table" cellspacing="0" class="table table-bordered table-hover display" width="100%">
+    <tfoot>
+        <tr>
+            <th>Mutually Agreeing Pipelines</th>
+            <th>Predicted Genre</th>
+            <th>Number of Articles</th>
+            <th>Articles</th>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+    $(document).ready(function() {
+        combinations = [];
+        window.combinations = combinations;
+
+        articles.forEach(article => {
+            const uniquePredictions = article.predictions.filter((v, i, a) => a.indexOf(v) === i);
+            uniquePredictions.forEach(prediction => {
+                // construct a key for the table row, consists of pipeline ids, prediction
+                const agreeingPipelineKeysPrediction = [
+                    ...Object.keys(_.pickBy(article.predictions, p => p===prediction)),
+                    prediction
+                ];
+
+                let combination = combinations.find(combi => _.isEqual(combi.key, agreeingPipelineKeysPrediction));
+                if (!combination) {
+                    combination = { articles: [] };
+                    combinations.push(combination);
+                }
+
+                combination.key = agreeingPipelineKeysPrediction;
+                combination.articles.push(article);
+            });
+        });
+
+        const data = [];
+        combinations.forEach((combi) => {
+            const prediction = combi.key.pop();
+            data.push([
+                combi.key.map(i => `
+                    <a href="/pipelines/${pipelines[i]._id}/results"> ${pipelines[i].display_title} </a>
+                `),
+                prediction,
+                combi.articles.length,
+                combi.articles.map((a,i) => `
+                    <a class="${prediction === a.label ? 'correct':'wrong'}">[${articles.indexOf(a)+1}]</a>
+                `).join(' '),
+            ]);
+        });
+
+
+        $('#combinations_table').DataTable( {
+            data,
+            columns: [
+                { title: "Mutually Agreeing Pipelines #" },
+                { title: "Predicted Genre" },
+                { title: "Number of Articles" },
+                { title: "Articles" },
+            ],
+            initComplete: addSearchFields,
+            stateSave: false,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+         } );
+    });
+</script>

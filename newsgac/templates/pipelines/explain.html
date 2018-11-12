@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h1>Explanation for Article {{ article_number }} using {{ pipeline.display_title }}</h1>
+    </div>
+    <div class="row">
+        <p>{{ pipeline.display_title }} predicts <strong>{{ prediction|code_to_label}}</strong>.
+            Actual genre is <strong>{{ article.label|code_to_label }}</strong>.</p>
+    </div>
+    <div class="row">
+        {% if exp1_html is defined %}
+            {{ exp1_html|indent(4)|safe }}
+        {% else %}
+            <p>There is no data to show.</p>
+        {% endif %}
+    </div>
+    <div class="row">
+        {% if exp2_html is defined %}
+            {{ exp2_html|indent(4)|safe }}
+        {% else %}
+            <p>There is no data to show.</p>
+        {% endif %}
+    </div>
+    <div class="row well">
+        {{ article.raw_text }}
+    </div>
+
+{% endblock %}

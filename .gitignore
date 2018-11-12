@@ -2,10 +2,19 @@
 
 # Python build remnants
 *.pyc
-
+.pytest_cache
 # file system nonsense
 *.DS_Store
 
 # project specific
 .idea
-flask/src/test/*
+src/test/*
+*/**/node_modules
+
+.ipynb_checkpoints
+
+data
+hub_notebooks
+dist
+build
+newsgac.egg-info

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% from "task.html" import task %}
+{% block content %}
+    {% if pipelines|length == 0 %}
+        <div class="page-header">
+            <h1>Pipeline configurations</h1>
+            <a class="btn btn-success" href="{{ url_for('pipelines.new') }}">
+                <span class="glyphicon glyphicon-plus "></span>
+                New
+            </a>
+        </div>
+        <p>
+            <i>There are no pipelines to view.</i>
+        </p>
+    {% else %}
+        <div class="page-header">
+            <h1>Pipelines</h1>
+            <a class="btn btn-success" href="{{ url_for('pipelines.new') }}">
+                <span class="glyphicon glyphicon-plus "></span>
+                New
+            </a>
+            {% if processed_pipelines|length > 0 %}
+                <a class="btn btn-info disabled" href="{{ url_for('pipelines.sources_overview') }}">
+                    <span class="glyphicon glyphicon-eye-open "></span>
+                    Overview
+                </a>
+            {% endif %}
+            <a class="btn btn-danger"
+               data-toggle="confirmation"
+               data-popout="true"
+               data-title="This action cannot be undone. Are you sure?"
+               href="{{ url_for('pipelines.delete_all') }}"
+               data-btn-ok-label="Yes, delete" data-btn-cancel-label="No, cancel"
+            >
+                <span class="glyphicon glyphicon-trash"></span>
+                Delete All
+            </a>
+        </div>
+
+        <!--<div class="container">-->
+            <div class="row">
+                <div class="col-xs-12">
+                    <table id="pipelines_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                    <!--<caption class="text-center">DataTables</caption>-->
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Time of creation</th>
+                            <th>Data source</th>
+                            <th>NLP Tool</th>
+                            <th>Learner</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for pipeline in pipelines %}
+
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('pipelines.visualise_results', pipeline_id=pipeline.id) }}">
+                                    {{ pipeline.display_title }}
+                                </a>
+                            </td>
+                            <td>{{ pipeline.created|datetime }}</td>
+                            <td>{{ pipeline.data_source.display_title }}</td>
+                            <td>{{ pipeline.nlp_tool.name }}</td>
+                            <td>{{ pipeline.learner.name }}</td>
+                            <td>
+                                {{ task(pipeline.task) }}
+                            </td>
+                            <td>
+                                <a class="btn btn-primary"
+                                   href="{{ url_for('pipelines.new', from_pipeline_id = pipeline.id) }}">
+                                        <span class="glyphicon glyphicon-file"></span>
+                                    Copy
+                                </a>
+                                <a class="btn btn-danger"
+                                   data-toggle="confirmation"
+                                   data-popout="true"
+                                   data-title="This action cannot be undone. Are you sure?"
+                                   href="{{ url_for('pipelines.delete', pipeline_id = pipeline.id) }}"
+                                   data-btn-ok-label="Yes, delete"
+                                   data-btn-cancel-label="No, cancel"
+                                   data-original-title=""
+                                   title="">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    Delete
+                                </a>
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    </table>
+                </div>
+            </div>
+        <!--</div>-->
+
+    {% endif %}
+{% endblock %}
+

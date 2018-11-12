@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NEWSGAC DEV</title>
+
+    {% include 'html_dependencies.html' %}
+
+    {% if js_resources is defined %}
+        {{ js_resources|indent(4)|safe }}
+    {% endif %}
+
+    {% if css_resources is defined %}
+        {{ css_resources|indent(4)|safe }}
+    {% endif %}
+
+    {% if plot_scripts is defined %}
+        {% for plot_script in plot_scripts %}
+            {{ plot_script|indent(4)|safe }}
+        {% endfor %}
+    {% elif (plot_script is defined and plot_script is not none)%}
+        {{ plot_script|indent(4)|safe }}
+    {% endif %}
+
+
+    {% for js in bokeh_js_css.js_files %}
+        <script src="{{ js }}"></script>
+    {% endfor %}
+    {% for css in bokeh_js_css.css_files %}
+        <link rel="stylesheet" type="text/css" href="{{ css }}">
+    {% endfor %}
+
+
+</head>
+<body>
+
+{% include('menu.html') with context %}
+
+{% block message_content %}
+
+    <div class="container" style="max-width: 60%">
+        {% with messages = get_flashed_messages(with_categories = true) or [] %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Error! </strong>{{ message }}
+                    </div>
+                {% elif category == 'success' %}
+                    <div class="alert alert-success alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Success! </strong>{{ message }}
+                    </div>
+                {% elif category == 'warning' %}
+                    <div class="alert alert-warning alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Warning! </strong>{{ message }}
+                    </div>
+                {% elif category == 'info' %}
+                    <div class="alert alert-info alert-dismissible fade in">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">×</span>
+                        </button>
+                        <strong>Info! </strong>{{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    <div class="content">
+        {% block content %} {% endblock %}
+    </div>
+{% endblock %}
+
+<div id="tasks_root"></div>
+</body>
+</html>
