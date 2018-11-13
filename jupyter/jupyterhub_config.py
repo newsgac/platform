@@ -508,8 +508,8 @@ c.Spawner.debug = False
 #    navigate the whole filesystem from their notebook server, but still start in their home directory.
 #  - Start with `/notebooks` instead of `/tree` if `default_url` points to a notebook instead of a directory.
 #  - You can set this to `/lab` to have JupyterLab start by default, rather than Jupyter Notebook.
-c.Spawner.default_url = ''
-
+#c.Spawner.default_url = ''
+c.Spawner.default_url = '/lab'
 ## Disable per-user configuration of single-user servers.
 #
 #  When starting the user's single-user server, any config file found in the
