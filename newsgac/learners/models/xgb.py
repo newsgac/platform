@@ -35,6 +35,32 @@ class Parameters(EmbeddedMongoModel):
     random_state = fields.IntegerField(required=True, default=42)
     random_state.description = 'Enter an integer for a random seed.'
 
+    gamma = fields.FloatField(required=False, default=0)
+    gamma.description = 'Minimum loss reduction required to make a further partition on a leaf node of the tree.'
+
+    min_child_weight = fields.IntegerField(required=False, default=1)
+    min_child_weight.description = 'Minimum sum of instance weight needed in a child.'
+
+    colsample_bytree = fields.FloatField(required=False, default=1)
+    colsample_bytree.description = 'Subsample ratio of columns when constructing each tree.'
+
+    subsample = fields.FloatField(required=False, default=1)
+    subsample.description = 'Subsample ratio of the training instance.'
+
+    importance_type = fields.CharField(
+        verbose_name="Importance type",
+        required=False,
+        default='gain',
+        choices=[
+            ('gain', 'Gain'),
+            ('weight', 'Weight'),
+            ('cover', 'Cover'),
+            ('total_gain', 'Total gain'),
+            ('total_cover', 'Total cover'),
+        ]
+    )
+    importance_type.description = 'The feature importance type for the feature_importances_ property. Only defined for gbtree booster.'
+
 class LearnerXGB(Learner):
     name = 'XGBoost'
     tag = 'xgb'
@@ -63,20 +89,22 @@ class LearnerXGB(Learner):
             max_depth=self.transform_0_to_none(self.parameters.max_depth),
             learning_rate=self.parameters.learning_rate,
             n_estimators=self.parameters.n_estimators,
+            booster=self.parameters.booster,
+            gamma=self.parameters.gamma,
+            min_child_weight=self.parameters.min_child_weight,
+            colsample_bytree=self.parameters.colsample_bytree,
+            subsample=self.parameters.subsample,
+            importance_type=self.parameters.importance_type,
+            random_state=self.parameters.random_state,
+
             silent=True,
-            objective="binary:logistic",
-            booster='gbtree',
+            objective="multi:softprob",
             n_jobs=config.n_parallel_jobs,
-            gamma=0,
-            min_child_weight=1,
             max_delta_step=0,
-            subsample=1,
-            colsample_bytree=1,
             colsample_bylevel=1,
             reg_alpha=0,
             reg_lambda=1,
             scale_pos_weight=1,
             base_score=0.5,
-            random_state=self.parameters.random_state,
             missing=None,
         )
