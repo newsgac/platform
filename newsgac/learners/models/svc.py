@@ -22,6 +22,9 @@ class Parameters(EmbeddedMongoModel):
     penalty_parameter_c = fields.FloatField(required=True, default=1.0)
     penalty_parameter_c.description = 'Penalty parameter C of the error term.'
 
+    gamma = fields.FloatField(required=True, default=1.0)
+    gamma.description = 'Kernel coefficient for non-linear kernels.'
+
     random_state = fields.IntegerField(required=True, default=42)
     random_state.description = 'Enter an integer for a random seed.'
 
@@ -36,11 +39,11 @@ class LearnerSVC(Learner):
             kernel=self.parameters.kernel,
             C=self.parameters.penalty_parameter_c,
             random_state=self.parameters.random_state,
+            gamma=self.parameters.gamma,
             decision_function_shape='ovr',
             # class_weight=self.class_weight,
             class_weight='balanced',
             probability=True,
-            gamma=0.1
         )
 
     def get_features_weights(self):
