@@ -36,7 +36,8 @@ class ACE(CreatedUpdated, DeleteObjectsMixin, MongoModel):
             self.delete()
         else:
             # rerun...
-            self.predictions.delete()
+            # self.predictions.delete()
+            self.predictions = ObjectField(blank=True)
             self.display_title = self.get_display_title()
             self.task = TrackedTask()
             self.save()
