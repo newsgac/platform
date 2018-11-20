@@ -189,17 +189,19 @@ def visualise_results(pipeline_id):
     results_model = pipeline.result
     p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
     p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
-
+    script_f = ''
+    div_f = ''
     # TODO: check for nb
     if pipeline.learner._tag in ['svc']:
-        coefficients = classifier.coef_
-        vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
-        names = sk_pipeline.named_steps['FeatureExtraction'].get_feature_names()
-        # get vectorizer for bow
-        if vectorized_pipeline:
-            p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names, vectorized_pipeline=True )
-        else:
-            p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names)
+        if classifier.kernel == 'linear':
+            coefficients = classifier.coef_
+            vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
+            names = sk_pipeline.named_steps['FeatureExtraction'].get_feature_names()
+            # get vectorizer for bow
+            if vectorized_pipeline:
+                p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names, vectorized_pipeline=True )
+            else:
+                p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names)
     elif pipeline.learner.tag in ['xgb']:
         from pandas import DataFrame
         from collections import OrderedDict
@@ -244,10 +246,6 @@ def visualise_results(pipeline_id):
 
         p_f, script_f, div_f = ResultVisualiser.visualize_df_feature_importance(feat_importances,
                                                                                 pipeline.display_title)
-
-    else:
-        script_f = ''
-        div_f = ''
 
     plots = []
     plots.append(p)
