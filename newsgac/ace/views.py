@@ -12,6 +12,7 @@ from newsgac.data_sources.models import DataSource
 from newsgac.users.models import User
 from newsgac.users.view_decorators import requires_login
 from newsgac.ace.tasks import run_ace, explain_article_lime_task
+from newsgac.visualisation.comparison import PipelineComparator
 
 ace_blueprint = Blueprint('ace', __name__)
 
@@ -93,6 +94,19 @@ def view(ace_id):
         articles=articles
     )
 
+@ace_blueprint.route('/<string:ace_id>/comparison')
+@requires_login
+def comparison_overview(ace_id):
+    ace = ACE.objects.get({'_id': ObjectId(ace_id)})
+    comparator = PipelineComparator(ace)
+
+    script, div = comparator.performComparison()
+    script_cm, div_cm = comparator.combineHeatMapPlotsForAllPipelines()
+    script.append(script_cm)
+    div.append(div_cm)
+
+    return render_template('ace/comparison.html', ace = ace, plot_scripts=script, plot_divs=div,
+                   mimetype='text/html')
 
 @ace_blueprint.route('/<string:ace_id>/delete')
 @requires_login

@@ -22,6 +22,9 @@
         {{ plot_script|indent(4)|safe }}
     {% endif %}
 
+    {% if plot_feature_script is defined and plot_feature_script is not none %}
+        {{ plot_feature_script|indent(4)|safe }}
+    {% endif %}
 
     {% for js in bokeh_js_css.js_files %}
         <script src="{{ js }}"></script>
@@ -29,6 +32,8 @@
     {% for css in bokeh_js_css.css_files %}
         <link rel="stylesheet" type="text/css" href="{{ css }}">
     {% endfor %}
+
+    {% block head_js %}{% endblock %}
 
 
 </head>

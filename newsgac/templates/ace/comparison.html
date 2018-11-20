@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="page-header">
+        <h1>Compare Pipelines for
+            <a href="{{ url_for('ace.view', ace_id=ace.id) }}">
+                <small> {{ ace.display_title }} </small>
+            </a>
+        </h1>
+    </div>
+
+    {% if plot_divs is defined %}
+        {% for plot_div in plot_divs %}
+            <div class="row">
+                {{ plot_div|safe }}
+                <br/><br/>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+{% endblock %}

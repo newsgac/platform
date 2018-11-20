@@ -19,12 +19,6 @@
                 <span class="glyphicon glyphicon-plus "></span>
                 New
             </a>
-            {% if processed_pipelines|length > 0 %}
-                <a class="btn btn-info disabled" href="{{ url_for('pipelines.sources_overview') }}">
-                    <span class="glyphicon glyphicon-eye-open "></span>
-                    Overview
-                </a>
-            {% endif %}
             <a class="btn btn-danger"
                data-toggle="confirmation"
                data-popout="true"

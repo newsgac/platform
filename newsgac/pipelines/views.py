@@ -181,11 +181,73 @@ def delete_all():
 @pipeline_blueprint.route('/<string:pipeline_id>/results')
 @requires_login
 def visualise_results(pipeline_id):
+    # TODO: refactor
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
+    sk_pipeline = pipeline.sk_pipeline.get()
+    classifier = sk_pipeline.named_steps['Classifier']
     results_eval = pipeline.result
     results_model = pipeline.result
     p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
     p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
+
+    # TODO: check for nb
+    if pipeline.learner._tag in ['svc']:
+        coefficients = classifier.coef_
+        vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
+        names = sk_pipeline.named_steps['FeatureExtraction'].get_feature_names()
+        # get vectorizer for bow
+        if vectorized_pipeline:
+            p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names, vectorized_pipeline=True )
+        else:
+            p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names)
+    elif pipeline.learner.tag in ['xgb']:
+        from pandas import DataFrame
+        from collections import OrderedDict
+
+        feature_weights = classifier.get_booster().get_fscore()
+        sorted_fw = OrderedDict(sorted(feature_weights.items(), key=lambda t: t[0]))
+        sorted_keys = sorted(sk_pipeline.named_steps['FeatureExtraction'].get_feature_names())
+        print sorted_fw
+
+        feat_importances = []
+        for (ft, score) in sorted_fw.items():
+            index = int(ft.split("f")[1])
+            feat_importances.append({'Feature': sorted_keys[index], 'Importance': score})
+        feat_importances = DataFrame(feat_importances)
+        feat_importances = feat_importances.sort_values(
+            by='Importance', ascending=True).reset_index(drop=True)
+        # Divide the importances by the sum of all importances
+        # to get relative importances. By using relative importances
+        # the sum of all importances will equal to 1, i.e.,
+        # np.sum(feat_importances['importance']) == 1
+        feat_importances['Importance'] /= feat_importances['Importance'].sum()
+        feat_importances = feat_importances.round(3)
+
+        p_f, script_f, div_f = ResultVisualiser.visualize_df_feature_importance(feat_importances, pipeline.display_title)
+    elif pipeline.learner.tag in ['rf']:
+        from pandas import DataFrame
+        feature_weights = classifier.feature_importances_
+        sorted_keys = sorted(sk_pipeline.named_steps['FeatureExtraction'].get_feature_names())
+
+        feat_importances = []
+        for (ft, key) in zip(feature_weights, sorted_keys):
+            feat_importances.append({'Feature': key, 'Importance': ft})
+        feat_importances = DataFrame(feat_importances)
+        feat_importances = feat_importances.sort_values(
+            by='Importance', ascending=True).reset_index(drop=True)
+        # Divide the importances by the sum of all importances
+        # to get relative importances. By using relative importances
+        # the sum of all importances will equal to 1, i.e.,
+        # np.sum(feat_importances['importance']) == 1
+        feat_importances['Importance'] /= feat_importances['Importance'].sum()
+        feat_importances = feat_importances.round(3)
+
+        p_f, script_f, div_f = ResultVisualiser.visualize_df_feature_importance(feat_importances,
+                                                                                pipeline.display_title)
+
+    else:
+        script_f = None
+        div_f = None
 
     plots = []
     plots.append(p)
@@ -199,88 +261,9 @@ def visualise_results(pipeline_id):
                            results_model=results_model,
                            plot_script=script,
                            plot_div=div,
+                           plot_feature_script=script_f,
+                           plot_feature_div=div_f,
                            mimetype='text/html')
 
-
-
-@pipeline_blueprint.route('/<string:pipeline_id>/features')
-@requires_login
-def visualise_features(pipeline_id):
-    pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-
-    p, script, div = ResultVisualiser.visualize_df_feature_importance(
-        pipeline.learner.get_features_weights(),
-        pipeline.display_title
-    )
-
-    # if type(pipeline.learner) == LearnerSVC:
-    #     f_weights = pipeline.learner.get_features_weights()
-    #     if 'tf-idf' in type(pipeline.nlp_tool) == TFIDF:
-    #         vectorizer = DATABASE.load_object(ds.vectorizer_handler)
-    #         p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
-    #                                                                         vectorizer=vectorizer)
-    #     else:
-    #         p, script, div = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=f_weights,
-    #                                                                         pipeline=pipeline)
-    # elif pipeline.type == "RF":
-    #     f_weights_df = pipeline.get_features_weights()
-    #     p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, pipeline.display_title)
-    # elif pipeline.type == "XGB":
-    #     f_weights_df = pipeline.get_features_weights()
-    #     p, script, div = ResultVisualiser.visualize_df_feature_importance(f_weights_df, pipeline.display_title)
-
-    if script is not None:
-        return render_template('pipelines/features.html',
-                               pipeline=pipeline,
-                               plot_script=script, plot_div=div,
-                               mimetype='text/html')
-
-    return render_template('pipelines/features.html', pipeline=pipeline)
-
-
-# @pipeline_blueprint.route('/explain/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>', methods=['GET'])
-# @user_decorators.requires_login
-# def explain_article_for_experiment(article_id, article_num, genre, experiment_id):
-#     # art = DataSource.get_processed_article_by_raw_text(article_text)
-#     art = DataSource.get_processed_article_by_id(article_id)
-#     exp = get_experiment_by_id(experiment_id)
-#
-#     # LIME explanations
-#     e = Explanation(experiment=exp, article=art, predicted_genre=genre)
-#     res = e.explain_using_text()
-#
-#     return render_template('pipelines/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
-#
-# @pipeline_blueprint.route('/explain_features/<string:article_id>/<string:article_num>/<string:genre>/<string:experiment_id>/', methods=['GET'])
-# @user_decorators.requires_login
-# def explain_features_for_experiment(article_id, article_num, genre, experiment_id):
-#     # art = DataSource.get_processed_article_by_raw_text(article_text)
-#     art = DataSource.get_processed_article_by_id(article_id)
-#     exp = get_experiment_by_id(experiment_id)
-#
-#     # LIME explanations
-#     e = Explanation(experiment=exp, article=art, predicted_genre=genre)
-#     res = e.explain_using_features()
-#
-#     return render_template('pipelines/explanation.html', experiment=exp, article=art, article_num=article_num, exp=res)
-#
-#
-
-#
-# @pipeline_blueprint.route('/recommend/<string:pipeline_id>')
-# @user_decorators.requires_login
-# def apply_grid_search(pipeline_id):
-#     ds = DataSource.get_by_id(pipeline_id)
-#
-#     task = grid_ds.delay(pipeline_id)
-#     task.wait()
-#
-#     if len(task.result) > 1:
-#         report_per_score = task.result[0][0]
-#         feature_reduction = task.result[0][1]
-#
-#     return render_template('pipelines/recommendation.html', pipeline = ds, report_per_score = report_per_score,
-#                            feature_reduction=feature_reduction)
-#
 
 

@@ -23,7 +23,6 @@ class PipelineComparator:
     def __init__(self, ace):
         self.ace = ace
         pipelines = ace.pipelines
-        # self.pipelines = pipelines
         self.pipelines = sorted(pipelines, key=lambda x: x.display_title)
         self.pipeline_titles = []
         for pipeline in self.pipelines:
@@ -261,7 +260,7 @@ class PipelineComparator:
 
         for pipeline in self.pipelines:
 
-            results = pipeline.get_results_model()
+            results = pipeline.result
             plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results,
                                                                            title=pipeline.display_title,
                                                                            ds_param = ds_param)

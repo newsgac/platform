@@ -1,0 +1,5 @@
+{% if plot_feature_div is defined %}
+    {{ plot_feature_div|indent(4)|safe }}
+{% else %}
+    <p>Feature importance rankings are not available for this pipeline.</p>
+{% endif %}

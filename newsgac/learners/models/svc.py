@@ -46,7 +46,3 @@ class LearnerSVC(Learner):
             probability=True,
         )
 
-    def get_features_weights(self):
-        # check if kernel is linear
-        if self.parameters.kernel == 'linear':
-            return self.trained_model.steps[-1][1].coef_

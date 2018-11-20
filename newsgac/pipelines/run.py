@@ -20,6 +20,7 @@ def run_pipeline(pipeline):
 
 
 def validate(model, X, labels):
+    # TODO: use stratified kfold
     cv = KFold(n_splits=10, random_state=42, shuffle=True)
     cross_val_predictions = cross_val_predict(model, X, labels, cv=cv, n_jobs=config.cross_val_n_jobs)
     return Result.from_prediction(labels, cross_val_predictions)

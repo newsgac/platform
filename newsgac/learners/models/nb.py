@@ -16,5 +16,3 @@ class LearnerNB(Learner):
     def get_classifier(self):
         return MultinomialNB(alpha=self.parameters.alpha)
 
-    def get_features_weights(self):
-        return self.trained_model.steps[-1][1].coef_

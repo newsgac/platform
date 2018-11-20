@@ -148,14 +148,7 @@ class ResultVisualiser(object):
         return p, script, div
 
     @staticmethod
-    def retrievePlotForFeatureWeights(coefficients, experiment=None, vectorizer=None):
-        if vectorizer == None:
-            # names = DataIO.get_feature_names()
-            names = [f for f in sorted(experiment.features.keys())]
-
-        else:
-            names = vectorizer.get_feature_names()
-
+    def retrievePlotForFeatureWeights(coefficients, names, vectorized_pipeline=False):
         top_features = 10
 
         i = 1
@@ -163,7 +156,7 @@ class ResultVisualiser(object):
         plots = []
         for classifier in coefficients:
 
-            if vectorizer != None:
+            if vectorized_pipeline:
                 # For classifiers using vectorizer
                 classifier = np.asarray(classifier.todense()).reshape(-1)
 
