@@ -246,8 +246,8 @@ def visualise_results(pipeline_id):
                                                                                 pipeline.display_title)
 
     else:
-        script_f = None
-        div_f = None
+        script_f = ''
+        div_f = ''
 
     plots = []
     plots.append(p)
