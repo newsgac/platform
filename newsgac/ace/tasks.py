@@ -65,7 +65,8 @@ run_ace_impl('%s')
 
 
 def get_lime_text_explanation(raw_text, prediction, used_class_names, predict_proba):
-    exp_lime = LimeTextExplainer(class_names=used_class_names)
+    # note for bow=False: Only set to false if the classifier uses word order in some way (bigrams, etc).
+    exp_lime = LimeTextExplainer(class_names=used_class_names, bow=False)
     return exp_lime.explain_instance(
         raw_text,
         predict_proba,
@@ -144,6 +145,8 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
     lime_features_html = ''
     anchor_html = ''
 
+    # TODO: do not send article raw text, I suspect the bug report for stop-word appearance is due to raw_text
+    # although we are sending through the pipeline predict_proba
     if pipeline.nlp_tool.name == 'TF-IDF':
         lime_text_html = get_lime_text_explanation(
             article.raw_text,

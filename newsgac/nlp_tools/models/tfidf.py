@@ -20,5 +20,6 @@ class TFIDF(NlpTool):
             sublinear_tf=True,
             min_df=5,
             norm='l2',
-            ngram_range=(1, 2)
+            ngram_range=(1, 2),
+            lowercase=True,
         )
