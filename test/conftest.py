@@ -5,19 +5,24 @@ import pytest
 from newsgac.app import app as flask_app
 from pymodm.connection import _get_db
 
-# def pytest_addoption(parser):
-#     parser.addoption(
-#         "--frog", action="store_true", default=False, help="run tests using frog"
-#     )
-#
-#
-# def pytest_collection_modifyitems(config, items):
-#     if config.getoption("--frog"):
-#         return
-#     skip_slow = pytest.mark.skip(reason="need --runslow option to run")
-#     for item in items:
-#         if "slow" in item.keywords:
-#             item.add_marker(skip_slow)
+def pytest_addoption(parser):
+    parser.addoption(
+        "--frog", action="store_true", default=False, help="run tests using frog"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--frog"):
+        from newsgac.nlp_tools import tasks
+        tasks.worker_name = 'frog_test'
+        tasks.setup_frog_conn(None, None)
+
+    skip_frog = pytest.mark.skip(reason="need --frog option to run")
+    for item in items:
+        if "frog" in item.keywords:
+            item.add_marker(skip_frog)
+
+
 
 @pytest.fixture
 def client():
