@@ -5,7 +5,7 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 script:
-  - docker-compose -f docker-compose_test.yml run test
+  - docker-compose -f docker-compose_test.yml run --name newsgac_test test
 after_script:
   - docker cp newsgac_test:/newsgac/.coverage .
   - docker-compose -f docker-compose_test.yml down
