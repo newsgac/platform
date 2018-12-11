@@ -7,6 +7,7 @@ before_script:
 script:
   - docker-compose -f docker-compose_test.yml run --name newsgac_test test
 after_script:
-  - docker cp newsgac_test:/newsgac/coverage.xml ./newsgac
+  - docker cp newsgac_test:/newsgac/coverage.xml ./coverage_docker.xml
   - docker-compose -f docker-compose_test.yml down
-  - cd newsgac && ../cc-test-reporter after-build -p /newsgac/newsgac --exit-code $TRAVIS_TEST_RESULT --debug
+  - cat coverage_docker.xml | sed "s|<source>.*</source>|<source>newsgac</source>|" > coverage.xml
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT --debug
