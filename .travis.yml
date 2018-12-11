@@ -1,15 +1,12 @@
 install:
   - docker-compose -f docker-compose_test.yml build test
 before_script:
-
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
-  - >
-    docker-compose -f docker-compose_test.yml run -e CC_TEST_REPORTER_ID=$TEST_REPORTER_ID --name newsgac_test test "
-      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter &&
-      chmod +x ./cc-test-reporter &&
-      ./cc-test-reporter before-build &&
-      pytest --cov=newsgac --cov-report=xml &&
-      ./cc-test-reporter after-build --exit-code $?
-    "
+  - docker-compose -f docker-compose_test.yml run --name newsgac_test test
 after_script:
+  - docker cp newsgac_test:/newsgac/coverage.xml ./newsgac
   - docker-compose -f docker-compose_test.yml down
+  - cd newsgac && ../cc-test-reporter after-build -p /newsgac/newsgac --exit-code $TRAVIS_TEST_RESULT
