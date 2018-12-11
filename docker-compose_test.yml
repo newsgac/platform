@@ -28,4 +28,4 @@ services:
         networks:
             - newsgac-net
         entrypoint: /bin/sh -c
-        command: ["pytest --cov=newsgac"]
+        command: ["pytest --cov=newsgac --cov-report=xml"]
