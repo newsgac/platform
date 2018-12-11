@@ -7,6 +7,6 @@ before_script:
 script:
   - docker-compose -f docker-compose_test.yml run --name newsgac_test test
 after_script:
-  - docker cp newsgac_test:/newsgac/.coverage .
+  - docker cp newsgac_test:/newsgac/coverage.xml .
   - docker-compose -f docker-compose_test.yml down
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
