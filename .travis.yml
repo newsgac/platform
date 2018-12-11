@@ -1,6 +1,12 @@
 install:
   - docker-compose -f docker-compose_test.yml build test
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
   - docker-compose -f docker-compose_test.yml run test
 after_script:
+  - docker cp newsgac_test:/newsgac/.coverage .
   - docker-compose -f docker-compose_test.yml down
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

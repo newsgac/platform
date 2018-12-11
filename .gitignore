@@ -18,3 +18,4 @@ hub_notebooks
 dist
 build
 newsgac.egg-info
+.coverage

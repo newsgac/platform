@@ -59,7 +59,7 @@ def db():
 @pytest.fixture(scope="module", autouse=True)
 def setup_db(db):
     # drops whole db
-    for collection_name in db.collection_names():
+    for collection_name in db.list_collection_names():
         db[collection_name].drop()
 
 

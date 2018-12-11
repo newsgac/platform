@@ -21,7 +21,6 @@ RUN chmod a+x /newsgac/entrypoint.sh
 
 USER flask
 
-
 COPY newsgac /newsgac/newsgac
 
 RUN ["bash", "-c", "python <<< \"import nltk; nltk.download('punkt')\""]
