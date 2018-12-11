@@ -28,4 +28,4 @@ services:
         networks:
             - newsgac-net
         entrypoint: /bin/sh -c
-        command: ["pytest . -m \"not frog\""]
+        command: ["pytest ."]

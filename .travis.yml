@@ -1,0 +1,6 @@
+install:
+  - docker-compose -f docker-compose_test.yml build test
+script:
+  - docker-compose -f docker-compose_test.yml run test
+after_script:
+  - docker-compose -f docker-compose_test.yml down
