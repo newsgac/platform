@@ -110,6 +110,19 @@ u.save()
 
 * You can now login from the frontend as this user.
 
+## References
+
+[Utilizing a Transparency-driven Environment toward Trusted Automatic Genre Classification: A Case Study in Journalism History](https://arxiv.org/pdf/1810.00968.pdf)
+
+```
+@article{bilgin2018utilizing,
+  title={Utilizing a Transparency-driven Environment toward Trusted Automatic Genre Classification: A Case Study in Journalism History},
+  author={Bilgin, Aysenur and Hollink, Laura and van Ossenbruggen, Jacco and Sang, Erik Tjong Kim and Smeenk, Kim and Harbers, Frank and Broersma, Marcel},
+  journal={arXiv preprint arXiv:1810.00968},
+  year={2018}
+}
+```
+
 ## Contributors
 
 - Aysenur Bilgin (aysenur.bilgin@cwi.nl)
