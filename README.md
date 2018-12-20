@@ -1,7 +1,7 @@
 # NEWSGAC
-[![Build Status](https://travis-ci.org/Tommos0/newsgac.svg?branch=master)](https://travis-ci.org/Tommos0/newsgac)
-[![Maintainability](https://api.codeclimate.com/v1/badges/c1ec34a79cab87e2189b/maintainability)](https://codeclimate.com/github/Tommos0/newsgac/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/c1ec34a79cab87e2189b/test_coverage)](https://codeclimate.com/github/Tommos0/newsgac/test_coverage)
+[![Build Status](https://travis-ci.org/newsgac/platform.svg?branch=master)](https://travis-ci.org/newsgac/platform)
+[![Maintainability](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/maintainability)](https://codeclimate.com/github/newsgac/platform/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/test_coverage)](https://codeclimate.com/github/newsgac/platform/test_coverage)
 
 This is the development repository for NEWSGAC Project.
 
