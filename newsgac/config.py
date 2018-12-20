@@ -61,4 +61,3 @@ if environment in [Env.test, Env.dockertest]:
 
 redis_url = 'redis://%s:%s/0' % (redis_host, redis_port)
 mongo_url = 'mongodb://%s:%s/%s' % (mongo_host, mongo_port, mongo_database_name)
-celery_eager = False

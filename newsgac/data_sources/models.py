@@ -8,7 +8,7 @@ from newsgac.tasks.models import TrackedTask
 from newsgac.users.models import User
 
 
-class Article(EmbeddedMongoModel):
+class Article(MongoModel):
     raw_text = fields.CharField()
     date = fields.DateTimeField()
     year = fields.IntegerField()
@@ -22,7 +22,7 @@ class DataSource(CreatedUpdated, MongoModel):
     description = fields.CharField(required=True)
     file = fields.FileField(required=True)
     training_purpose = fields.BooleanField(required=True, default=False)
-    articles = fields.EmbeddedDocumentListField(Article)
+    articles = fields.ListField(fields.ReferenceField(Article))
 
     task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
 

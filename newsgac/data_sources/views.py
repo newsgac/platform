@@ -33,7 +33,6 @@ def new():
     if request.method == 'POST':
         try:
             form_dict = request.form.to_dict()
-
             data_source = DataSource(**form_dict)
             data_source.filename = secure_filename(request.files['file'].filename)
             data_source.file = request.files['file']
