@@ -5,6 +5,7 @@ from bokeh.layouts import gridplot
 from flask import Blueprint, render_template, request, session, json, url_for, Response
 from lime.lime_tabular import LimeTabularExplainer
 from pymodm.errors import ValidationError
+from scipy.sparse import csr_matrix
 
 from newsgac.common.back import back
 from newsgac.common.json_encoder import _dumps
@@ -198,10 +199,9 @@ def visualise_results(pipeline_id):
             vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
             names = sk_pipeline.named_steps['FeatureExtraction'].get_feature_names()
             # get vectorizer for bow
-            if vectorized_pipeline:
-                p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names, vectorized_pipeline=True )
-            else:
-                p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names)
+            if isinstance(coefficients, csr_matrix):
+                coefficients = coefficients.toarray()
+            p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names, vectorized_pipeline=vectorized_pipeline )
     elif pipeline.learner.tag in ['xgb']:
         from pandas import DataFrame
         from collections import OrderedDict
