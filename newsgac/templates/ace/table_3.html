@@ -24,7 +24,9 @@
             const agreeingPipelineKeys = Object.keys(_.pickBy(article.predictions, p => p===mostCommonPrediction));
             data.push([
                 `<span title="${article.raw_text}">${articleKey+1}</span>`,
-                pipelines.filter((p, i) => agreeingPipelineKeys.indexOf(i.toString()) !== -1).map(pipeline => pipeline.display_title).join(', '),
+                pipelines.filter((p, i) => agreeingPipelineKeys.indexOf(i.toString()) !== -1).map(pipeline =>
+                    `<a href="/pipelines/${pipeline._id}/results"> ${pipeline.display_title} </a>`
+                ).join(', '),
                 mostCommonPrediction,
                 article.label,
             ]);

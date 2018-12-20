@@ -28,7 +28,7 @@
 
                 data.push([
                  `<span title="${article.raw_text}">${articleKey+1}</span>`,
-                 pipeline.display_title,
+                 `<a href="/pipelines/${pipeline._id}/results"> ${pipeline.display_title} </a>`,
                  article.predictions[pipelineKey],
                  article.label,
                  `<a href="${limeURL}" target="_blank" > Click for explanation </a>`,
