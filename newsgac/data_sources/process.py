@@ -56,10 +56,9 @@ def get_articles_from_file(file):
             article.date = datetime.strptime(date_str_corr, "%d/%m/%Y")
             article.raw_text = groups[2].rstrip()
 
+            articles.append(article)
 
-            if article.raw_text not in map(lambda a: a.raw_text, articles):
-                articles.append(article)
-            else:
+            if article.raw_text in map(lambda a: a.raw_text, articles):
                 duplicate_count += 1
 
     print( "Found ", other_count, " other genre in documents..")
