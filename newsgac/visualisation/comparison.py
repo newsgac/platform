@@ -11,6 +11,7 @@ import uuid
 
 from collections import defaultdict, Counter
 from newsgac import database
+from newsgac.pipelines.models import Result
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 # from newsgac.models.data_sources.data_source_old import DataSource
 
@@ -22,8 +23,8 @@ class PipelineComparator:
 
     def __init__(self, ace):
         self.ace = ace
-        pipelines = ace.pipelines
-        self.pipelines = sorted(pipelines, key=lambda x: x.display_title)
+        self.pipelines = pipelines = ace.pipelines
+        # self.pipelines = sorted(pipelines, key=lambda x: x.display_title)
         self.pipeline_titles = []
         for pipeline in self.pipelines:
             self.pipeline_titles.append(pipeline.display_title)
@@ -50,8 +51,13 @@ class PipelineComparator:
         self.other['cross_validation_accuracies'] = []
         self.other['kappas'] = []
 
-        for pipeline in self.pipelines:
-            results = pipeline.result
+        predictions = ace.predictions.get().transpose()
+
+        for key, pipeline in enumerate(self.pipelines):
+            true_labels = [article.label for article in ace.data_source.articles]
+            predicted_labels = predictions[key]
+            results = Result.from_prediction(true_labels, predicted_labels)
+            # results = pipeline.result
             self.fmeasure['weighted'].append(results.fmeasure_weighted)
             self.fmeasure['micro'].append(results.fmeasure_micro)
             self.fmeasure['macro'].append(results.fmeasure_macro)
@@ -258,9 +264,15 @@ class PipelineComparator:
         else:
             ds_param = 1/math.sqrt(len(self.pipelines))
 
-        for pipeline in self.pipelines:
 
-            results = pipeline.result
+        predictions = self.ace.predictions.get().transpose()
+
+        for key, pipeline in enumerate(self.pipelines):
+            true_labels = [article.label for article in self.ace.data_source.articles]
+            predicted_labels = predictions[key]
+            results = Result.from_prediction(true_labels, predicted_labels)
+
+            # results = pipeline.result
             plot, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results,
                                                                            title=pipeline.display_title,
                                                                            ds_param = ds_param)
