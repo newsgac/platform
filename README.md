@@ -115,11 +115,13 @@ u.save()
 [Utilizing a Transparency-driven Environment toward Trusted Automatic Genre Classification: A Case Study in Journalism History](https://arxiv.org/pdf/1810.00968.pdf)
 
 ```
-@article{bilgin2018utilizing,
+@inproceedings{bilgin2018utilizing,
   title={Utilizing a Transparency-driven Environment toward Trusted Automatic Genre Classification: A Case Study in Journalism History},
-  author={Bilgin, Aysenur and Hollink, Laura and van Ossenbruggen, Jacco and Sang, Erik Tjong Kim and Smeenk, Kim and Harbers, Frank and Broersma, Marcel},
-  journal={arXiv preprint arXiv:1810.00968},
-  year={2018}
+  author={Bilgin, Aysenur and Sang, Erik Tjong Kim and Smeenk, Kim and Hollink, Laura and van Ossenbruggen, Jacco and Harbers, Frank and Broersma, Marcel},
+  booktitle={2018 IEEE 14th International Conference on e-Science (e-Science)},
+  pages={486--496},
+  year={2018},
+  organization={IEEE}
 }
 ```
 
