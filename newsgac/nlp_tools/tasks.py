@@ -7,11 +7,10 @@ from pynlpl.clients.frogclient import FrogClient
 
 from newsgac import config
 from newsgac.tasks.celery_app import celery_app, ResultTask
-from celery.signals import worker_init, worker_process_init
-
-frogclient = None
+from celery.signals import worker_init
 
 worker_name=None
+
 
 @worker_init.connect()
 def setup_worker_name(sender, signal, **kwargs):
@@ -19,21 +18,14 @@ def setup_worker_name(sender, signal, **kwargs):
     worker_name = sender.hostname
 
 
-@worker_process_init.connect()
-def setup_frog_conn(sender, signal, **kwargs):
-    if worker_name.startswith('frog'):
-        global frogclient
-        frogclient = FrogClient(
-            config.frog_hostname,
-            config.frog_port,
-            returnall=True,
-            timeout=1800.0,
-        )
-
-
 @celery_app.task(base=ResultTask)
 def frog_process(text):
-    global frogclient
+    frogclient = FrogClient(
+        config.frog_hostname,
+        config.frog_port,
+        returnall=True,
+        timeout=1800.0,
+    )
     cache = Cache.get_or_new(hashlib.sha1(text.encode('utf-8')).hexdigest())
     if cache.data is None:
         sentences = [s for s in sent_tokenize(text) if s]
