@@ -72,9 +72,7 @@
                             data-actions-box="true"
                     >
                         {% for data_source in data_sources %}
-                        {% if data_source.articles %}
                             <option value="{{ data_source.pk }}">{{ data_source.display_title }}</option>
-                        {% endif %}
                         {% endfor %}
                     </select>
 
