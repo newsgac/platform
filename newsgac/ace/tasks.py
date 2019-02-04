@@ -8,6 +8,7 @@ from anchor import anchor_text
 
 from lime.lime_tabular import LimeTabularExplainer
 from lime.lime_text import LimeTextExplainer
+from scipy.sparse import csr_matrix
 
 from newsgac.cached_views.models import CachedView
 from newsgac.genres import genre_labels
@@ -82,6 +83,8 @@ def get_lime_feature_explanation(article, prediction, skp, predict_proba, traini
     # calculate feature vectors for explanators
     data = skp.transform([a.raw_text for a in training_articles])
     # labels = [a.label for a in training_articles]
+    if isinstance(data, csr_matrix):
+        data = data.toarray()
 
     exp_lime = LimeTabularExplainer(
         training_data=data,
