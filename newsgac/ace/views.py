@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from bson import ObjectId
-from flask import Blueprint, render_template, request, url_for, redirect, session
+from flask import Blueprint, render_template, request, url_for, redirect, session, flash
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
@@ -131,6 +131,10 @@ def delete_all():
 @ace_blueprint.route('/<string:ace_id>/explain_features_lime/<string:pipeline_id>/<string:article_number>')
 @requires_login
 def explain_article(*args, **kwargs):
+    pipeline = Pipeline.objects.get({'_id': ObjectId(kwargs['pipeline_id'])})
+    if pipeline.nlp_tool.tag == 'frog_tfidf':
+        flash('Unfortunately, due to limitations of LIME, we cannot show explanations for TFIDF+Frog pipelines :(.', 'error')
+        return view(kwargs['ace_id'])
     return cached_view(
         template='pipelines/explain.html',
         view_name='explain_article',
