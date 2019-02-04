@@ -32,5 +32,6 @@ class CachedView(CreatedUpdated, DeleteObjectsMixin, MongoModel):
             return cls(hash=hash)
 
     def delete(self):
-        self.data.delete()
+        if self.data:
+            self.data.delete()
         super(CachedView, self).delete()
