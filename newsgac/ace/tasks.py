@@ -99,7 +99,10 @@ def get_lime_feature_explanation(article, prediction, skp, predict_proba, traini
     # exp_anchor.fit(train_data=X_train, train_labels=y_train, validation_data=X_test,
     #                    validation_labels=y_test)
 
-    article_features = skp.transform([article.raw_text])[0]
+    feature_list = skp.transform([article.raw_text])
+    if isinstance(feature_list, csr_matrix):
+        feature_list = feature_list.toarray()
+    article_features = feature_list[0]
 
     # TODO: check the order of features with feature_names
     return exp_lime.explain_instance(
@@ -191,6 +194,7 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
 @celery_app.task(bind=True)
 def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_number):
     # explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number)
+    # return
     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
     (stdoutdata, stderrdata) = process.communicate("""
 import newsgac.database

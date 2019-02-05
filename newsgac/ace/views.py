@@ -132,9 +132,9 @@ def delete_all():
 @requires_login
 def explain_article(*args, **kwargs):
     pipeline = Pipeline.objects.get({'_id': ObjectId(kwargs['pipeline_id'])})
-    if pipeline.nlp_tool.tag == 'frog_tfidf':
-        flash('Unfortunately, due to limitations of LIME, we cannot show explanations for TFIDF+Frog pipelines :(.', 'error')
-        return view(kwargs['ace_id'])
+    # if pipeline.nlp_tool.tag == 'frog_tfidf':
+    #     flash('Unfortunately, due to limitations of LIME, we cannot show explanations for TFIDF+Frog pipelines :(.', 'error')
+    #     return view(kwargs['ace_id'])
     return cached_view(
         template='pipelines/explain.html',
         view_name='explain_article',
