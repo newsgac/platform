@@ -14,6 +14,10 @@
       <li><a data-toggle="pill" href="#features">Feature Rankings</a></li>
     </ul>
 
+    <div class="mermaid">
+        {{ mermaid }}
+    </div>
+
     <div class="tab-content">
         <div id="results" class="tab-pane fade in active">
             {% include('pipelines/metrics.html') with context %}
@@ -23,5 +27,8 @@
             {% include('pipelines/features.html') with context %}
         </div>
     </div>
+
+    <script src="https://unpkg.com/mermaid@8.0.0/dist/mermaid.min.js"></script>
+    <!--<script>mermaid.initialize({startOnLoad:true});</script>-->
 
 {% endblock %}
