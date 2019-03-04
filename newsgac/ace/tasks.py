@@ -67,7 +67,7 @@ run_ace_impl('%s')
 
 def get_lime_text_explanation(raw_text, prediction, used_class_names, predict_proba):
     # note for bow=False: Only set to false if the classifier uses word order in some way (bigrams, etc).
-    exp_lime = LimeTextExplainer(class_names=used_class_names, bow=False)
+    exp_lime = LimeTextExplainer(class_names=used_class_names, bow=True)
     return exp_lime.explain_instance(
         raw_text,
         predict_proba,
