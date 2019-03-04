@@ -13,6 +13,12 @@ class Article(MongoModel):
     date = fields.DateTimeField()
     year = fields.IntegerField()
     label = fields.IntegerField(max_value=len(genre_codes)-1)
+    source = fields.CharField()
+    page = fields.IntegerField()
+    urls = fields.ListField(fields.CharField())
+
+    class Meta:
+        ignore_unknown_fields = True
 
 
 class DataSource(CreatedUpdated, MongoModel):
@@ -53,3 +59,7 @@ class DataSource(CreatedUpdated, MongoModel):
             except DoesNotExist as e:
                 return
             raise ValidationError('Display title exists')
+
+    def __repr__(self):
+        return '[DataSource id: {0}]'.format(self._id)
+

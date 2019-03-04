@@ -33,3 +33,4 @@ watchdog==0.9.0
 xgboost==0.72.1
 lightgbm==2.2.1
 pytest-cov==2.6.0
+dateparser==0.7.1
