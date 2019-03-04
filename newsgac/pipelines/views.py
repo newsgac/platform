@@ -194,7 +194,8 @@ def visualise_results(pipeline_id):
     script_f = ''
     div_f = ''
     # TODO: check for nb
-    if pipeline.learner._tag in ['svc']:
+    # TODO: _svc because it's crashing atm
+    if pipeline.learner._tag in ['_svc']:
         if classifier.kernel == 'linear':
             coefficients = classifier.coef_
             vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
