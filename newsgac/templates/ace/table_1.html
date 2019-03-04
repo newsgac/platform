@@ -27,7 +27,7 @@
                     .replace('article_number', articleKey);
 
                 data.push([
-                 `<span title="${article.raw_text}">${articleKey+1}</span>`,
+                 `${articleKey+1}`,
                  `<a href="/pipelines/${pipeline._id}/results"> ${pipeline.display_title} </a>`,
                  article.predictions[pipelineKey],
                  article.label,

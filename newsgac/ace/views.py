@@ -79,7 +79,6 @@ def view(ace_id):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
     articles = [{
-        'raw_text': article.raw_text.encode('utf-8'),
         'predictions': [genre_codes[p] for p in ace.predictions.get()[idx]],
         'label': genre_codes[article.label],
     } for idx, article in enumerate(ace.data_source.articles)]
