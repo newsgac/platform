@@ -127,6 +127,7 @@ def new_save():
     pipeline.learner = create_learner(request.json['learner']['_tag'], False, **request.json['learner'])
 
     try:
+        pipeline.result = None
         pipeline.save()
         if isinstance(pipeline.learner, GridSearch):
             task = run_grid_search_task.delay(str(pipeline._id))

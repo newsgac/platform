@@ -69,7 +69,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     nlp_tool = fields.EmbeddedDocumentField(NlpTool, blank=True, required=True, default=TFIDF.create())
     learner = fields.EmbeddedDocumentField(Learner)
     sk_pipeline = ObjectField()
-    result = fields.EmbeddedDocumentField(Result)
+    result = fields.EmbeddedDocumentField(Result, blank=True)
     grid_search_result = ObjectField()
 
     task = fields.EmbeddedDocumentField(TrackedTask, default=TrackedTask())
