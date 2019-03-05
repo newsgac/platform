@@ -5,7 +5,7 @@ numpy==1.14.0
 scipy==1.0.0
 dill==0.2.7.1
 enum34==1.1.6
-Flask==0.12
+Flask==1.0.2
 future==0.16.0
 futures==3.2.0
 lime==0.1.1.29
@@ -15,7 +15,7 @@ Pattern==2.6
 passlib==1.7.1
 pymodm==0.4.1
 PyNLPl==1.2.5
-requests==2.18.4
+requests==2.21.0
 regex==2017.4.5
 scikit-learn==0.20.0
 stop-words==2015.2.23.1
@@ -33,3 +33,4 @@ watchdog==0.9.0
 xgboost==0.72.1
 lightgbm==2.2.1
 pytest-cov==2.6.0
+dateparser==0.7.1

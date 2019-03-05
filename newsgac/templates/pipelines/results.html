@@ -11,17 +11,27 @@
 
     <ul class="nav nav-pills nav-justified">
       <li class="active"><a data-toggle="pill" href="#results">Results</a></li>
+      <li><a data-toggle="pill" href="#details">Details</a></li>
       <li><a data-toggle="pill" href="#features">Feature Rankings</a></li>
     </ul>
+
+
 
     <div class="tab-content">
         <div id="results" class="tab-pane fade in active">
             {% include('pipelines/metrics.html') with context %}
         </div>
-
+        <div id="details" class="tab-pane fade active">
+            <div class="mermaid">
+                {{ mermaid }}
+            </div>
+        </div>
         <div id="features" class="tab-pane fade">
             {% include('pipelines/features.html') with context %}
         </div>
     </div>
+
+    <script src="https://unpkg.com/mermaid@8.0.0/dist/mermaid.min.js"></script>
+    <!--<script>mermaid.initialize({startOnLoad:true});</script>-->
 
 {% endblock %}

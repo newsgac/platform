@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, session, json, url_for, R
 from lime.lime_tabular import LimeTabularExplainer
 from pymodm.errors import ValidationError
 from scipy.sparse import csr_matrix
+from sklearn.pipeline import FeatureUnion, Pipeline as SKPipeline
 
 from newsgac.common.back import back
 from newsgac.common.json_encoder import _dumps
@@ -127,6 +128,7 @@ def new_save():
     pipeline.learner = create_learner(request.json['learner']['_tag'], False, **request.json['learner'])
 
     try:
+        pipeline.result = None
         pipeline.save()
         if isinstance(pipeline.learner, GridSearch):
             task = run_grid_search_task.delay(str(pipeline._id))
@@ -179,6 +181,48 @@ def delete_all():
     return back.redirect()
 
 
+def get_pipeline_step(step, label='', from_label=None, to_label=None):
+    output = ''
+    if isinstance(step[1], SKPipeline):
+        for i, sub_step in enumerate(step[1].steps):
+            output += get_pipeline_step(
+                sub_step,
+                label + '_' + str(i),
+                from_label if i==0 else None,
+                to_label if i==len(step[1].steps)-1 else label + '_' + str(i+1)
+            )
+
+    elif isinstance(step[1], FeatureUnion):
+        if from_label:
+            output += '%s --> %s\n' % (from_label, label)
+        output += '%s[%s: %s]\n' % (label, step[0], step[1].__class__.__name__)
+        for i, sub_step in enumerate(step[1].transformer_list):
+            output += get_pipeline_step(
+                sub_step,
+                label + '_' + str(i),
+                label,
+                to_label
+            )
+
+    else:
+        output += '%s[%s: %s]\n' % (label, step[0], step[1].__class__.__name__)
+        if from_label:
+            output += '%s --> %s\n' % (from_label, label)
+        if to_label:
+            output += '%s --> %s\n' % (label, to_label)
+    return output
+
+
+def get_mermaid(pipeline):
+    output = 'graph TD\n'
+    output += 'Source[Data source]\n'
+    output += 'Result[End result]\n'
+    output += get_pipeline_step(('Root', pipeline), 'Root', from_label='Source', to_label='Result')
+
+    # output += get_mermaid_pipeline(pipeline)
+    return output
+
+
 @pipeline_blueprint.route('/<string:pipeline_id>/results')
 @requires_login
 def visualise_results(pipeline_id):
@@ -193,7 +237,8 @@ def visualise_results(pipeline_id):
     script_f = ''
     div_f = ''
     # TODO: check for nb
-    if pipeline.learner._tag in ['svc']:
+    # TODO: _svc because it's crashing atm
+    if pipeline.learner._tag in ['_svc']:
         if classifier.kernel == 'linear':
             coefficients = classifier.coef_
             vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
@@ -261,7 +306,9 @@ def visualise_results(pipeline_id):
                            plot_div=div,
                            plot_feature_script=script_f,
                            plot_feature_div=div_f,
-                           mimetype='text/html')
+                           mimetype='text/html',
+                           mermaid=get_mermaid(pipeline.get_sk_pipeline())
+                           )
 
 
 

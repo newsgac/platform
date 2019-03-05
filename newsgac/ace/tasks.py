@@ -9,6 +9,8 @@ from anchor import anchor_text
 from lime.lime_tabular import LimeTabularExplainer
 from lime.lime_text import LimeTextExplainer
 from scipy.sparse import csr_matrix
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.pipeline import FeatureUnion, Pipeline as SKPipeline
 
 from newsgac.cached_views.models import CachedView
 from newsgac.genres import genre_labels
@@ -67,7 +69,7 @@ run_ace_impl('%s')
 
 def get_lime_text_explanation(raw_text, prediction, used_class_names, predict_proba):
     # note for bow=False: Only set to false if the classifier uses word order in some way (bigrams, etc).
-    exp_lime = LimeTextExplainer(class_names=used_class_names, bow=False)
+    exp_lime = LimeTextExplainer(class_names=used_class_names, bow=True)
     return exp_lime.explain_instance(
         raw_text,
         predict_proba,
@@ -128,7 +130,6 @@ def get_anchor_text_explanation(skp, raw_text, predict, used_class_names):
 
     return exp_anchor.explain_instance(clean_text, predict, use_proba=True)
 
-
 def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
@@ -154,11 +155,29 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
     # TODO: do not send article raw text, I suspect the bug report for stop-word appearance is due to raw_text
     # although we are sending through the pipeline predict_proba
     if pipeline.nlp_tool.name == 'TF-IDF':
+        # the pipeline should be linear, but it contains a FeatureUnion (with a Pipeline), so let's flatten it
+        steps = []  # will contained the flattened steps
+        for step in sk_pipeline.steps:
+            if isinstance(step[1], FeatureUnion):
+                # step[1] FeatureUnion, should contain a single Pipeline
+                steps.extend(step[1].transformer_list[0][1].steps)
+            else:
+                steps.append(step)
+
+        # find tfidf vectorizer step number
+        for tfidf_step_index, step in enumerate(steps):
+            if isinstance(step[1], TfidfVectorizer):
+                break
+
+        preprocess_pipeline = SKPipeline(steps[:tfidf_step_index])
+        rest_pipeline = SKPipeline(steps[tfidf_step_index:])
+
+        # give lime text before tfidf_step, the function should be the rest of the pipeline.
         lime_text_html = get_lime_text_explanation(
-            article.raw_text,
+            preprocess_pipeline.transform([article.raw_text])[0],
             prediction,
             used_class_names,
-            sk_pipeline.predict_proba
+            rest_pipeline.predict_proba
         ).as_html()
 
         # anchor_html = get_anchor_text_explanation(
