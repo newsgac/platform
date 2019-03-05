@@ -58,7 +58,7 @@ def get_articles_from_file(file):
         try:
             article = parse_article(line)
         except ValueError as e:
-            raise Exception("Error in line %s: %s", (str(line_number), e))
+            raise Exception("Error in line %s: %s" % (str(line_number), e))
 
         articles.append(article)
         if article.raw_text in map(lambda a: a.raw_text, articles):
