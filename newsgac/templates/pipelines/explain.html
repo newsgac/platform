@@ -4,7 +4,7 @@
         <h1>Explanation for Article {{ article_number + 1}} using {{ pipeline.display_title }}</h1>
     </div>
     <div class="row">
-        <p>{{ pipeline.display_title }} predicts <strong>{{ prediction|code_to_label}}</strong>.
+        <p><a href="/pipelines/{{pipeline.pk}}/results">{{ pipeline.display_title }}</a> predicts <strong>{{ prediction|code_to_label}}</strong>.
             Actual genre is <strong>{{ article.label|code_to_label }}</strong>.</p>
     </div>
     <div class="row">
