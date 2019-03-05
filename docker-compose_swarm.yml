@@ -144,7 +144,7 @@ services:
                 max_attempts: 3
         ports:
         - target: 80
-          published: 5050
+          published: 5055
           protocol: tcp
           mode: host
 
