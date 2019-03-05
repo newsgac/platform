@@ -4,10 +4,13 @@ import os
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-sentry_sdk.init(
-    dsn=os.environ.get('SENTRY_DSK', ''),
-    integrations=[FlaskIntegration()]
-)
+sentry_dsn = os.environ.get('SENTRY_DSK', None)
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[FlaskIntegration()]
+    )
+
 from flask import Flask, render_template
 
 from newsgac import config
