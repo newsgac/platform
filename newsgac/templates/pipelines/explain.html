@@ -24,8 +24,11 @@
     <div class="row">
         <br/><br/><br/>
     </div>
-    <div class="row well">
-        {{ article.raw_text }}
-    </div>
+    {% if article.urls|length > 0 %}
+        <div class="row well">
+            <a href="{{article.urls[0]}}"><button type="submit" class="btn btn-success">View article</button></a>
+            <a href="{{article.urls[0]}}:ocr"><button type="submit" class="btn btn-success">View article text</button></a>
+        </div>
+    {% endif %}
 
 {% endblock %}
