@@ -173,7 +173,6 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
         rest_pipeline = SKPipeline(steps[tfidf_step_index:])
 
         # give lime text before tfidf_step, the function should be the rest of the pipeline.
-        print article.raw_text
         lime_text_html = get_lime_text_explanation(
             preprocess_pipeline.transform([article.raw_text])[0],
             prediction,
