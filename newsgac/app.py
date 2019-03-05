@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+import os
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn=os.environ.get('SENTRY_DSK', ''),
+    integrations=[FlaskIntegration()]
+)
 from flask import Flask, render_template
 
 from newsgac import config
@@ -10,10 +19,7 @@ from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
 from newsgac.tasks.views import task_blueprint
 from newsgac.ace.views import ace_blueprint
-
 from newsgac import database
-
-
 
 __author__ = 'abilgin'
 
