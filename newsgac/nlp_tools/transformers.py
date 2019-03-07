@@ -235,6 +235,18 @@ class StopWordRemoval(TransformerMixin):
         return {}
 
 
+class Lowercase(TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return [text.lower() for text in X]
+
+    def get_params(self, deep=False):
+        return {}
+
+
+
 ## LEMMATIZATION
 def apply_lemmatization(text):
     stemmer = SnowballStemmer('dutch', ignore_stopwords=False)

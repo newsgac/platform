@@ -64,6 +64,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
 
     data_source = fields.ReferenceField(DataSource, required=True, blank=False)
     sw_removal = fields.BooleanField(required=True, default=False)
+    lowercase = fields.BooleanField(required=True, default=True)
     lemmatization = fields.BooleanField(required=True, default=False)
     quote_removal = fields.BooleanField(required=True, default=True)
     nlp_tool = fields.EmbeddedDocumentField(NlpTool, blank=True, required=True, default=TFIDF.create())
@@ -80,6 +81,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
             display_title="",
             data_source=None,
             sw_removal=cls.sw_removal.default,
+            lowercase=cls.lowercase.default,
             lemmatization=cls.lemmatization.default,
             nlp_tool=cls.nlp_tool.default,
             learner=LearnerSVC.create()

@@ -9,6 +9,26 @@
             <div class="row mar_ned">
                 <div class="col-md-3">
                     <p align="right" class="center-align-pad">
+                        <strong>Lowercase text</strong>
+                    </p>
+                </div>
+                <div class="col-md-1">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" checked name="lowercase" id="lowercase"
+                                   v-model="model.lowercase">
+                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <span class="help-block"><i>Lowercase the text.</i></span>
+                </div>
+            </div>
+            <div class="row mar_ned"></div>
+            <div class="row mar_ned">
+                <div class="col-md-3">
+                    <p align="right" class="center-align-pad">
                         <strong>Stop-words removal</strong>
                     </p>
                 </div>
