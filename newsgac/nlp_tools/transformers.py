@@ -82,7 +82,7 @@ class ExtractQuotes(TransformerMixin):
         opening_quote_chars = ExtractQuotes.opening_quote_chars
         closing_quote_chars = ExtractQuotes.closing_quote_chars
 
-        pattern = ('(^|[^\w])(' + '|'.join(opening_quote_chars +
+        pattern = ('(' + '|'.join(opening_quote_chars +
                                            closing_quote_chars) + ')(\s\w|\w\w?)')
         pattern += ('(?:(?!' + '|'.join(opening_quote_chars +
                                         ['\s' + c + '\w\w' for c in closing_quote_chars]) +
