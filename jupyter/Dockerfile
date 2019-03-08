@@ -14,6 +14,7 @@ RUN pip install jupyter jupyterlab && \
 
 RUN jupyter labextension install @jupyterlab/hub-extension
 RUN jupyter nbextension enable --py widgetsnbextension
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 
 WORKDIR /newsgac
