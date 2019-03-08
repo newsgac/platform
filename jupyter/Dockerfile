@@ -8,11 +8,12 @@ COPY requirements.txt /newsgac/requirements.txt
 
 RUN pip install jupyter jupyterlab && \
     conda create -n py27 python=2.7 && \
-    /opt/conda/envs/py27/bin/pip install jupyter ipykernel setuptools wheel && \
+    /opt/conda/envs/py27/bin/pip install jupyter ipykernel setuptools wheel ipywidgets && \
     /opt/conda/envs/py27/bin/pip install -r /newsgac/requirements.txt && \
     /opt/conda/envs/py27/bin/python -m ipykernel install
 
 RUN jupyter labextension install @jupyterlab/hub-extension
+RUN jupyter nbextension enable --py widgetsnbextension
 
 
 WORKDIR /newsgac
