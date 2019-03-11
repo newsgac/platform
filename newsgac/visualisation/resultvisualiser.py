@@ -289,7 +289,7 @@ class ResultVisualiser(object):
                width=1,
                line_color="white",
                fill_color=factor_cmap('x',
-                                      palette=Category20[10],
+                                      palette=Category20[20],
                                       factors=sorted(list(df.label.unique())),
                                       start=1,
                                       end=2
