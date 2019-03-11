@@ -233,7 +233,7 @@ def visualise_results(pipeline_id):
     results_eval = pipeline.result
     results_model = pipeline.result
     p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
-    p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
+    # p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
     script_f = ''
     div_f = ''
     # TODO: check for nb
@@ -294,7 +294,6 @@ def visualise_results(pipeline_id):
 
     plots = []
     plots.append(p)
-    plots.append(p_mod)
     overview_layout = gridplot(plots, ncols=2)
     script, div = components(overview_layout)
 
