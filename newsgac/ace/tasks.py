@@ -88,6 +88,13 @@ def get_lime_feature_explanation(article, prediction, skp, predict_proba, traini
     if isinstance(data, csr_matrix):
         data = data.toarray()
 
+    num_samples = 5000
+    # In case we have a TFIDF pipeline there are a lot of features
+    # We should increase num_samples to at least a multitude of the
+    # amount of features.
+    if len(feature_names) > 1000:
+        num_samples = len(feature_names) * 5
+
     exp_lime = LimeTabularExplainer(
         training_data=data,
         feature_names=feature_names,
@@ -112,7 +119,7 @@ def get_lime_feature_explanation(article, prediction, skp, predict_proba, traini
         predict_proba,
         labels=[prediction],
         # num_features=24,
-        # num_samples=3000
+        num_samples=num_samples
     )
 
 
