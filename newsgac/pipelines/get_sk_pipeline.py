@@ -4,7 +4,7 @@ from sklearn.preprocessing import RobustScaler, MinMaxScaler
 from newsgac.learners import LearnerNB
 from newsgac.nlp_tools import TFIDF, Frog, FrogTFIDF
 from newsgac.nlp_tools.transformers import CleanOCR, StopWordRemoval, ApplyLemmatization, ExtractBasicFeatures, \
-    ExtractSentimentFeatures, RemoveQuotes, ExtractQuotes, Lowercase
+    ExtractSentimentFeatures, RemoveQuotes, ExtractQuotes
 
 
 def features_pipeline(steps, feature_names_from=None):
@@ -69,7 +69,6 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('Lowercase', Lowercase()) if pipeline.lowercase else None,
                 ('StopWordRemoval', StopWordRemoval()) if pipeline.sw_removal else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', tfidf_union(pipeline, pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())),

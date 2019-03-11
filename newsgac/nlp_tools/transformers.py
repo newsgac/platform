@@ -215,7 +215,7 @@ except:
     )
 
 def remove_stop_words(text):
-    pattern = re.compile(r'\b(' + r'|'.join(stop_words) + r')\b\s*')
+    pattern = re.compile(r'\b(' + r'|'.join(stop_words) + r')\b\s*', re.IGNORECASE)
     reg_text = pattern.sub('', text)
 
     return reg_text
