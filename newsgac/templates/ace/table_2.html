@@ -44,7 +44,7 @@
                 prediction,
                 combi.articles.length,
                 combi.articles.map((a,i) => `
-                    <a class="${prediction === a.label ? 'correct':'wrong'}">[${articles.indexOf(a)+1}]</a>
+                    <a class="${a.label === "UNL" ? 'unlabeled' : prediction === a.label ? 'correct':'wrong'}">[${articles.indexOf(a)+1}]</a>
                 `).join(' '),
             ]);
         });
