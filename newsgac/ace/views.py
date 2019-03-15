@@ -88,6 +88,7 @@ def view(ace_id):
         # ace=ace,
         # genre_codes=genre_codes,
         # genre_labels=genre_labels,
+        display_title=ace.display_title,
         ace_id=ace_id,
         pipelines=pipelines,
         articles=articles
