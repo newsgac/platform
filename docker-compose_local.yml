@@ -40,7 +40,7 @@ services:
         env_file:
             - .env.localdocker
         volumes:
-            - ./data:/data/db
+            - ./../data:/data/db
 
     web:
         build:
