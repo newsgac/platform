@@ -4,7 +4,7 @@ services:
     frog:
         hostname: lamachine
         image: proycon/lamachine:latest
-        command: bash -c "frog -S 12345"
+        command: bash -c "frog -S 12345 --skip p"
         env_file:
             - .env.prod
         deploy:

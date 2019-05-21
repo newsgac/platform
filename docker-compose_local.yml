@@ -10,7 +10,7 @@ services:
     frog:
         hostname: proycon/lamachine
         image: proycon/lamachine:latest
-        command: bash -c "frog -S 12345"
+        command: bash -c "frog -S 12345 --skip p"
         networks:
             - newsgac-net
         ports:
@@ -40,7 +40,7 @@ services:
         env_file:
             - .env.localdocker
         volumes:
-            - ./../data:/data/db
+            - ./data:/data/db
 
     web:
         build:
