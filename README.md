@@ -9,13 +9,13 @@ This is the development repository for NEWSGAC Project.
 
 1. Install docker-compose
 
-2. In terminal, navigate to newsgac_docker_dev folder.
+2. In terminal, navigate to platform folder.
 
 3. By default, database data will be saved to `./../data`, e.g. in a folder called `data` in the parent of this repository's directory.
-   To change this modify `docker-compose_local.yml` line 23 to a folder of your choice on your local machine.
+   To change this modify `docker-compose_local.yml` line 43 to a folder of your choice on your local machine.
    For example change `./../data:/data/db` to `<your_local_path>:/data/db`
 
-4. To run from command line, navigate to newsgac_docker_dev and run:
+4. To run from command line, navigate to platform and run:
 
 ```
 docker-compose -f docker-compose_local.yml up --build
@@ -45,7 +45,7 @@ pip install -r requirements.txt
 export $(cat .env.local | xargs)
 ```
 
-* To run from command line, navigate to `newsgac_docker_dev/` and run:
+* To run from command line, navigate to `platform/` and run:
 
 ```
 PYTHONPATH=. python newsgac/app.py
