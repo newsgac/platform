@@ -21,6 +21,8 @@ This is the development repository for NEWSGAC Project.
 docker-compose -f docker-compose_local.yml up --build
 ```
 
+The platform will now be available as web server on: 
+http://localhost:5050
 
 ## Run flask web app locally (through IDE)
 
