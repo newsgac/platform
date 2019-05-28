@@ -5,12 +5,16 @@ from sklearn.model_selection import KFold, cross_val_predict
 from newsgac import config
 from newsgac.pipelines.models import Result
 
+
 def run_pipeline(pipeline):
+    print('Running pipeline ' + str(pipeline.pk))
     texts = numpy.array([article.raw_text for article in pipeline.data_source.articles])
     labels = numpy.array([article.label for article in pipeline.data_source.articles])
     sk_pipeline = pipeline.get_sk_pipeline()
+    print("Fitting pipeline")
     sk_pipeline.fit(texts, labels)
     pipeline.sk_pipeline = sk_pipeline
+    print("Validating pipeline")
     pipeline.result = validate(
         sk_pipeline,
         texts,

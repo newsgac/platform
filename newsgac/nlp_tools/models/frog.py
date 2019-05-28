@@ -6,13 +6,16 @@ from celery.result import allow_join_result
 
 from pymodm import EmbeddedMongoModel
 from pymodm import fields
+from pymodm.errors import DoesNotExist
 from sklearn.base import TransformerMixin
 
-from newsgac.common.utils import model_to_dict
+from newsgac.caches import Cache
+from newsgac.common.utils import model_to_dict, hash_text
 from newsgac.nlp_tools.models.frog_extract_features import get_frog_features
 from newsgac.nlp_tools.models.frog_features import feature_descriptions, features
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.nlp_tools.tasks import frog_process
+
 
 class Features(EmbeddedMongoModel):
     # adds all features (from array + descr dict) to the Feature class as BooleanFields.
@@ -37,6 +40,35 @@ class Parameters(EmbeddedMongoModel):
     features.description = 'Included features.'
 
 
+# splits a list into equal chunks of size n
+def chunk_list(l, n):
+    # For item i in a range that is a length of l,
+    for i in range(0, len(l), n):
+        # Create an index range for l of n items:
+        yield l[i:i+n]
+
+
+def populate_frog_cache(texts, max_chunk_size=100):
+    uncached = []
+    for text in texts:
+        try:
+            Cache.objects.raw({'hash': hash_text(text)})[0]
+        except DoesNotExist:
+            uncached.append(text)
+
+    if len(uncached) > 0:
+        print(str(len(uncached)) + ' texts to FROG')
+        chunks = list(chunk_list(uncached, max_chunk_size))
+        with allow_join_result():
+            # list of frog tokens per text
+            # concurrently process each chunk with celery. Why not chunk_size == 1? Celery has a memory leak,
+            # which scales per task, so larger chunks reduce memory leakage.
+            print('frogging ' + str(len(chunks)) + ' chunks')
+            # waits till done
+            group(frog_process.s(chunk) for chunk in chunks)().get()
+            print('frogging done')
+
+
 class FrogFeatureExtractor(TransformerMixin):
     def __init__(self, nlp_tool):
         # we need to know the nlp_tools parameters
@@ -46,17 +78,14 @@ class FrogFeatureExtractor(TransformerMixin):
         return self
 
     def transform(self, X):
-        articles = X
+        print('Frog: ' + str(len(X)) + ' articles')
+
+        texts = X
+        populate_frog_cache(texts)
+        frog_tokens = [Cache.objects.raw({'hash': hash_text(text)})[0].data.get() for text in texts]
         extract_features_dict = self.nlp_tool.parameters.features.to_son().to_dict()
+
         features = []
-
-        if current_task:
-            print("WARNING: Running parallel from inside celery task. Using dangerous allow_join_result & disable_sync_subtasks=False")
-
-        with allow_join_result():
-            # list of frog tokens per text
-            frog_tokens = group(frog_process.s(text) for text in X)().get(disable_sync_subtasks=False)
-
         for article_key, tokens in enumerate(frog_tokens):
             article_features = {
                 k: v for k, v in

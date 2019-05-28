@@ -182,7 +182,6 @@ cogn_verbs = [
 ]
 
 
-
 def get_frog_features(tokens, text):
     features = {}
 

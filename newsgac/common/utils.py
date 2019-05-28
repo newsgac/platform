@@ -1,3 +1,5 @@
+import hashlib
+
 from passlib.hash import pbkdf2_sha512
 import re
 from itertools import chain, combinations
@@ -73,3 +75,7 @@ def split_long_sentences(sentences, max_tokens=450):
            new_sentences.append(' '.join(words))
 
     return new_sentences
+
+
+def hash_text(text):
+    return hashlib.sha1(text.encode('utf-8')).hexdigest()
