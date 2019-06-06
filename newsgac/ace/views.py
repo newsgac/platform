@@ -77,7 +77,11 @@ def new_save():
 @requires_login
 def view(ace_id):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
-    pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
+    # pipelines = [model_to_dict(pipeline) for pipeline in ace.pipelines]
+    pipelines = [{
+        "_id": str(pipeline._id),
+        "display_title": pipeline.display_title
+    } for pipeline in ace.pipelines]
     articles = [{
         'predictions': [genre_codes[p] for p in ace.predictions.get()[idx]],
         'label': genre_codes[article.label],
