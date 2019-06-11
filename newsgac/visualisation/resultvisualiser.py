@@ -39,7 +39,12 @@ class ResultVisualiser(object):
     def retrieveHeatMapfromResult(normalisation_flag, result, title="", ds_param = 1):
         confusion_matrix = result.confusion_matrix.get()
         cm_normalised = normalise_confusion_matrix(confusion_matrix)
-        genre_names = DataUtils.genre_labels
+        if len(result.sorted_labels) > 0:
+            genre_names = []
+            for label_id in result.sorted_labels:
+                genre_names.append(DataUtils.genre_labels[label_id])
+        else:
+            genre_names = DataUtils.genre_labels
         # print title
         # print confusion_matrix
 
