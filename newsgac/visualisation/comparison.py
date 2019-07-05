@@ -85,9 +85,6 @@ class PipelineComparator:
         plots.extend(p_recall)
         plots.extend(p_other)
 
-        print "SELF.FMEASURE:"
-        print self.fmeasure
-
         return list(plots)
 
 
