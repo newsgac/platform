@@ -24,12 +24,10 @@ class PipelineComparator:
     def __init__(self, ace):
         self.ace = ace
         self.pipelines = pipelines = ace.pipelines
-        # self.pipelines = sorted(pipelines, key=lambda x: x.display_title)
         self.pipeline_titles = []
         for pipeline in self.pipelines:
             self.pipeline_titles.append(pipeline.display_title)
 
-        self.pipeline_titles = sorted(self.pipeline_titles)
         # construct data_sources x axis pipeline names, y axis result
         self.fmeasure = {}
         self.precision = {}
@@ -87,6 +85,9 @@ class PipelineComparator:
         plots.extend(p_recall)
         plots.extend(p_other)
 
+        print "SELF.FMEASURE:"
+        print self.fmeasure
+
         return list(plots)
 
 
@@ -123,7 +124,7 @@ class PipelineComparator:
 
         for type in types:
             p = figure(y_range=self.pipeline_titles, plot_height=height, title=title + ' (' + type + ')',
-                       plot_width = 400, x_range=[0,1], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
+                       plot_width = 400, x_range=[0,1.05], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
 
             p.hbar(y=self.pipeline_titles, height=0.5, left=0, right=metric[type], color=color)
 
@@ -161,7 +162,7 @@ class PipelineComparator:
         i = 0
         for type in types:
             p = figure(y_range=self.pipeline_titles, plot_height=height, title=title + ' (' + subtitles[i] + ')',
-                       plot_width = 400, x_range=[0,1], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
+                       plot_width = 400, x_range=[0,1.05], toolbar_location='right', tools="save,pan,box_zoom,reset,wheel_zoom")
 
             p.hbar(y=self.pipeline_titles, height=0.5, left=0, right=metric[type], color=color)
 
