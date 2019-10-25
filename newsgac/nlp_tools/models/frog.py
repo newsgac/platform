@@ -96,7 +96,7 @@ class FrogFeatureExtractor(TransformerMixin):
 
         # assert each article has the same set of feature keys
         for i in range(len(features) - 1):
-            assert features[i].keys() == features[i+1].keys()
+            if not features[i].keys() == features[i+1].keys(): raise AssertionError()
 
         # features is a list of ordered dicts like { [feature_name]: [feature_value] }
         return_value = numpy.array([f.values() for f in features])

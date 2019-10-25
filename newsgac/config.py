@@ -11,7 +11,7 @@ class Env:
 
 # one of Env.
 environment = environ['ENVIRONMENT']
-assert environment in Env.__dict__
+if not environment in Env.__dict__: raise AssertionError()
 
 # path where this file is located, used to find relative files
 root_path = path.dirname(path.abspath(__file__))
