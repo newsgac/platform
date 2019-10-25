@@ -3,7 +3,7 @@ $(document).ready(function () {
     $(".nav-tabs > li a[title]").tooltip();
 
     //Wizard
-    $('a[data-toggle="tab"]').on("show.bs.tab", function (e) {
+    $("a[data-toggle=\"tab\"]").on("show.bs.tab", function (e) {
 
         var $target = $(e.target);
 
@@ -28,10 +28,10 @@ $(document).ready(function () {
 });
 
 function nextTab(elem) {
-    $(elem).next().find('a[data-toggle="tab"]').click();
+    $(elem).next().find("a[data-toggle=\"tab\"]").click();
 }
 function prevTab(elem) {
-    $(elem).prev().find('a[data-toggle="tab"]').click();
+    $(elem).prev().find("a[data-toggle=\"tab\"]").click();
 }
 
 
@@ -76,7 +76,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $('[data-toggle="confirmation"]').confirmation();
+    $("[data-toggle=\"confirmation\"]").confirmation();
 });
 
 $(function()
@@ -93,7 +93,7 @@ $(function()
         controlForm.find(".entry:not(:last) .btn-add")
             .removeClass("btn-add").addClass("btn-remove")
             .removeClass("btn-success").addClass("btn-danger")
-            .html('<span class="glyphicon glyphicon-minus"></span>');
+            .html("<span class=\"glyphicon glyphicon-minus\"></span>");
     }).on("click", ".btn-remove", function(e)
     {
 		$(this).parents(".entry:first").remove();
@@ -176,7 +176,7 @@ $(document).ready(function() {
     initComplete: function () {
             this.api().columns().every( function () {
                 var column = this;
-                var select = $('<select><option value=""></option></select>')
+                var select = $("<select><option value=\"\"></option></select>")
                     .appendTo( $(column.footer()).empty() )
                     .on( "change", function () {
                         var val = $.fn.dataTable.util.escapeRegex(
@@ -184,12 +184,12 @@ $(document).ready(function() {
                         );
 
                         column
-                            .search( val ? "^"+val+'$' : "", true, false )
+                            .search( val ? "^"+val+"\$" : "", true, false )
                             .draw();
                     } );
 
                 column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+"</option>" )
+                    select.append( "<option value=\""+d+"\">"+d+"</option>" )
                 })
                 })
                 },
