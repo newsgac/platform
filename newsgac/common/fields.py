@@ -17,7 +17,7 @@ class PasswordField(pymodm.fields.CharField):
     def hash(value):
         return hash_password(value)
 
-    def to_mongo(value):
+    def to_mongo(self,value):
         if is_hashed_password(value):
             return value
         return PasswordField.hash(value)
@@ -80,10 +80,10 @@ class ObjectField(pymodm.fields.MongoBaseField):
                 # current_value instanceof WrappedObject
                 current_value.set(value)
 
-    def is_blank(value):
+    def is_blank(self,value):
         return value is None or value.get() is None
 
-    def to_mongo(value):
+    def to_mongo(self,value):
         if value is not None and value.get() is not None:
             value.save()
             return value._object_id
@@ -95,7 +95,7 @@ class ObjectField(pymodm.fields.MongoBaseField):
             return super(ObjectField, self).to_python(WrappedObject(object_id=value))
         return super(ObjectField, self).to_python(value)
 
-    def validate(value):
+    def validate(self,value):
         return True
     # @staticmethod
     # def delete(hash, db_name='cache'):
@@ -121,7 +121,7 @@ class EnumField(MongoBaseField):
         super(EnumField, self).__init__(*args, **kwargs)
         self.validators.append(enum_validator(choices))
 
-    def to_mongo(value):
+    def to_mongo(self,value):
         # value is an Enum val
         return value.value
 
