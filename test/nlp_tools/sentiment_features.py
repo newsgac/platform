@@ -17,5 +17,5 @@ def test_sentiment_features():
 
     result = pipeline.fit_transform([text])
 
-    assert result.shape == (1, 2)
-    assert (pipeline.steps[1][1].get_feature_names() == expected_features).all()
+    if not result.shape == (1, 2): raise AssertionError()
+    if not (pipeline.steps[1][1].get_feature_names() == expected_features).all(): raise AssertionError()

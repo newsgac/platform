@@ -4,14 +4,14 @@ from test.helpers import is_valid_html
 
 def test_page_loads(client):
     rv = client.get('/users/register')
-    assert rv.status_code == 200
-    assert is_valid_html(rv.data)
+    if not rv.status_code == 200: raise AssertionError()
+    if not is_valid_html(rv.data): raise AssertionError()
 
 
 def test_empty_register(client):
     rv = client.post('/users/register', data=dict(
     ))
-    assert rv.status_code == 200
+    if not rv.status_code == 200: raise AssertionError()
 
 
 def test_register(client):
@@ -22,12 +22,12 @@ def test_register(client):
         password="test123test",
     ))
     print (rv.data)
-    assert rv.status_code == 302
+    if not rv.status_code == 302: raise AssertionError()
     user = User.objects.get({'_id': 'test@test.com'})
-    assert user.name == 'Test'
-    assert user.surname == 'User'
-    assert user.email == 'test@test.com'
-    assert user.password != 'test123test'
+    if not user.name == 'Test': raise AssertionError()
+    if not user.surname == 'User': raise AssertionError()
+    if not user.email == 'test@test.com': raise AssertionError()
+    if not user.password != 'test123test': raise AssertionError()
 
 
 def test_register_exists(client):
@@ -38,5 +38,5 @@ def test_register_exists(client):
         password="test123test",
     ))
 
-    assert rv.status_code == 200
-    assert 'already in use' in rv.data
+    if not rv.status_code == 200: raise AssertionError()
+    if not 'already in use' in rv.data: raise AssertionError()

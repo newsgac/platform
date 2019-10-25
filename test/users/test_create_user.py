@@ -21,5 +21,5 @@ def test_password_is_hashed():
     user = User(email='testuser@test.com', password=password, name='Test', surname='User')
     user.save()
     user.refresh_from_db()
-    assert user.password != password
+    if not user.password != password: raise AssertionError()
     user.delete()

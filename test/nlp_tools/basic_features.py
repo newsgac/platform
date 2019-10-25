@@ -17,5 +17,5 @@ def test_basic_features():
     expected_result = numpy.array([9, 0, 0, 0, 0, 2])
 
     result = pipeline.fit_transform([text])
-    assert (pipeline.steps[1][1].get_feature_names() == expected_features).all()
-    assert (result.todense()[0] == expected_result).all()
+    if not (pipeline.steps[1][1].get_feature_names() == expected_features).all(): raise AssertionError()
+    if not (result.todense()[0] == expected_result).all(): raise AssertionError()

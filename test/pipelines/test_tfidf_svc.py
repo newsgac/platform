@@ -16,4 +16,4 @@ def test_run_tfidf_svc_pipeline(test_user, data_source_balanced_10):
     run_pipeline(pipeline)
     sk_pipeline = pipeline.sk_pipeline.get()
     result = sk_pipeline.predict(['Dit is een willekeurige tekst'])
-    assert sk_pipeline is not None
+    if not sk_pipeline is not None: raise AssertionError()

@@ -20,5 +20,5 @@ def test_frog_features():
 
     result = pipeline.fit_transform([text])
 
-    assert result.shape == (1, len(expected_features))
-    assert (pipeline.steps[1][1].get_feature_names() == expected_features).all()
+    if not result.shape == (1, len(expected_features)): raise AssertionError()
+    if not (pipeline.steps[1][1].get_feature_names() == expected_features).all(): raise AssertionError()

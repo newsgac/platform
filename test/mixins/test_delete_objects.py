@@ -29,13 +29,13 @@ def test_delete_objects():
     m.embed = EmbeddedModelWithObjectField(data="some embedded object")
     m.save()
     db = _get_db()
-    assert db['fs.files'].count() == 2
-    assert db['fs.chunks'].count() == 2
-    assert ModelWithObjectField.objects.count() == 1
+    if not db['fs.files'].count() == 2: raise AssertionError()
+    if not db['fs.chunks'].count() == 2: raise AssertionError()
+    if not ModelWithObjectField.objects.count() == 1: raise AssertionError()
     m.delete()
-    assert db['fs.files'].count() == 0
-    assert db['fs.chunks'].count() == 0
-    assert ModelWithObjectField.objects.count() == 0
+    if not db['fs.files'].count() == 0: raise AssertionError()
+    if not db['fs.chunks'].count() == 0: raise AssertionError()
+    if not ModelWithObjectField.objects.count() == 0: raise AssertionError()
 
 
 def test_objects_are_cleaned_up_when_saved():
@@ -44,13 +44,13 @@ def test_objects_are_cleaned_up_when_saved():
     m.embed = EmbeddedModelWithObjectField(data="some embedded object")
     m.save()
     db = _get_db()
-    assert db['fs.files'].count() == 2
-    assert db['fs.chunks'].count() == 2
-    assert ModelWithObjectField.objects.count() == 1
+    if not db['fs.files'].count() == 2: raise AssertionError()
+    if not db['fs.chunks'].count() == 2: raise AssertionError()
+    if not ModelWithObjectField.objects.count() == 1: raise AssertionError()
     m.save()
-    assert db['fs.files'].count() == 2
-    assert db['fs.chunks'].count() == 2
-    assert ModelWithObjectField.objects.count() == 1
+    if not db['fs.files'].count() == 2: raise AssertionError()
+    if not db['fs.chunks'].count() == 2: raise AssertionError()
+    if not ModelWithObjectField.objects.count() == 1: raise AssertionError()
 
 
 def test_objects_are_not_cloned_up_when_model_gets_serialized():
@@ -71,6 +71,6 @@ def test_objects_are_not_cloned_up_when_model_gets_serialized():
     m.save()
     m.delete()
     db = _get_db()
-    assert 0 == db['fs.files'].count()
-    assert 0 == db['fs.chunks'].count()
-    assert 0 == ModelWithObjectField.objects.count()
+    if not 0 == db['fs.files'].count(): raise AssertionError()
+    if not 0 == db['fs.chunks'].count(): raise AssertionError()
+    if not 0 == ModelWithObjectField.objects.count(): raise AssertionError()

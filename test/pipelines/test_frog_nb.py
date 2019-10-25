@@ -17,7 +17,7 @@ def test_run_frog_nb_pipeline(test_user, data_source_balanced_10):
     )
     pipeline.save()
     run_pipeline(pipeline)
-    assert pipeline.sk_pipeline is not None
+    if not pipeline.sk_pipeline is not None: raise AssertionError()
 
 
 @pytest.mark.frog
@@ -32,4 +32,4 @@ def test_second_run_uses_cache(test_user, data_source_balanced_10):
     )
     pipeline.save()
     run_pipeline(pipeline)
-    assert pipeline.sk_pipeline is not None
+    if not pipeline.sk_pipeline is not None: raise AssertionError()
