@@ -34,7 +34,6 @@
 
 6 - Implement tests (Tom :))
     
-    
 ## Potential improvements
 
 1 - Progress bars are lost when pipeline page is refreshed
