@@ -22,7 +22,6 @@ from newsgac.data_sources.views import data_source_blueprint
 from newsgac.pipelines.views import pipeline_blueprint
 from newsgac.tasks.views import task_blueprint
 from newsgac.ace.views import ace_blueprint
-from newsgac import database
 
 __author__ = 'abilgin'
 
