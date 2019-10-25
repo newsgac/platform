@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', e => {
-    Vue.options.delimiters = ['[[', ']]'];
+document.addEventListener("DOMContentLoaded", e => {
+    Vue.options.delimiters = ["[[", "]]"];
 
     initComponents();
 
     v = new Vue({
-        el: '#vue-root',
+        el: "#vue-root",
         data: { ...data, error: {} },
         computed: {
             nlpParams: function() {
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', e => {
     });
 
     function initComponents() {
-        Vue.component('document-field', {
-            props: ['param', 'value'],
+        Vue.component("document-field", {
+            props: ["param", "value"],
             template: `
                 <div>
                     <h6><strong>[[ param.verbose_name || param.attname ]]</strong></h6>
@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', e => {
               `
         });
 
-        Vue.component('textinput-field', {
-            props: ['param', 'value'],
+        Vue.component("textinput-field", {
+            props: ["param", "value"],
             template: `
                 <div class="row mar_ned">
                     <div class="col-md-3">
@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', e => {
               `
         });
 
-         Vue.component('select-field', {
-            props: ['param', 'value'],
+         Vue.component("select-field", {
+            props: ["param", "value"],
             template: `
                 <div class="row mar_ned">
                     <div class="col-md-3">
@@ -126,8 +126,8 @@ document.addEventListener('DOMContentLoaded', e => {
               `
         });
 
-        Vue.component('boolean-field', {
-            props: ['param', 'value'],
+        Vue.component("boolean-field", {
+            props: ["param", "value"],
             template: `
                 <div class="row mar_ned">
                     <div class="col-md-3">
@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', e => {
         });
 
 
-        Vue.component('parameter-field', {
-            props: ['param', 'value'],
+        Vue.component("parameter-field", {
+            props: ["param", "value"],
             template: `<div>
                             <boolean-field v-if="param.type === 'BooleanField'" @input="$emit('input', $event)" v-bind="$props"></boolean-field>
                             <document-field v-else-if="param.type === 'EmbeddedDocumentField'" @input="$emit('input', $event)" v-bind="$props"></document-field>
