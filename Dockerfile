@@ -1,7 +1,5 @@
 FROM python:2.7
 
-MAINTAINER abilgin
-
 RUN mkdir /newsgac
 RUN mkdir /home/flask
 
