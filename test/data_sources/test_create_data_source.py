@@ -13,7 +13,7 @@ def test_create(test_user, dataset_balanced_100):
         file=dataset_balanced_100
     )
     data_source.save()
-    assert data_source.created is not None
+    if data_source.created is None: raise AssertionError()
 
 
 def test_create_same_name_fails(test_user, dataset_balanced_100):

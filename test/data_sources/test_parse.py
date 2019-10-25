@@ -9,39 +9,39 @@ article_4 = """__label__OPI Wat wilt u op uw scherm zien in de Oudejaarsnacht ? 
 
 def test_parse_all_fields1(app):
     article = parse_article(article_1)
-    assert article.year == 1985
-    assert article.source == '06De_Telegraaf'
-    assert article.page == 3
-    assert article.urls[0] == 'http://resolver.kb.nl/resolve?urn=ddd:011207010:mpeg21:a0171'
-    assert article.raw_text.split(' ')[0] == 'Man'
-    assert article.label == DataUtils.genre_codes.index('NIE')
+    if not article.year == 1985: raise AssertionError()
+    if not article.source == '06De_Telegraaf': raise AssertionError()
+    if not article.page == 3: raise AssertionError()
+    if not article.urls[0] == 'http://resolver.kb.nl/resolve?urn=ddd:011207010:mpeg21:a0171': raise AssertionError()
+    if not article.raw_text.split(' ')[0] == 'Man': raise AssertionError()
+    if not article.label == DataUtils.genre_codes.index('NIE'): raise AssertionError()
 
 
 def test_parse_label_only1(app):
     article = parse_article(article_2)
-    assert article.year is None
-    assert article.source is None
-    assert article.page is None
-    assert len(article.urls) == 0
-    assert article.raw_text.split(' ')[0] == 'Man'
-    assert article.label == DataUtils.genre_codes.index('NIE')
+    if not article.year is None: raise AssertionError()
+    if not article.source is None: raise AssertionError()
+    if not article.page is None: raise AssertionError()
+    if not len(article.urls) == 0: raise AssertionError()
+    if not article.raw_text.split(' ')[0] == 'Man': raise AssertionError()
+    if not article.label == DataUtils.genre_codes.index('NIE'): raise AssertionError()
 
 
 def test_parse_all_fields2(app):
     article = parse_article(article_3)
-    assert article.year == 1965
-    assert article.source == '05NRC_Handelsblad'
-    assert article.page == 7
-    assert article.urls[0] == 'http://resolver.kb.nl/resolve?urn=KBNRC01:000035728:mpeg21:a0094'
-    assert article.raw_text.split(' ')[0] == 'Wat'
-    assert article.label == DataUtils.genre_codes.index('OPI')
+    if not article.year == 1965: raise AssertionError()
+    if not article.source == '05NRC_Handelsblad': raise AssertionError()
+    if not article.page == 7: raise AssertionError()
+    if not article.urls[0] == 'http://resolver.kb.nl/resolve?urn=KBNRC01:000035728:mpeg21:a0094': raise AssertionError()
+    if not article.raw_text.split(' ')[0] == 'Wat': raise AssertionError()
+    if not article.label == DataUtils.genre_codes.index('OPI'): raise AssertionError()
 
 
 def test_parse_label_only2(app):
     article = parse_article(article_4)
-    assert article.year is None
-    assert article.source is None
-    assert article.page is None
-    assert len(article.urls) == 0
-    assert article.raw_text.split(' ')[0] == 'Wat'
-    assert article.label == DataUtils.genre_codes.index('OPI')
+    if not article.year is None: raise AssertionError()
+    if not article.source is None: raise AssertionError()
+    if not article.page is None: raise AssertionError()
+    if not len(article.urls) == 0: raise AssertionError()
+    if not article.raw_text.split(' ')[0] == 'Wat': raise AssertionError()
+    if not article.label == DataUtils.genre_codes.index('OPI'): raise AssertionError()
