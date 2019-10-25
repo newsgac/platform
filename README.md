@@ -3,19 +3,19 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/maintainability)](https://codeclimate.com/github/newsgac/platform/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/test_coverage)](https://codeclimate.com/github/newsgac/platform/test_coverage)
 
-[NEWSGAC](https://www.esciencecenter.nl/project/newsgac) is a research project which aims at transparent automatic classification of the genres of newspaper articles. The project is a cooperation between the [University of Groningen](https://www.rug.nl/let/onze-faculteit/organisatie/vakgebieden/journalistiek-en-media-studies/), the Amsterdam [Center for Mathematics and Computer Science](https://www.cwi.nl/research/groups/information-access) and the [Netherlands eScience Center](https://www.esciencecenter.nl/).
+[NEWSGAC](https://www.esciencecenter.nl/project/newsgac) is a research project which aims at transparent automatic classification of genres of newspaper articles. The project is a cooperation between the [University of Groningen](https://www.rug.nl/let/onze-faculteit/organisatie/vakgebieden/journalistiek-en-media-studies/), the Amsterdam [Center for Mathematics and Computer Science](https://www.cwi.nl/research/groups/information-access) and the [Netherlands eScience Center](https://www.esciencecenter.nl/).
 
 In the project, we developed an online platform for applying machine learning models to text data, with the opportunity closely analyze the performance of the models. This repository contains the code of this platform.
 
 ## Setup Instructions for DOCKER
 
-In order to run the platform at your computer, you need to have the programs [anaconda](https://www.anaconda.com/distribution/) and [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following command in a command line environment:
+In order to run the platform at your computer, you need to have the programs [anaconda](https://www.anaconda.com/distribution/) and [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
 
 1. git clone https://github.com/newsgac/platform.git
 2. cd platform
 3. docker-compose -f docker-compose_local.yml up --build
 
-When these commands have successfully completed, the platform will now be available as web server on the address: [http://localhost:5050](http://localhost:5050)
+When these commands have successfully completed, the platform will be available as web server on the address: [http://localhost:5050](http://localhost:5050)
 
 ## Run flask web app locally (through IDE)
 
