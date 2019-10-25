@@ -12,7 +12,7 @@ In the project, we developed an online platform for applying machine learning mo
 
 In order to run the platform at your computer, you need to have the programs [anaconda](https://www.anaconda.com/distribution/) and [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
 
- 1. git clone https://github.com/newsgac/platform.git
+ 1. git clone [https://github.com/newsgac/platform.git]([https://github.com/newsgac/platform.git)
  2. cd platform
  3. docker-compose -f docker-compose_local.yml up --build
 
