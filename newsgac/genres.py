@@ -60,7 +60,7 @@ genre_codes = [
     'UNL',
 ]
 
-assert len(genre_codes) == len(genres_full) == len(genre_labels)
+if len(genre_codes) == len(genres_full) == len(genre_labels): raise AssertionError()
 
 genre_unlabeled_index = len(genre_codes) - 1
 
