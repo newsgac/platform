@@ -5,7 +5,6 @@ from flask import render_template, request, url_for, redirect, session, flash
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
 from newsgac.common.cached_view import cached_view
-from newsgac.common.utils import model_to_dict
 from newsgac.genres import genre_codes
 from newsgac.pipelines.models import Pipeline
 from newsgac.data_sources.models import DataSource
