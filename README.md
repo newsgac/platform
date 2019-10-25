@@ -1,5 +1,6 @@
 # NEWSGAC
 [![Build Status](https://travis-ci.org/newsgac/platform.svg?branch=master)](https://travis-ci.org/newsgac/platform)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7da69edab6084303a6bbad203013b5a2)](https://www.codacy.com/manual/eriktks/platform?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=newsgac/platform&amp;utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/maintainability)](https://codeclimate.com/github/newsgac/platform/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/test_coverage)](https://codeclimate.com/github/newsgac/platform/test_coverage)
 
