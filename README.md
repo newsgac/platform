@@ -3,26 +3,19 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/maintainability)](https://codeclimate.com/github/newsgac/platform/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/40ee8b8ba037d26a4e4d/test_coverage)](https://codeclimate.com/github/newsgac/platform/test_coverage)
 
-This is the development repository for NEWSGAC Project.
+[NEWSGAC](https://www.esciencecenter.nl/project/newsgac) is a research project which aims at transparent automatic classification of the genres of newspaper articles. The project is a cooperation between the [University of Groningen](https://www.rug.nl/let/onze-faculteit/organisatie/vakgebieden/journalistiek-en-media-studies/), the Amsterdam [Center for Mathematics and Computer Science](https://www.cwi.nl/research/groups/information-access) and the [Netherlands eScience Center](https://www.esciencecenter.nl/).
+
+In the project, we developed an online platform for applying machine learning models to text data, with the opportunity closely analyze the performance of the models. This repository contains the code of this platform.
 
 ## Setup Instructions for DOCKER
 
-1. Install docker-compose
+In order to run the platform at your computer, you need to have the programs [anaconda](https://www.anaconda.com/distribution/) and [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following command in a command line environment:
 
-2. In terminal, navigate to platform folder.
+1. git clone https://github.com/newsgac/platform.git
+2. cd platform
+3. docker-compose -f docker-compose_local.yml up --build
 
-3. By default, database data will be saved to `./../data`, e.g. in a folder called `data` in the parent of this repository's directory.
-   To change this modify `docker-compose_local.yml` line 43 to a folder of your choice on your local machine.
-   For example change `./../data:/data/db` to `<your_local_path>:/data/db`
-
-4. To run from command line, navigate to platform and run:
-
-```
-docker-compose -f docker-compose_local.yml up --build
-```
-
-The platform will now be available as web server on: 
-http://localhost:5050
+When these commands have successfully completed, the platform will now be available as web server on the address: [http://localhost:5050](http://localhost:5050)
 
 ## Run flask web app locally (through IDE)
 
