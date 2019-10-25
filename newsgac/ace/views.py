@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from bson import ObjectId
-from flask import Blueprint, render_template, request, url_for, redirect, session, flash
+from flask import render_template, request, url_for, redirect, session, flash
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
