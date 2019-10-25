@@ -104,7 +104,6 @@ E.g. to create a user:
 
   * You can now login from the frontend as this user.
 
-
 ## References
 
 A. Bilgin, E. Tjong Kim Sang, K. Smeenk, L. Hollink, J. van Ossenbruggen, F. Harbers and M. Broersma, [Utilizing a Transparency-driven Environment toward Trusted Automatic Genre Classification: A Case Study in Journalism History](https://arxiv.org/pdf/1810.00968.pdf) (2018)
@@ -147,6 +146,6 @@ T. Klaver, E. Tjong Kim Sang, A. Bilgin, K. Smeenk, L. Hollink, J. van Ossenbrug
 
 ## Contributors
 
-  - Aysenur Bilgin (aysenur.bilgin@cwi.nl)
-  - Erik Tjong Kim Sang (e.tjongkimsang@esciencecenter.nl)
-  - Tom Klaver (t.klaver@esciencecenter.nl)
+  * Aysenur Bilgin (aysenur.bilgin@cwi.nl)
+  * Erik Tjong Kim Sang (e.tjongkimsang@esciencecenter.nl)
+  * Tom Klaver (t.klaver@esciencecenter.nl)
