@@ -134,8 +134,8 @@ def delete_all():
 @ace_blueprint.route('/<string:ace_id>/explain_features_lime/<string:pipeline_id>/<string:article_number>')
 @requires_login
 def explain_article(*args, **kwargs):
-    pipeline = Pipeline.objects.get({'_id': ObjectId(kwargs['pipeline_id'])})
-    # if pipeline.nlp_tool.tag == 'frog_tfidf':
+    _ = Pipeline.objects.get({'_id': ObjectId(kwargs['pipeline_id'])})
+    # if _.nlp_tool.tag == 'frog_tfidf':
     #     flash('Unfortunately, due to limitations of LIME, we cannot show explanations for TFIDF+Frog pipelines :(.', 'error')
     #     return view(kwargs['ace_id'])
     return cached_view(
