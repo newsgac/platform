@@ -1,27 +1,27 @@
 $(document).ready(function () {
     //Initialize tooltips
-    $('.nav-tabs > li a[title]').tooltip();
+    $(".nav-tabs > li a[title]").tooltip();
 
     //Wizard
-    $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+    $('a[data-toggle="tab"]').on("show.bs.tab", function (e) {
 
         var $target = $(e.target);
 
-        if ($target.parent().hasClass('disabled')) {
+        if ($target.parent().hasClass("disabled")) {
             return false;
         }
     });
 
     $(".next-step-tab").click(function (e) {
 
-        var $active = $('.wizard .nav-tabs li.active');
-        $active.next().removeClass('disabled');
+        var $active = $(".wizard .nav-tabs li.active");
+        $active.next().removeClass("disabled");
         nextTab($active);
 
     });
     $(".prev-step-tab").click(function (e) {
 
-        var $active = $('.wizard .nav-tabs li.active');
+        var $active = $(".wizard .nav-tabs li.active");
         prevTab($active);
 
     });
@@ -40,27 +40,27 @@ function prevTab(elem) {
 $(document).ready(function()
 {
     //Add Inactive Class To All Accordion Headers
-    $('.accordion-header').toggleClass('inactive-header');
+    $(".accordion-header").toggleClass("inactive-header");
 
 	//Set The Accordion Content Width
-	var contentwidth = $('.accordion-header').width();
-	$('.accordion-content').css({});
+	var contentwidth = $(".accordion-header").width();
+	$(".accordion-content").css({});
 
 	//Open The First Accordion Section When Page Loads
-	$('.accordion-header').first().toggleClass('active-header').toggleClass('inactive-header');
-	$('.accordion-content').first().slideDown().toggleClass('open-content');
+	$(".accordion-header").first().toggleClass("active-header").toggleClass("inactive-header");
+	$(".accordion-content").first().slideDown().toggleClass("open-content");
 
 	// The Accordion Effect
-	$('.accordion-header').click(function () {
-		if($(this).is('.inactive-header')) {
-			$('.active-header').toggleClass('active-header').toggleClass('inactive-header').next().slideToggle().toggleClass('open-content');
-			$(this).toggleClass('active-header').toggleClass('inactive-header');
-			$(this).next().slideToggle().toggleClass('open-content');
+	$(".accordion-header").click(function () {
+		if($(this).is(".inactive-header")) {
+			$(".active-header").toggleClass("active-header").toggleClass("inactive-header").next().slideToggle().toggleClass("open-content");
+			$(this).toggleClass("active-header").toggleClass("inactive-header");
+			$(this).next().slideToggle().toggleClass("open-content");
 		}
 
 		else {
-			$(this).toggleClass('active-header').toggleClass('inactive-header');
-			$(this).next().slideToggle().toggleClass('open-content');
+			$(this).toggleClass("active-header").toggleClass("inactive-header");
+			$(this).next().slideToggle().toggleClass("open-content");
 		}
 	});
 
@@ -69,10 +69,10 @@ $(document).ready(function()
 
 
 $(document).ready(function() {
-    $('#experiment_nb').bootstrapValidator();
-    $('#experiment_svc').bootstrapValidator();
-    $('#experiment_rf').bootstrapValidator();
-    $('#experiment_xgb').bootstrapValidator();
+    $("#experiment_nb").bootstrapValidator();
+    $("#experiment_svc").bootstrapValidator();
+    $("#experiment_rf").bootstrapValidator();
+    $("#experiment_xgb").bootstrapValidator();
 });
 
 $(document).ready(function() {
@@ -81,22 +81,22 @@ $(document).ready(function() {
 
 $(function()
 {
-    $(document).on('click', '.btn-add', function(e)
+    $(document).on("click", ".btn-add", function(e)
     {
         e.preventDefault();
 
-        var controlForm = $('#aspects'),
-            currentEntry = $(this).parents('.entry:first'),
+        var controlForm = $("#aspects"),
+            currentEntry = $(this).parents(".entry:first"),
             newEntry = $(currentEntry.clone()).appendTo(controlForm);
 
-        newEntry.find('input').val('');
-        controlForm.find('.entry:not(:last) .btn-add')
-            .removeClass('btn-add').addClass('btn-remove')
-            .removeClass('btn-success').addClass('btn-danger')
+        newEntry.find("input").val("");
+        controlForm.find(".entry:not(:last) .btn-add")
+            .removeClass("btn-add").addClass("btn-remove")
+            .removeClass("btn-success").addClass("btn-danger")
             .html('<span class="glyphicon glyphicon-minus"></span>');
-    }).on('click', '.btn-remove', function(e)
+    }).on("click", ".btn-remove", function(e)
     {
-		$(this).parents('.entry:first').remove();
+		$(this).parents(".entry:first").remove();
 
 		e.preventDefault();
 		return false;
@@ -105,54 +105,54 @@ $(function()
 
 $(document).ready(function() {
 //    console.log("here")
-    $('.features_div').hide();
-    $('#data_source').change(function(){
-        if($('#data_source').val().toLowerCase().indexOf("tf-idf") < 0) {
-            $('.features_div').fadeIn();
+    $(".features_div").hide();
+    $("#data_source").change(function(){
+        if($("#data_source").val().toLowerCase().indexOf("tf-idf") < 0) {
+            $(".features_div").fadeIn();
         } else {
-            $('.features_div').fadeOut();
+            $(".features_div").fadeOut();
         }
     });
 });
 
 $(document).ready(function() {
-    $('.auto_data').change(function () {
-        if ($('.auto_data').is(":checked")) {
-            $('.details_div_data').fadeOut();
+    $(".auto_data").change(function () {
+        if ($(".auto_data").is(":checked")) {
+            $(".details_div_data").fadeOut();
             return; }
-       $('.details_div_data').fadeIn();
+       $(".details_div_data").fadeIn();
     });
-    if ($('.auto_data').is(":checked")) {
-            $('.details_div_data').fadeOut();
+    if ($(".auto_data").is(":checked")) {
+            $(".details_div_data").fadeOut();
             return; }
 });
 
 $(document).ready(function() {
-    $('.auto_feat').change(function () {
-        if ($('.auto_feat').is(":checked")) {
-            $('.details_div_feat').fadeOut();
+    $(".auto_feat").change(function () {
+        if ($(".auto_feat").is(":checked")) {
+            $(".details_div_feat").fadeOut();
             return; }
-       $('.details_div_feat').fadeIn();
+       $(".details_div_feat").fadeIn();
     });
-    if ($('.auto_feat').is(":checked")) {
-            $('.details_div_feat').fadeOut();
+    if ($(".auto_feat").is(":checked")) {
+            $(".details_div_feat").fadeOut();
             return; }
 });
 
 $(document).ready(function() {
-    $('.auto_alg').change(function () {
-        if ($('.auto_alg').is(":checked")) {
-            $('.details_div_alg').fadeOut();
+    $(".auto_alg").change(function () {
+        if ($(".auto_alg").is(":checked")) {
+            $(".details_div_alg").fadeOut();
             return; }
-       $('.details_div_alg').fadeIn();
+       $(".details_div_alg").fadeIn();
     });
-    if ($('.auto_alg').is(":checked")) {
-            $('.details_div_alg').fadeOut();
+    if ($(".auto_alg").is(":checked")) {
+            $(".details_div_alg").fadeOut();
             return; }
 });
 
 $(document).ready(function() {
-    $('#recommendation_table').DataTable(
+    $("#recommendation_table").DataTable(
     {
     columnDefs: [
 //        {targets: 1, render: $.fn.dataTable.render.ellipsis(100, true)},
@@ -165,7 +165,7 @@ $(document).ready(function() {
 } );
 
 $(document).ready(function() {
-    $('#data_sources_table').DataTable(
+    $("#data_sources_table").DataTable(
     {
     columnDefs: [
         {targets: 4, render: $.fn.dataTable.render.ellipsis(75, true)},
@@ -178,18 +178,18 @@ $(document).ready(function() {
                 var column = this;
                 var select = $('<select><option value=""></option></select>')
                     .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
+                    .on( "change", function () {
                         var val = $.fn.dataTable.util.escapeRegex(
                             $(this).val()
                         );
 
                         column
-                            .search( val ? '^'+val+'$' : '', true, false )
+                            .search( val ? "^"+val+'$' : "", true, false )
                             .draw();
                     } );
 
                 column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                    select.append( '<option value="'+d+'">'+d+"</option>" )
                 })
                 })
                 },
