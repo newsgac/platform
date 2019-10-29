@@ -265,7 +265,7 @@ class ResultVisualiser(object):
         title = data_source.display_title
         articles = [{
             'year': str(article.year),
-            'label': genre_labels[article.label]
+            'label': data_source.labels[article.label]
         } for article in data_source.articles]
 
         df = DataFrame(articles)

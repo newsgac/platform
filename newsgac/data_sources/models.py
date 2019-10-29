@@ -12,7 +12,7 @@ class Article(MongoModel):
     raw_text = fields.CharField()
     date = fields.DateTimeField()
     year = fields.IntegerField()
-    label = fields.CharField()
+    label = fields.IntegerField()
     source = fields.CharField()
     page = fields.IntegerField()
     urls = fields.ListField(fields.CharField())

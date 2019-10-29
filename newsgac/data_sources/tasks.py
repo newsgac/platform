@@ -15,7 +15,17 @@ def process_data_source(self, data_source_id):
     data_source.save()
     try:
         parser = get_parser(data_source.file_format)
-        data_source.articles = parser.get_articles_from_data_source(data_source)
+        articles = parser.get_articles_from_data_source(data_source)
+        labels = list(set([article.label for article in articles]))
+        assert len(labels) > 0
+
+        inverse_labels = {v: k for k, v in enumerate(list(set(labels)))}
+        for article in articles:
+            article.label = inverse_labels[article.label]
+
+        data_source.labels = [str(label) for label in labels]
+        data_source.articles = articles
+
         for article in data_source.articles:
             article.save()
         data_source.save()
