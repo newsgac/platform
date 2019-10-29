@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "task.html" import task %}
 {% block content %}
 
     {% if data_sources|length == 0 %}
@@ -29,10 +30,10 @@
                     <thead>
                         <tr>
                             <th>Title</th>
-                            <th>Processed</th>
                             <th>Description</th>
                             <th>Time of creation</th>
                             <th>Number of instances</th>
+                            <th>Status</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -41,17 +42,12 @@
                         {% for data_source in data_sources %}
                         <tr>
                             <td><a href="{{ url_for('data_sources.view', data_source_id = data_source._id) }}">{{ data_source.display_title }}</a></td>
-                            {% if data_source.articles | length > 0 %}
-                                <td>Yes</td>
-                            {% elif data_source.task.task_id %}
-                                <td>In progress</td>
-                            {% else %}
-                                <td>No</td>
-                            {% endif %}
-
                             <td>{{ data_source.description }}</td>
                             <td>{{ data_source.created | datetime }}</td>
                             <td>{{ data_source.articles|length or '?' }}</td>
+                            <td>
+                                {{ task(data_source['task']) }}
+                            </td>
                             <td>
                                 <a class="btn btn-danger"
                                    data-toggle="confirmation"

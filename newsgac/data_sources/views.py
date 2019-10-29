@@ -19,7 +19,6 @@ data_source_blueprint = Blueprint('data_sources', __name__)
 
 @data_source_blueprint.route('/')
 @requires_login
-@back.anchor
 def overview():
     # todo: get users data sources only
     data_sources = list(DataSource.objects.values())
@@ -28,7 +27,6 @@ def overview():
 
 @data_source_blueprint.route('/new', methods=['GET', 'POST'])
 @requires_login
-@back.anchor
 def new():
     if request.method == 'POST':
         try:

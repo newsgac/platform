@@ -1,6 +1,8 @@
 import logging
 from os import environ, path
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 logger = logging.getLogger(__name__)
 
@@ -41,3 +43,11 @@ pipeline_cache_dir = '/tmp/newsgac'
 
 redis_url = 'redis://%s:%s/0' % (redis_host, redis_port)
 mongo_url = 'mongodb://%s:%s/%s' % (mongo_host, mongo_port, mongo_database_name)
+
+sentry_dsn = environ.get('SENTRY_DSN', None)
+
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[FlaskIntegration()]
+    )

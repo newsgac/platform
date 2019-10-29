@@ -1,16 +1,4 @@
 #!/usr/bin/env python
-import os
-
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
-
-sentry_dsn = os.environ.get('SENTRY_DSK', None)
-if sentry_dsn:
-    sentry_sdk.init(
-        dsn=sentry_dsn,
-        integrations=[FlaskIntegration()]
-    )
-
 from flask import Flask, render_template
 
 from newsgac import config
@@ -43,18 +31,6 @@ app.register_blueprint(ace_blueprint, url_prefix="/ace")
 app.json_encoder = _JSONEncoder
 
 load_filters(app)
-
-if config.environment in [config.Env.local, config.Env.localdocker]:
-    import time
-    last_time = time.time()
-
-    def time_measure():
-        global last_time
-        print((time.time() - last_time))
-        last_time = time.time()
-
-    app.jinja_env.globals.update(time_measure=time_measure)
-
 
 if __name__ == "__main__":
     app.run(
