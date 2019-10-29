@@ -18,7 +18,7 @@ def load_filters(app):
 
     @app.template_filter('dict_string')
     def _format_dict_string(dict_val):
-        return ', '.join("%s=%s" % (key, val) for (key, val) in dict_val.iteritems() if key != '_cls')
+        return ', '.join("%s=%s" % (key, val) for (key, val) in dict_val.items() if key != '_cls')
 
     @app.template_filter('code_to_label')
     def _code_to_label(code):

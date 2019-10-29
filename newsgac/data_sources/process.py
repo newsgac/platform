@@ -61,9 +61,9 @@ def get_articles_from_file(file):
             raise Exception("Error in line %s: %s" % (str(line_number), e))
 
         articles.append(article)
-        if article.raw_text in map(lambda a: a.raw_text, articles):
+        if article.raw_text in [a.raw_text for a in articles]:
             duplicate_count += 1
 
-    print("Found ", duplicate_count, " duplicate(s) in documents..")
+    print(("Found ", duplicate_count, " duplicate(s) in documents.."))
 
     return articles

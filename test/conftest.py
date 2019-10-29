@@ -5,6 +5,7 @@ import pytest
 from newsgac.app import app as flask_app
 from pymodm.connection import _get_db
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--frog", action="store_true", default=False, help="run tests using frog"
@@ -28,6 +29,7 @@ def pytest_collection_modifyitems(config, items):
 def client():
     flask_app.testing = True
     _client = flask_app.test_client()
+
     def login(username='test@test.com', password='testtesttest'):
         return _client.post('/users/login', data=dict(
             identifier=username,

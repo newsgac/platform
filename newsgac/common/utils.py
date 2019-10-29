@@ -48,7 +48,7 @@ def remove_cls_from_dict(model_dict):
     if isinstance(model_dict, dict):
         if '_cls' in model_dict:
             del model_dict['_cls']
-        for value in model_dict.values():
+        for value in list(model_dict.values()):
             remove_cls_from_dict(value)
 
     if isinstance(model_dict, list):
@@ -67,7 +67,7 @@ def split_long_sentences(sentences, max_tokens=450):
         words = sentence.split(' ')
 
         while len(words) > max_tokens:
-            print("WARNING: sentence found with > %s tokens" % str(max_tokens))
+            print(("WARNING: sentence found with > %s tokens" % str(max_tokens)))
             new_sentences.append(' '.join(words[:max_tokens]) + '.')
             words = words[max_tokens:]
 

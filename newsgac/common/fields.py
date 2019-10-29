@@ -8,7 +8,7 @@ from pymodm.errors import ValidationError
 
 from newsgac.common.utils import hash_password, is_hashed_password
 
-from dill import dill
+import dill
 
 
 class PasswordField(pymodm.fields.CharField):

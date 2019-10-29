@@ -6,7 +6,7 @@ import numpy
 from collections import OrderedDict
 
 from sklearn.base import TransformerMixin
-from sklearn.externals.joblib import delayed, Parallel
+from joblib import delayed, Parallel
 
 from nltk import word_tokenize, sent_tokenize
 from nltk.stem.snowball import SnowballStemmer
@@ -14,41 +14,41 @@ from nltk.stem.snowball import SnowballStemmer
 from newsgac import config
 
 unwanted_chars = {
-    u'|',
-    u'_',
-    u'=',
-    u'(',
-    u')',
-    u'[',
-    u']',
-    u'<',
-    u'>',
-    u'#',
-    u'/',
-    u'\\',
-    u'*',
-    u'~',
-    u'`',
-    u'«',
-    u'»',
-    u'®',
-    u'^',
-    u'°',
-    u'•',
-    u'★',
-    u'■',
-    u'{',
-    u'}',
-    u'™',
-    u'§',
-    u'♦',
-    u'±',
-    u'►',
-    u'и',
-    u'✓',
-    u'з',
-    u'□',
-    u'▼',
+    '|',
+    '_',
+    '=',
+    '(',
+    ')',
+    '[',
+    ']',
+    '<',
+    '>',
+    '#',
+    '/',
+    '\\',
+    '*',
+    '~',
+    '`',
+    '«',
+    '»',
+    '®',
+    '^',
+    '°',
+    '•',
+    '★',
+    '■',
+    '{',
+    '}',
+    '™',
+    '§',
+    '♦',
+    '±',
+    '►',
+    'и',
+    '✓',
+    'з',
+    '□',
+    '▼',
 }
 
 
@@ -71,8 +71,8 @@ class CleanOCR(TransformerMixin):
 
 
 class ExtractQuotes(TransformerMixin):
-    opening_quote_chars = [u'„', u'‚‚', u',,']
-    closing_quote_chars = [u'"', u'”', u"'", u'’']
+    opening_quote_chars = ['„', '‚‚', ',,']
+    closing_quote_chars = ['"', '”', "'", '’']
 
     def fit(self, X, y=None):
         return self
@@ -141,7 +141,7 @@ class ExtractBasicFeatures(TransformerMixin):
         features['question_marks_perc'] = text.count('?') / float(word_token_count) if word_token_count > 0 else 0
         features['exclamation_marks_perc'] = text.count('!') / float(word_token_count) if word_token_count > 0 else 0
         currency_symbols = 0
-        for char in [u'$', u'€', u'£', u'ƒ']:
+        for char in ['$', '€', '£', 'ƒ']:
             currency_symbols += text.count(char)
         features['currency_symbols_perc'] = currency_symbols / float(word_token_count) if word_token_count > 0 else 0
         features['digits_perc'] = len([c for c in text if c.isdigit()]) / float(word_token_count) if word_token_count > 0 else 0
@@ -149,7 +149,7 @@ class ExtractBasicFeatures(TransformerMixin):
         features['sentences'] = len(sentence_tokens)
         features['avg_sentence_length'] = (word_token_count / float(sentence_token_count)) if sentence_token_count > 0 else 0
 
-        return numpy.array([value for idx, value in features.iteritems()])
+        return numpy.array([value for idx, value in features.items()])
 
         # return features
 

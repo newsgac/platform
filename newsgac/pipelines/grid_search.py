@@ -98,7 +98,7 @@ def run_grid_search(pipeline):
     for learner in learners:
         if learner in param_space:
             space = {
-                'Classifier__%s' % name: space for name, space in param_space[learner].iteritems()
+                'Classifier__%s' % name: space for name, space in param_space[learner].items()
             }
             space['Classifier'] = [learner.create().get_classifier()]
             param_grid.append(space)
@@ -111,16 +111,16 @@ def run_grid_search(pipeline):
                           scoring=scores[3])
     start = time()
     search.fit(texts, labels)
-    print("Best parameter (CV score=%0.3f):" % search.best_score_)
-    print(search.best_params_)
+    print(("Best parameter (CV score=%0.3f):" % search.best_score_))
+    print((search.best_params_))
 
     pipeline.grid_search_result = {
         'full': search.cv_results_,
         'best': search.best_params_
     }
-    print pipeline.grid_search_result
-    print("GridSearchCV took %.2f seconds for %d candidate parameter settings."
-          % (time() - start, len(search.cv_results_['params'])))
+    print(pipeline.grid_search_result)
+    print(("GridSearchCV took %.2f seconds for %d candidate parameter settings."
+          % (time() - start, len(search.cv_results_['params']))))
     report(search.cv_results_)
 
     pipeline.save()

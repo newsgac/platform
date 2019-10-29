@@ -46,7 +46,7 @@ def run_ace_impl(ace_id):
         ace.task.status = Status.FAILURE
         ace.task.set_failure(e)
         ace.save()
-        raise t, v, tb
+        raise t(v).with_traceback(tb)
 
 
 @celery_app.task(bind=True, trail=True)

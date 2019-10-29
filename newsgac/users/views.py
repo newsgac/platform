@@ -44,14 +44,14 @@ def register_user():
             return redirect('/')
         except ValidationError as e:
             error_dict = e.message
-            if 'password' in error_dict.keys():
+            if 'password' in list(error_dict.keys()):
                 # hide entered password from error msg
                 error_dict['password'] = [
                     msg.replace(form_dict.get('password', ''), 'password') for msg in error_dict['password']
                 ]
 
             flash(Markup('<br>'.join([
-                '%s: %s' % (key, ' '.join(value)) for (key, value) in error_dict.iteritems()
+                '%s: %s' % (key, ' '.join(value)) for (key, value) in error_dict.items()
             ])), 'error')
         except DuplicateKeyError:
             flash('E-mail address is already in use', 'error')

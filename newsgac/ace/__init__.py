@@ -1,1 +1,1 @@
-from .models import ACE
+from newsgac.ace.models import ACE

@@ -63,18 +63,18 @@ class ParametersMixin(object):
             result_field_dict = {'type': field.__class__.__name__}
             field_dict = field.__dict__
             if isinstance(field, EmbeddedDocumentField):
-                result_field_dict['model'] = map(map_field, field.related_model._mongometa.get_fields())
+                result_field_dict['model'] = list(map(map_field, field.related_model._mongometa.get_fields()))
                 result_field_dict['attname'] = field_dict['attname']
                 result_field_dict['description'] = field_dict['description']
                 result_field_dict['default'] = model_to_dict(field.default)
             else:
                 attrs = ['attname', 'default', 'choices', 'verbose_name', 'description']
                 for attr in attrs:
-                    if attr in field_dict.keys():
+                    if attr in list(field_dict.keys()):
                         result_field_dict[attr] = field_dict[attr]
             return result_field_dict
 
-        result = map(map_field, cls.parameters.related_model._mongometa.get_fields())
+        result = list(map(map_field, cls.parameters.related_model._mongometa.get_fields()))
         return result
 
     @classmethod

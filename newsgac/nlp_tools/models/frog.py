@@ -57,13 +57,13 @@ def populate_frog_cache(texts, max_chunk_size=100):
             uncached.append(text)
 
     if len(uncached) > 0:
-        print(str(len(uncached)) + ' texts to FROG')
+        print((str(len(uncached)) + ' texts to FROG'))
         chunks = list(chunk_list(uncached, max_chunk_size))
         with allow_join_result():
             # list of frog tokens per text
             # concurrently process each chunk with celery. Why not chunk_size == 1? Celery has a memory leak,
             # which scales per task, so larger chunks reduce memory leakage.
-            print('frogging ' + str(len(chunks)) + ' chunks')
+            print(('frogging ' + str(len(chunks)) + ' chunks'))
             # waits till done
             group(frog_process.s(chunk) for chunk in chunks)().get()
             print('frogging done')
@@ -78,7 +78,7 @@ class FrogFeatureExtractor(TransformerMixin):
         return self
 
     def transform(self, X):
-        print('Frog: ' + str(len(X)) + ' articles')
+        print(('Frog: ' + str(len(X)) + ' articles'))
 
         texts = X
         populate_frog_cache(texts)
@@ -89,17 +89,17 @@ class FrogFeatureExtractor(TransformerMixin):
         for article_key, tokens in enumerate(frog_tokens):
             article_features = {
                 k: v for k, v in
-                get_frog_features(tokens, X[article_key]).iteritems()
+                get_frog_features(tokens, X[article_key]).items()
                 if extract_features_dict[k]
             }
-            features.append(OrderedDict(sorted(article_features.items(), key=lambda t: t[0])))
+            features.append(OrderedDict(sorted(list(article_features.items()), key=lambda t: t[0])))
 
         # assert each article has the same set of feature keys
         for i in range(len(features) - 1):
-            if not features[i].keys() == features[i+1].keys(): raise AssertionError()
+            if not list(features[i].keys()) == list(features[i+1].keys()): raise AssertionError()
 
         # features is a list of ordered dicts like { [feature_name]: [feature_value] }
-        return_value = numpy.array([f.values() for f in features])
+        return_value = numpy.array([list(f.values()) for f in features])
         return return_value
 
     def get_feature_names(self):

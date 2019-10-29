@@ -24,7 +24,7 @@ def run_pipeline_task_impl(pipeline_id):
         pipeline.refresh_from_db()
         pipeline.task.set_failure(e)
         pipeline.save()
-        raise t, v, tb
+        raise t(v).with_traceback(tb)
 
 @celery_app.task(bind=True)
 def run_pipeline_task(self, pipeline_id):
@@ -57,7 +57,7 @@ def run_grid_search_task_impl(pipeline_id):
         pipeline.task.status = Status.FAILURE
         pipeline.task.set_failure(e)
         pipeline.save()
-        raise t, v, tb
+        raise t(v).with_traceback(tb)
 
     # wait for grid search task to be finished
     # TODO: these to be added to celery task after completion of grid search

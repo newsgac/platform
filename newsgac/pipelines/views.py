@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 from bson import ObjectId
 from bokeh.embed import components
 from bokeh.layouts import gridplot
@@ -252,12 +252,12 @@ def visualise_results(pipeline_id):
         from collections import OrderedDict
 
         feature_weights = classifier.get_booster().get_fscore()
-        sorted_fw = OrderedDict(sorted(feature_weights.items(), key=lambda t: t[0]))
+        sorted_fw = OrderedDict(sorted(list(feature_weights.items()), key=lambda t: t[0]))
         sorted_keys = sorted(sk_pipeline.named_steps['FeatureExtraction'].get_feature_names())
-        print sorted_fw
+        print(sorted_fw)
 
         feat_importances = []
-        for (ft, score) in sorted_fw.items():
+        for (ft, score) in list(sorted_fw.items()):
             index = int(ft.split("f")[1])
             feat_importances.append({'Feature': sorted_keys[index], 'Importance': score})
         feat_importances = DataFrame(feat_importances)

@@ -126,15 +126,15 @@ class ResultVisualiser(object):
         else:
             font_size = "10pt"
 
-        prediction_data = {'genres': sorted_probabilities.keys(),
-                       'probs': sorted_probabilities.values()}
+        prediction_data = {'genres': list(sorted_probabilities.keys()),
+                       'probs': list(sorted_probabilities.values())}
         pred_source = ColumnDataSource(data=prediction_data)
 
-        p = figure(y_range=sorted_probabilities.keys(), plot_height=int(600*ds_param), title='Genre Probabilities for '+ title_suffix,
+        p = figure(y_range=list(sorted_probabilities.keys()), plot_height=int(600*ds_param), title='Genre Probabilities for '+ title_suffix,
                    plot_width=int(800*ds_param), x_range=[0, 1], toolbar_location='right',
                    tools="save,pan,box_zoom,reset,wheel_zoom")
 
-        p.hbar(y=sorted_probabilities.keys(), height=0.5, left=0, right=sorted_probabilities.values(), color='navy')
+        p.hbar(y=list(sorted_probabilities.keys()), height=0.5, left=0, right=list(sorted_probabilities.values()), color='navy')
 
         labels = LabelSet(x='probs', y='genres', text='probs', level='glyph', text_font_size=font_size,
                           x_offset=2, y_offset=-1, source=pred_source, render_mode='canvas')

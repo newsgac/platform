@@ -20,3 +20,4 @@ build
 newsgac.egg-info
 .coverage
 .env.prod
+.env

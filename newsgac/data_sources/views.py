@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 from bson import ObjectId
 from flask import Blueprint, render_template, request, session, url_for, flash
 from pymodm.errors import ValidationError
@@ -8,7 +8,7 @@ from newsgac.common.back import back
 from newsgac.pipelines.models import Pipeline
 from newsgac.users.view_decorators import requires_login
 from newsgac.data_sources.models import DataSource
-from newsgac.data_sources.tasks import process
+from newsgac.data_sources.tasks import process_data_source
 from newsgac.users.models import User
 from newsgac.visualisation.resultvisualiser import ResultVisualiser
 
@@ -41,8 +41,7 @@ def new():
             flash('The file has been successfully uploaded.', 'success')
             data_source.task.set_started()
             data_source.save()
-            process.delay(data_source._id)
-
+            process_data_source.delay(data_source._id)
 
             return redirect(url_for("data_sources.overview"))
         except ValidationError as e:
@@ -56,7 +55,7 @@ def new():
 @requires_login
 def view(data_source_id):
     print(data_source_id)
-    print(type(data_source_id))
+    print((type(data_source_id)))
     data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
     script, div = None, None
     try:

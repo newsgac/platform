@@ -1,1 +1,1 @@
-from models import Cache
+from .models import Cache
