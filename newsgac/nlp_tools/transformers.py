@@ -177,7 +177,7 @@ class ExtractSentimentFeatures(TransformerMixin):
 
     @staticmethod
     def transform_text(text):
-        from pattern.nl import sentiment
+        from pattern.text.nl import sentiment
         polarity, subjectivity = sentiment(text)
         return numpy.array([
             polarity,
