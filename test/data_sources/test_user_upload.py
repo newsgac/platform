@@ -12,19 +12,20 @@ def login(test_user, client):
 def test_index_page(client):
     sv = client.get('/data_sources/')
     if not sv.status_code == 200: raise AssertionError()
-    if not is_valid_html(sv.data): raise AssertionError()
+    if not is_valid_html(sv.data.decode('utf-8')): raise AssertionError()
 
 
 def test_new_page(client):
     sv = client.get('/data_sources/new')
     if not sv.status_code == 200: raise AssertionError()
-    if not is_valid_html(sv.data): raise AssertionError()
+    if not is_valid_html(sv.data.decode('utf-8')): raise AssertionError()
 
 
 #@pytest.mark.timeout(10)
 def test_upload(client, dataset_balanced_100):
     sv = client.post('/data_sources/new', data=dict(
         file=(dataset_balanced_100, 'dataset.txt'),
+        file_format='newsgac',
         display_title="Test data set",
         description="For testing purposes"
     ))

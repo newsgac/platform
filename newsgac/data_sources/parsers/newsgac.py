@@ -26,8 +26,11 @@ class NewsgacFormatParser:
 
     @staticmethod
     def parse_article(article_str):
+        if isinstance(article_str, bytes):
+            article_str = article_str.decode('utf-8')
         article = Article()
-        line = article_str.rstrip().decode('utf-8')
+        # line = article_str.rstrip().decode('utf-8')
+        line = article_str.rstrip()
         words = line.split(' ', 20)
 
         for word_index, word in enumerate(words):

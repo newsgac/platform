@@ -14,7 +14,7 @@ def test_parse_all_fields1(app):
     if not article.page == 3: raise AssertionError()
     if not article.urls[0] == 'http://resolver.kb.nl/resolve?urn=ddd:011207010:mpeg21:a0171': raise AssertionError()
     if not article.raw_text.split(' ')[0] == 'Man': raise AssertionError()
-    if not article.label == DataUtils.genre_codes.index('NIE'): raise AssertionError()
+    if not article.label == 'NIE': raise AssertionError()
 
 
 def test_parse_label_only1(app):
@@ -24,7 +24,7 @@ def test_parse_label_only1(app):
     if not article.page is None: raise AssertionError()
     if not len(article.urls) == 0: raise AssertionError()
     if not article.raw_text.split(' ')[0] == 'Man': raise AssertionError()
-    if not article.label == DataUtils.genre_codes.index('NIE'): raise AssertionError()
+    if not article.label == 'NIE': raise AssertionError()
 
 
 def test_parse_all_fields2(app):
@@ -34,7 +34,7 @@ def test_parse_all_fields2(app):
     if not article.page == 7: raise AssertionError()
     if not article.urls[0] == 'http://resolver.kb.nl/resolve?urn=KBNRC01:000035728:mpeg21:a0094': raise AssertionError()
     if not article.raw_text.split(' ')[0] == 'Wat': raise AssertionError()
-    if not article.label == DataUtils.genre_codes.index('OPI'): raise AssertionError()
+    if not article.label == 'OPI': raise AssertionError()
 
 
 def test_parse_label_only2(app):
@@ -44,4 +44,4 @@ def test_parse_label_only2(app):
     if not article.page is None: raise AssertionError()
     if not len(article.urls) == 0: raise AssertionError()
     if not article.raw_text.split(' ')[0] == 'Wat': raise AssertionError()
-    if not article.label == DataUtils.genre_codes.index('OPI'): raise AssertionError()
+    if not article.label == 'OPI': raise AssertionError()

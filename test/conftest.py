@@ -4,7 +4,7 @@ import sys
 import pytest
 from newsgac.app import app as flask_app
 from pymodm.connection import _get_db
-
+from pathlib import Path
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -76,10 +76,12 @@ def test_user(db):
 
 @pytest.yield_fixture()
 def dataset_balanced_100():
-    with open(os.path.join(sys.path[0], 'test', 'mocks', 'balanced_label_date_100.txt'), 'r') as f:
+    file_path = Path(__file__).parent / 'mocks' / 'balanced_label_date_100.txt'
+    with open(str(file_path), 'rb') as f:
         yield f
 
 @pytest.yield_fixture()
 def dataset_balanced_10():
-    with open(os.path.join(sys.path[0], 'test', 'mocks', 'balanced_label_date_10.txt'), 'r') as f:
+    file_path = Path(__file__).parent / 'mocks' / 'balanced_label_date_10.txt'
+    with open(str(file_path), 'rb') as f:
         yield f

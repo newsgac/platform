@@ -5,7 +5,7 @@ from test.helpers import is_valid_html
 def test_page_loads(client):
     rv = client.get('/users/register')
     if not rv.status_code == 200: raise AssertionError()
-    if not is_valid_html(rv.data): raise AssertionError()
+    if not is_valid_html(rv.data.decode('utf-8')): raise AssertionError()
 
 
 def test_empty_register(client):
@@ -21,7 +21,7 @@ def test_register(client):
         email="test@test.com",
         password="test123test",
     ))
-    print (rv.data)
+
     if not rv.status_code == 302: raise AssertionError()
     user = User.objects.get({'_id': 'test@test.com'})
     if not user.name == 'Test': raise AssertionError()
@@ -39,4 +39,4 @@ def test_register_exists(client):
     ))
 
     if not rv.status_code == 200: raise AssertionError()
-    if not 'already in use' in rv.data: raise AssertionError()
+    if not 'already in use' in rv.data.decode('utf-8'): raise AssertionError()
