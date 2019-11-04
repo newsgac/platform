@@ -33,8 +33,8 @@ def overview():
         } for ace in list(ACE.objects.all())
     ]
 
-    # data_sources = list(DataSource.objects.all())
-    data_sources = list(DataSource.objects.raw({'training_purpose': False}))
+    data_sources = list(DataSource.objects.all())
+    # data_sources = list(DataSource.objects.raw({'training_purpose': False}))
     pipelines = list(Pipeline.objects.all())
     return render_template(
         "ace/overview.html",
@@ -67,6 +67,7 @@ def new_save():
     ace.display_title = ace.get_display_title()
     ace.save()
     task = run_ace.delay(str(ace._id))
+    ace.refresh_from_db()
     ace.task.task_id = task.task_id
     ace.save()
     return redirect(url_for('ace.overview'))

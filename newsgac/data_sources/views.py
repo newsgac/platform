@@ -1,4 +1,4 @@
-
+from bokeh.embed import components
 from bson import ObjectId
 from flask import Blueprint, render_template, request, session, url_for, flash
 from pymodm.errors import ValidationError
@@ -10,7 +10,7 @@ from newsgac.users.view_decorators import requires_login
 from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process_data_source
 from newsgac.users.models import User
-from newsgac.visualisation.resultvisualiser import ResultVisualiser
+from newsgac.visualisation.resultvisualiser import data_source_stats
 
 __author__ = 'abilgin'
 
@@ -55,7 +55,9 @@ def view(data_source_id):
     data_source = DataSource.objects.get({'_id': ObjectId(data_source_id)})
     script, div = None, None
     try:
-        script, div = ResultVisualiser.visualize_data_source_stats(data_source)
+        plot = data_source_stats(data_source)
+        script, div = components(plot)
+
     except Exception:
         pass
 
@@ -67,22 +69,6 @@ def view(data_source_id):
         mimetype='text/html'
     )
 
-
-# #todo: check
-# @data_source_blueprint.route('/recommend/<string:data_source_id>')
-# @user_decorators.requires_login
-# def apply_grid_search(data_source_id):
-#     ds = DataSource.get_by_id(data_source_id)
-#
-#     task = grid_ds.delay(data_source_id)
-#     task.wait()
-#
-#     if len(task.result) > 1:
-#         report_per_score = task.result[0][0]
-#         feature_reduction = task.result[0][1]
-#
-#     return render_template('data_sources/recommendation.html', data_source = ds, report_per_score = report_per_score,
-#                            feature_reduction=feature_reduction)
 
 #todo: write test for this
 @data_source_blueprint.route('/<string:data_source_id>/delete')

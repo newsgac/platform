@@ -51,7 +51,6 @@ def run_ace_impl(ace_id):
 
 @celery_app.task(bind=True, trail=True)
 def run_ace(self, ace_id):
-    # run_ace_impl(ace_id)
     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
     (stdoutdata, stderrdata) = process.communicate("""
 import newsgac.database

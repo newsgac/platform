@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import logging
+
 from flask import Flask, render_template
 
 from newsgac import config
@@ -12,6 +14,10 @@ from newsgac.tasks.views import task_blueprint
 from newsgac.ace.views import ace_blueprint
 
 __author__ = 'abilgin'
+
+
+logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 app.secret_key = config.secret_key

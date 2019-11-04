@@ -27,14 +27,14 @@ class Result(EmbeddedMongoModel):
     recall_micro = fields.FloatField()
     recall_weighted = fields.FloatField()
     std = fields.FloatField()
-    sorted_labels = fields.ListField()
+    # sorted_labels = fields.ListField()
 
     @classmethod
     def from_prediction(cls, true_labels, predicted_labels):
         scores = numpy.array([
             1 if true_labels[i] == predicted_labels[i] else 0 for i in range(0, len(true_labels))
         ])
-        sorted_labels = sorted(list(set(list(true_labels)+list(predicted_labels))))
+        # sorted_labels = sorted(list(set(list(true_labels)+list(predicted_labels))))
 
         return cls(
             confusion_matrix=confusion_matrix(true_labels, predicted_labels),
@@ -51,7 +51,7 @@ class Result(EmbeddedMongoModel):
             cohens_kappa=metrics.cohen_kappa_score(true_labels, predicted_labels),
             accuracy=scores.mean(),
             std=scores.std(),
-            sorted_labels=sorted_labels
+            # sorted_labels=sorted_labels
         )
 
 

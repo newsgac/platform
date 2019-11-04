@@ -15,8 +15,6 @@
       <li><a data-toggle="pill" href="#features">Feature Rankings</a></li>
     </ul>
 
-
-
     <div class="tab-content">
         <div id="results" class="tab-pane fade in active">
             {% include('pipelines/metrics.html') with context %}
@@ -26,7 +24,7 @@
                 {{ mermaid }}
             </div>
         </div>
-        <div id="features" class="tab-pane fade">
+        <div id="features" class="tab-pane fade" style="width: 1500px">
             {% include('pipelines/features.html') with context %}
         </div>
     </div>

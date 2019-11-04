@@ -1,11 +1,12 @@
 import logging
+import sys
 from os import environ, path
 from dotenv import load_dotenv
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 logger = logging.getLogger(__name__)
-
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def parse_bool(value):
     return value in [True, 'true', "True", "TRUE", 1, "1", "yes", "Yes"]
@@ -51,3 +52,4 @@ if sentry_dsn:
         dsn=sentry_dsn,
         integrations=[FlaskIntegration()]
     )
+

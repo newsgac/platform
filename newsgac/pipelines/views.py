@@ -20,7 +20,7 @@ from newsgac.users.models import User
 from newsgac.learners.factory import learners, create_learner
 from newsgac.nlp_tools import nlp_tools
 from newsgac.nlp_tools.factory import create_nlp_tool
-from newsgac.visualisation.resultvisualiser import ResultVisualiser
+from newsgac.visualisation.resultvisualiser import heatMapFromResult, feature_weights
 
 pipeline_blueprint = Blueprint('pipelines', __name__)
 
@@ -48,8 +48,8 @@ def get_data_sources_dict():
         str(data_source.pk): {
             'display_title': data_source.display_title,
         }
-        # for data_source in list(DataSource.objects.all())
-        for data_source in list(DataSource.objects.raw({'training_purpose': True}))
+        for data_source in list(DataSource.objects.all())
+        # for data_source in list(DataSource.objects.raw({'training_purpose': True}))
     }
 
 
@@ -134,6 +134,7 @@ def new_save():
             task = run_grid_search_task.delay(str(pipeline._id))
         else:
             task = run_pipeline_task.delay(str(pipeline._id))
+        pipeline.refresh_from_db()
         pipeline.task.task_id = task.task_id
         pipeline.save()
         return Response(
@@ -226,88 +227,25 @@ def get_mermaid(pipeline):
 @pipeline_blueprint.route('/<string:pipeline_id>/results')
 @requires_login
 def visualise_results(pipeline_id):
-    # TODO: refactor
     pipeline = Pipeline.objects.get({'_id': ObjectId(pipeline_id)})
-    sk_pipeline = pipeline.sk_pipeline.get()
-    classifier = sk_pipeline.named_steps['Classifier']
     results_eval = pipeline.result
     results_model = pipeline.result
-    p, script, div = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_eval, title="Evaluation", ds_param=0.7)
-    # p_mod, script_mod, div_mod = ResultVisualiser.retrieveHeatMapfromResult(normalisation_flag=True, result=results_model, title="Model", ds_param=0.7)
-    script_f = ''
-    div_f = ''
-    # TODO: check for nb
-    # TODO: _svc because it's crashing atm
-    if pipeline.learner._tag in ['_svc']:
-        if classifier.kernel == 'linear':
-            coefficients = classifier.coef_
-            vectorized_pipeline = sk_pipeline.named_steps['FeatureExtraction'].transformer_list[0][0] == 'TFIDF'
-            names = sk_pipeline.named_steps['FeatureExtraction'].get_feature_names()
-            # get vectorizer for bow
-            if isinstance(coefficients, csr_matrix):
-                coefficients = coefficients.toarray()
-            p_f, script_f, div_f = ResultVisualiser.retrievePlotForFeatureWeights(coefficients=coefficients, names=names, vectorized_pipeline=vectorized_pipeline )
-    elif pipeline.learner.tag in ['xgb']:
-        from pandas import DataFrame
-        from collections import OrderedDict
 
-        feature_weights = classifier.get_booster().get_fscore()
-        sorted_fw = OrderedDict(sorted(list(feature_weights.items()), key=lambda t: t[0]))
-        sorted_keys = sorted(sk_pipeline.named_steps['FeatureExtraction'].get_feature_names())
-        print(sorted_fw)
+    p = heatMapFromResult(pipeline=pipeline, ds_param=0.7)
+    script, div = components(p)
 
-        feat_importances = []
-        for (ft, score) in list(sorted_fw.items()):
-            index = int(ft.split("f")[1])
-            feat_importances.append({'Feature': sorted_keys[index], 'Importance': score})
-        feat_importances = DataFrame(feat_importances)
-        feat_importances = feat_importances.sort_values(
-            by='Importance', ascending=True).reset_index(drop=True)
-        # Divide the importances by the sum of all importances
-        # to get relative importances. By using relative importances
-        # the sum of all importances will equal to 1, i.e.,
-        # np.sum(feat_importances['importance']) == 1
-        feat_importances['Importance'] /= feat_importances['Importance'].sum()
-        feat_importances = feat_importances.round(3)
+    p_features = feature_weights(pipeline=pipeline)
+    f_script, f_div = components(p_features)
 
-        p_f, script_f, div_f = ResultVisualiser.visualize_df_feature_importance(feat_importances, pipeline.display_title)
-    elif pipeline.learner.tag in ['rf']:
-        from pandas import DataFrame
-        feature_weights = classifier.feature_importances_
-        sorted_keys = sorted(sk_pipeline.named_steps['FeatureExtraction'].get_feature_names())
-
-        feat_importances = []
-        for (ft, key) in zip(feature_weights, sorted_keys):
-            feat_importances.append({'Feature': key, 'Importance': ft})
-        feat_importances = DataFrame(feat_importances)
-        feat_importances = feat_importances.sort_values(
-            by='Importance', ascending=True).reset_index(drop=True)
-        # Divide the importances by the sum of all importances
-        # to get relative importances. By using relative importances
-        # the sum of all importances will equal to 1, i.e.,
-        # np.sum(feat_importances['importance']) == 1
-        feat_importances['Importance'] /= feat_importances['Importance'].sum()
-        feat_importances = feat_importances.round(3)
-
-        p_f, script_f, div_f = ResultVisualiser.visualize_df_feature_importance(feat_importances,
-                                                                                pipeline.display_title)
-
-    plots = []
-    plots.append(p)
-    overview_layout = gridplot(plots, ncols=2)
-    script, div = components(overview_layout)
-
-    return render_template('pipelines/results.html',
-                           pipeline=pipeline,
-                           results_eval=results_eval,
-                           results_model=results_model,
-                           plot_script=script,
-                           plot_div=div,
-                           plot_feature_script=script_f,
-                           plot_feature_div=div_f,
-                           mimetype='text/html',
-                           mermaid=get_mermaid(pipeline.get_sk_pipeline())
-                           )
-
-
-
+    return render_template(
+        'pipelines/results.html',
+        pipeline=pipeline,
+        results_eval=results_eval,
+        results_model=results_model,
+        plot_script=script,
+        plot_div=div,
+        plot_feature_script=f_script,
+        plot_feature_div=f_div,
+        mimetype='text/html',
+        mermaid=get_mermaid(pipeline.get_sk_pipeline())
+    )
