@@ -235,7 +235,10 @@ def visualise_results(pipeline_id):
     script, div = components(p)
 
     p_features = feature_weights(pipeline=pipeline)
-    f_script, f_div = components(p_features)
+    if p_features:
+        f_script, f_div = components(p_features)
+    else:
+        f_script, f_div = (None, None)
 
     return render_template(
         'pipelines/results.html',

@@ -1,4 +1,4 @@
-{% if plot_feature_div|length > 0 %}
+{% if plot_feature_div and plot_feature_div|length > 0 %}
     {{ plot_feature_div|indent(4)|safe }}
 {% else %}
     <p>Feature importance rankings are not available for this pipeline.</p>
