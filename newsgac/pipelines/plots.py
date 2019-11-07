@@ -255,9 +255,10 @@ def feature_weights(pipeline, top_features = 10):
     )
 
 
-def visualize_df_feature_importance(data_frame, title_suffix):
-
+def visualize_df_feature_importance(data_frame, title_suffix, max_features=30):
     pred_source = ColumnDataSource(data=data_frame)
+
+    data_frame = data_frame[len(data_frame) - max_features:]
 
     p = figure(y_range=data_frame['Feature'].tolist(), plot_height=1000, title='Feature Importance for '+ title_suffix,
                plot_width=800, x_range=[0, 0.4], toolbar_location='right',
