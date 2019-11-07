@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import logging
 
+from bokeh.embed import components
+from bokeh.plotting import figure
 from flask import Flask, render_template
 
 from newsgac import config

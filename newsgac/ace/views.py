@@ -1,6 +1,6 @@
-
+from bokeh.embed import components
 from bson import ObjectId
-from flask import Blueprint, render_template, request, url_for, redirect, session, flash
+from flask import Blueprint, render_template, request, url_for, redirect, session
 
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
@@ -8,10 +8,11 @@ from newsgac.common.cached_view import cached_view
 from newsgac.genres import genre_codes
 from newsgac.pipelines.models import Pipeline
 from newsgac.data_sources.models import DataSource
+from newsgac.pipelines.plots import confusion_matrix_plot
 from newsgac.users.models import User
 from newsgac.users.view_decorators import requires_login
 from newsgac.ace.tasks import run_ace, explain_article_lime_task
-from newsgac.visualisation.comparison import PipelineComparator
+from newsgac.ace.plots import metrics_plots
 
 ace_blueprint = Blueprint('ace', __name__)
 
@@ -102,15 +103,26 @@ def view(ace_id):
 @requires_login
 def comparison_overview(ace_id):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
-    comparator = PipelineComparator(ace)
+    from bokeh.layouts import gridplot
+    script, div = components(gridplot(metrics_plots(ace), ncols=3))
 
-    script, div = comparator.performComparison()
-    script_cm, div_cm = comparator.combineHeatMapPlotsForAllPipelines()
-    script.append(script_cm)
-    div.append(div_cm)
+    cm_plots = [confusion_matrix_plot(pipeline, pipeline.display_title) for pipeline in ace.pipelines]
+    cm_script, cm_div = components(gridplot(cm_plots, ncols=3))
 
-    return render_template('ace/comparison.html', ace = ace, plot_scripts=script, plot_divs=div,
-                   mimetype='text/html')
+    # comparator = PipelineComparator(ace)
+
+    # script, div = comparator.performComparison()
+    # script_cm, div_cm = comparator.combineHeatMapPlotsForAllPipelines()
+    # script.append(script_cm)
+    # div.append(div_cm)
+
+    return render_template(
+        'ace/comparison.html',
+        ace=ace,
+        plot_scripts=[script, cm_script],
+        plot_divs=[div, cm_div],
+        mimetype='text/html'
+    )
 
 @ace_blueprint.route('/<string:ace_id>/delete')
 @requires_login

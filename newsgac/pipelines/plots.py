@@ -1,30 +1,13 @@
 from collections import OrderedDict
 
-from pandas import DataFrame
-
 import colorcet
 import numpy as np
-
-from bokeh.models import (
-    ColumnDataSource,
-    LabelSet,
-    HoverTool,
-    LinearColorMapper,
-    PrintfTickFormatter,
-    ColorBar,
-    FixedTicker, FactorRange)
-from bokeh.embed import components
-from bokeh.plotting import figure
 from bokeh.layouts import gridplot
-
-from bokeh.transform import factor_cmap
-from bokeh.palettes import Category20
+from bokeh.models import LinearColorMapper, ColumnDataSource, ColorBar, FixedTicker, PrintfTickFormatter, HoverTool, \
+    LabelSet
+from bokeh.plotting import figure
+from pandas import DataFrame
 from scipy.sparse import csr_matrix
-
-from newsgac import genres as DataUtils
-from newsgac.genres import genre_labels
-
-__author__ = 'abilgin'
 
 
 def normalise_confusion_matrix(cm):
@@ -34,7 +17,7 @@ def normalise_confusion_matrix(cm):
     return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
 
 
-def heatMapFromResult(pipeline, title="Evaluation", normalisation_flag=True, ds_param = 1):
+def confusion_matrix_plot(pipeline, title="Evaluation", normalisation_flag=True, ds_param = 1):
     result = pipeline.result
     confusion_matrix = result.confusion_matrix.get()
     cm_normalised = normalise_confusion_matrix(confusion_matrix)
@@ -93,18 +76,22 @@ def heatMapFromResult(pipeline, title="Evaluation", normalisation_flag=True, ds_
            fill_color={'field': 'weight', 'transform': mapper},
            line_color='white')
 
-    color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size=font_size,
-                         ticker=FixedTicker(ticks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]),
-                         formatter=PrintfTickFormatter(format="%.1f"),
-                         label_standoff=7, border_line_color='white', location=(0, 0))
-    p.add_layout(color_bar, 'right')
-
+    # color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size=font_size,
+    #                      ticker=FixedTicker(ticks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]),
+    #                      formatter=PrintfTickFormatter(format="%.1f"),
+    #                      label_standoff=7, border_line_color='white', location=(0, 0))
+    # p.add_layout(color_bar, 'right')
+    #
     p.select_one(HoverTool).tooltips = [
         ('Class', ' @actual predicted as @predicted'),
         ('Predicted # instances', ' @pred_value'),
         ('Total # instances', ' @actual_value'),
         ('Normalized', ' @weight'),
     ]
+
+    # p.min_border_left = 100
+    # p.min_border_top = 20
+    # p.min_border_bottom = 20
 
     return p
 
@@ -207,9 +194,7 @@ def svc_feature_weights(pipeline, top_features=10):
 
         p.add_layout(labels_pos)
         p.add_layout(labels_neg)
-        p.min_border_left = 100
-        p.min_border_top = 20
-        p.min_border_bottom = 20
+
         plots.append(p)
 
     # return plots[0]
@@ -292,67 +277,8 @@ def visualize_df_feature_importance(data_frame, title_suffix):
 
     p.add_layout(labels)
 
-    p.min_border_left = 100
-    p.min_border_top = 20
-    p.min_border_bottom = 50
+    # p.min_border_left = 100
+    # p.min_border_top = 20
+    # p.min_border_bottom = 50
 
     return p
-
-
-def data_source_stats(data_source):
-    # https://bokeh.pydata.org/en/latest/docs/user_guide/categorical.html#nested-categories
-    title = data_source.display_title
-    articles = [{
-        'year': str(article.year),
-        'label': data_source.labels[article.label]
-    } for article in data_source.articles]
-
-    df = DataFrame(articles)
-
-    group_sizes = df.groupby(['year', 'label']).size().to_frame('size')
-
-    counts = list(group_sizes['size'])
-    x = list(group_sizes.index)  # year,label tuples
-
-    source = ColumnDataSource(data=dict(
-        x=x,
-        counts=counts
-    ))
-
-    p = figure(x_range=FactorRange(*x),
-               plot_height=400,
-               plot_width=1200,
-               title="Distribution of genres over time in " + title,
-               toolbar_location='right',
-               tools="save,pan,box_zoom,reset,wheel_zoom"
-               )
-
-    p.vbar(source=source,
-           x='x',
-           top='counts',
-           width=1,
-           line_color="white",
-           fill_color=factor_cmap('x',
-                                  palette=Category20[20],
-                                  factors=sorted(list(df.label.unique())),
-                                  start=1,
-                                  end=2
-                                  )
-           )
-
-    p.x_range.range_padding = 0.1
-    p.xgrid.grid_line_color = None
-    p.yaxis.axis_label = "Total number of instances"
-    p.yaxis.major_label_text_font_size = '10pt'
-    p.xaxis.major_label_text_font_size = '10pt'
-    p.xaxis.major_label_orientation = "vertical"
-    p.legend.location = "top_left"
-    p.legend.orientation = "horizontal"
-
-    p.min_border_left = 100
-    p.min_border_top = 20
-    p.min_border_bottom = 50
-
-    return p
-
-

@@ -52,11 +52,11 @@ def run_ace_impl(ace_id):
 @celery_app.task(bind=True, trail=True)
 def run_ace(self, ace_id):
     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-    (stdoutdata, stderrdata) = process.communicate("""
+    (stdoutdata, stderrdata) = process.communicate(f"""
 import newsgac.database
 from newsgac.ace.tasks import run_ace_impl
-run_ace_impl('%s')
-""" % ace_id)
+run_ace_impl('{ace_id}')
+""".encode('ascii'))
 
 
     exit_code = process.wait()
@@ -221,11 +221,11 @@ def explain_article_lime_task(self, view_cache_id, ace_id, pipeline_id, article_
     # explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number)
     # return
     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-    (stdoutdata, stderrdata) = process.communicate("""
+    (stdoutdata, stderrdata) = process.communicate(f"""
 import newsgac.database
 from newsgac.ace.tasks import explain_article_lime_task_impl
-explain_article_lime_task_impl('%s', '%s', '%s', '%s')
-    """ % (view_cache_id, ace_id, pipeline_id, article_number))
+explain_article_lime_task_impl('{view_cache_id}', '{ace_id}', '{pipeline_id}', '{article_number}')
+    """.encode('ascii'))
 
     exit_code = process.wait()
     if exit_code > 0:

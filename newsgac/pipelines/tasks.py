@@ -28,20 +28,20 @@ def run_pipeline_task_impl(pipeline_id):
 
 @celery_app.task(bind=True)
 def run_pipeline_task(self, pipeline_id):
-    run_pipeline_task_impl(pipeline_id)
+    # run_pipeline_task_impl(pipeline_id)
 
-#     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-#     (stdoutdata, stderrdata) = process.communicate("""
-# import newsgac.database
-# from newsgac.pipelines.tasks import run_pipeline_task_impl
-# run_pipeline_task_impl('%s')
-#         """ % pipeline_id)
-#
-#     exit_code = process.wait()
-#
-#     print(exit_code)
-#     print(stderrdata)
-#     print(stdoutdata)
+    process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
+    (stdoutdata, stderrdata) = process.communicate(f"""
+import newsgac.database
+from newsgac.pipelines.tasks import run_pipeline_task_impl
+run_pipeline_task_impl('{pipeline_id}')
+        """.encode('ascii'))
+
+    exit_code = process.wait()
+
+    print(exit_code)
+    print(stderrdata)
+    print(stdoutdata)
 
 
 def run_grid_search_task_impl(pipeline_id):
@@ -68,11 +68,11 @@ def run_grid_search_task_impl(pipeline_id):
 @celery_app.task(bind=True)
 def run_grid_search_task(self, pipeline_id):
     process = subprocess.Popen(['python'], stdin=subprocess.PIPE)
-    (stdoutdata, stderrdata) = process.communicate("""
+    (stdoutdata, stderrdata) = process.communicate(f"""
 import newsgac.database
 from newsgac.pipelines.tasks import run_grid_search_task_impl
-run_grid_search_task_impl('%s')
-    """ % pipeline_id)
+run_grid_search_task_impl('{pipeline_id}')
+    """.encode('ascii'))
 
     exit_code = process.wait()
 

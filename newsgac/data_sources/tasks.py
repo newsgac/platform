@@ -16,7 +16,7 @@ def process_data_source(self, data_source_id):
     try:
         parser = get_parser(data_source.file_format)
         articles = parser.get_articles_from_data_source(data_source)
-        labels = list(set([article.label for article in articles]))
+        labels = sorted(list(set([article.label for article in articles])))
         assert len(labels) > 0
 
         inverse_labels = {v: k for k, v in enumerate(list(set(labels)))}

@@ -10,7 +10,7 @@ from newsgac.users.view_decorators import requires_login
 from newsgac.data_sources.models import DataSource
 from newsgac.data_sources.tasks import process_data_source
 from newsgac.users.models import User
-from newsgac.visualisation.resultvisualiser import data_source_stats
+from newsgac.data_sources.plots import data_source_stats
 
 __author__ = 'abilgin'
 

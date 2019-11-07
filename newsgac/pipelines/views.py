@@ -20,7 +20,7 @@ from newsgac.users.models import User
 from newsgac.learners.factory import learners, create_learner
 from newsgac.nlp_tools import nlp_tools
 from newsgac.nlp_tools.factory import create_nlp_tool
-from newsgac.visualisation.resultvisualiser import heatMapFromResult, feature_weights
+from newsgac.pipelines.plots import confusion_matrix_plot, feature_weights
 
 pipeline_blueprint = Blueprint('pipelines', __name__)
 
@@ -231,7 +231,7 @@ def visualise_results(pipeline_id):
     results_eval = pipeline.result
     results_model = pipeline.result
 
-    p = heatMapFromResult(pipeline=pipeline, ds_param=0.7)
+    p = confusion_matrix_plot(pipeline=pipeline, ds_param=0.7)
     script, div = components(p)
 
     p_features = feature_weights(pipeline=pipeline)
