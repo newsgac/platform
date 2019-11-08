@@ -8,7 +8,7 @@ scipy==1.3.1
 dill==0.3.1.1
 Flask==1.1.1
 lime==0.1.1.34
-MarkupSafe
+MarkupSafe==1.1.1
 nltk
 Pattern
 passlib
