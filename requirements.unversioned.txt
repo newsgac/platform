@@ -14,7 +14,7 @@ Pattern==3.6
 passlib==1.7.1
 pymodm==0.4.1
 PyNLPl==1.2.9
-requests
+requests==2.22.0
 regex
 scikit-learn
 stop-words
