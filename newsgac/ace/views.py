@@ -5,7 +5,6 @@ from flask import Blueprint, render_template, request, url_for, redirect, sessio
 from newsgac.ace.models import ACE
 from newsgac.common.back import back
 from newsgac.common.cached_view import cached_view
-from newsgac.genres import genre_codes
 from newsgac.pipelines.models import Pipeline
 from newsgac.data_sources.models import DataSource
 from newsgac.pipelines.plots import confusion_matrix_plot
@@ -84,8 +83,8 @@ def view(ace_id):
         "display_title": pipeline.display_title
     } for pipeline in ace.pipelines]
     articles = [{
-        'predictions': [genre_codes[p] for p in ace.predictions.get()[idx]],
-        'label': genre_codes[article.label],
+        'predictions': [ace.data_source.labels[p] for p in ace.predictions.get()[idx]],
+        'label': ace.data_source.labels[article.label],
     } for idx, article in enumerate(ace.data_source.articles)]
 
     return render_template(

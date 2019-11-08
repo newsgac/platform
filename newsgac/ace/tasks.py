@@ -13,7 +13,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import FeatureUnion, Pipeline as SKPipeline
 
 from newsgac.cached_views.models import CachedView
-from newsgac.genres import genre_labels
 from newsgac.pipelines import Pipeline
 from newsgac.tasks.models import Status
 
@@ -152,7 +151,7 @@ def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_n
     model = skp.steps.pop()[1]
 
     used_classes = model.classes_
-    used_class_names = [genre_labels[x] for x in used_classes]
+    used_class_names = [ace.data_source.labels[x] for x in used_classes]
 
     lime_text_html = ''
     lime_features_html = ''

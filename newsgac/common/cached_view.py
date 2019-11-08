@@ -22,7 +22,8 @@ def generate_view_data(hash, task, args, kwargs):
 
 
 def cached_view(template, view_name, task, args, kwargs):
-    hash = hashlib.sha1('%s.%s.%s' % (view_name, args.__repr__(), kwargs.__repr__())).hexdigest()
+    to_hash = '%s.%s.%s' % (view_name, args.__repr__(), kwargs.__repr__())
+    hash = hashlib.sha1(to_hash.encode('ascii')).hexdigest()
     try:
         cache = CachedView.objects.get({'hash': hash})
     except DoesNotExist:

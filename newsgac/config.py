@@ -8,6 +8,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
+
 def parse_bool(value):
     return value in [True, 'true', "True", "TRUE", 1, "1", "yes", "Yes"]
 

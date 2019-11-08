@@ -2,7 +2,6 @@ from pymodm import MongoModel, EmbeddedMongoModel, fields
 from pymodm.errors import DoesNotExist, ValidationError
 
 from newsgac.common.mixins import CreatedUpdated
-from newsgac.genres import genre_codes
 from newsgac.data_sources.validators import has_extension
 from newsgac.tasks.models import TrackedTask
 from newsgac.users.models import User

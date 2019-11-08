@@ -1,6 +1,3 @@
-from newsgac.genres import genre_labels
-
-
 def load_filters(app):
     @app.context_processor
     def inject_bokeh_js_css():
@@ -22,4 +19,4 @@ def load_filters(app):
 
     @app.template_filter('code_to_label')
     def _code_to_label(code):
-        return genre_labels[code]
+        return 'i' + str(code)

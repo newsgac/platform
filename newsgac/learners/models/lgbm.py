@@ -3,7 +3,6 @@ from pymodm import fields
 from lightgbm import LGBMClassifier
 
 from newsgac import config
-from newsgac.genres import genre_codes
 from .learner import Learner
 
 
@@ -35,6 +34,7 @@ class Parameters(EmbeddedMongoModel):
 
     random_state = fields.IntegerField(required=True, default=42)
     random_state.description = 'Enter an integer for a random seed.'
+
 
 class LearnerLGBM(Learner):
     name = 'Light GBM'
@@ -72,7 +72,7 @@ class LearnerLGBM(Learner):
             subsample_for_bin=200000,
             objective='multiclass',
             metric='multi_logloss',
-            num_class=len(genre_codes),
+            # num_class=len(genre_codes),
             class_weight=None,
             min_split_gain=0.0,
             min_child_weight=0.001,
