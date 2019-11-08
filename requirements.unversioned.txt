@@ -15,7 +15,7 @@ passlib==1.7.1
 pymodm==0.4.1
 PyNLPl==1.2.9
 requests==2.22.0
-regex
+regex==2019.11.1
 scikit-learn
 stop-words
 pandas
