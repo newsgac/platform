@@ -5,10 +5,6 @@ from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 
 from newsgac.tasks.models import TrackedTask
 
-import spacy
-
-DUTCH_NLP = spacy.load('nl_core_news_sm')
-
 
 # Analyze, compare, explain
 class ACE(CreatedUpdated, DeleteObjectsMixin, MongoModel):
