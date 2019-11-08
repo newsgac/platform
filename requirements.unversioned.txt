@@ -28,6 +28,6 @@ spacy==2.2.2
 xgboost==0.90
 lightgbm==2.3.0
 pytest-cov==2.8.1
-dateparser
+dateparser==0.7.2
 sentry-sdk[flask]
 watchdog
