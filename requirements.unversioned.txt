@@ -29,5 +29,5 @@ xgboost==0.90
 lightgbm==2.3.0
 pytest-cov==2.8.1
 dateparser==0.7.2
-sentry-sdk[flask]
+sentry-sdk[flask]==0.13.1
 watchdog
