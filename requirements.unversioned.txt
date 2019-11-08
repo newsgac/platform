@@ -9,7 +9,7 @@ gunicorn
 lightgbm
 git+git://github.com/newsgac/lime@master#egg=lime
 MarkupSafe
-nltk
+nltk==3.4.5
 numpy
 pandas
 passlib
