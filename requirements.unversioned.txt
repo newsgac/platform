@@ -13,7 +13,7 @@ nltk
 numpy
 pandas
 passlib
-Pattern
+Pattern==3.6
 pymodm
 PyNLPl
 pytest
