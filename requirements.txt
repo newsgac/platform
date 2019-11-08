@@ -146,7 +146,7 @@ python-mimeparse==1.6.0
 pytoml==0.1.21
 pytz==2019.3
 PyWavelets==1.1.1
-PyYAML==3.13
+PyYAML==5.1.2
 rdflib==4.2.2
 redis==3.3.11
 regex==2019.8.19
