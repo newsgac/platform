@@ -171,7 +171,7 @@ tabulate==0.8.5
 tempora==1.14.1
 testtools==2.3.0
 texttable==1.6.2
-thinc==7.1.1
+thinc==7.3.1
 tornado==6.0.3
 tqdm==4.36.1
 traceback2==1.4.0
