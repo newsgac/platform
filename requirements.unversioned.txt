@@ -14,7 +14,7 @@ numpy
 pandas
 passlib
 Pattern
-pymodm
+pymodm==0.4.1
 PyNLPl
 pytest
 pytest-cov
