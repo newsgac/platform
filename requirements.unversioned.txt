@@ -10,7 +10,7 @@ lightgbm
 git+git://github.com/newsgac/lime@master#egg=lime
 MarkupSafe
 nltk
-numpy
+numpy==1.17.3
 pandas
 passlib
 Pattern
