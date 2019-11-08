@@ -1,6 +1,5 @@
 # coding=utf-8
 from newsgac.data_sources.parsers.newsgac import NewsgacFormatParser
-import newsgac.genres as DataUtils
 
 article_1 = """__label__NIE DATE=10/04/1985 NEWSPAPER=06De_Telegraaf PAGE=3 LENGTH=237 URLS=http://resolver.kb.nl/resolve?urn=ddd:011207010:mpeg21:a0171 Man dood na doorzagen elektrische leiding ZUID-SCHARWOUDE , vrijdag Een 49-jarige man uit Zuid- Scharwoude ( gem . Langedijk ) is gisteren om het leven gekomen toen hij per ongeluk een levensgevaarlijke elektriciteitsleiding doorzaagde ."""
 article_2 = """__label__NIE Man dood na doorzagen elektrische leiding ZUID-SCHARWOUDE , vrijdag Een 49-jarige man uit Zuid- Scharwoude ( gem . Langedijk ) is gisteren om het leven gekomen toen hij per ongeluk een levensgevaarlijke elektriciteitsleiding doorzaagde ."""
