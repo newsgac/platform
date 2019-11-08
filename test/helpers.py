@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 def is_valid_html(page):
     url = 'https://validator.w3.org/nu/?out=json'
     headers = {'Content-Type': 'text/html; charset=utf-8'}
-    files = {'file': ('index.html', page)}
-    r = requests.post(url, files=files, headers=headers)
+    r = requests.post(url, page, headers=headers)
     messages = r.json()['messages']
     errors = list(filter(lambda message: message['type'] == 'error', messages))
     warnings = list(filter(lambda message: message.get('subType', None) == 'warning', messages))
@@ -24,6 +23,7 @@ def is_valid_html(page):
     ]
 
     for collection, func in levels:
-        func(pformat(collection))
+        if len(collection) > 0:
+            func(pformat(collection))
 
     return False if errors else True
