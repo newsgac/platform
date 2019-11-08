@@ -18,7 +18,7 @@ requests==2.22.0
 regex==2019.11.1
 scikit-learn==0.21.3
 stop-words==2018.7.23
-pandas
+pandas==0.25.3
 gunicorn
 redis
 pytest
