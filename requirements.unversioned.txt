@@ -11,7 +11,7 @@ lime==0.1.1.34
 MarkupSafe==1.1.1
 nltk==3.4.5
 Pattern==3.6
-passlib
+passlib==1.7.1
 pymodm
 PyNLPl
 requests
