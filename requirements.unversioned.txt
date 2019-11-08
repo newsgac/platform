@@ -12,7 +12,7 @@ MarkupSafe==1.1.1
 nltk==3.4.5
 Pattern==3.6
 passlib==1.7.1
-pymodm
+pymodm==0.4.1
 PyNLPl
 requests
 regex
