@@ -79,7 +79,7 @@ monotonic==1.5
 more-itertools==7.2.0
 msgpack==0.6.2
 murmurhash==1.0.2
-mysqlclient==1.4.4
+mysqlclient==1.4.5
 netaddr==0.7.19
 netifaces==0.10.9
 networkx==2.4
