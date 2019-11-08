@@ -127,7 +127,7 @@ pyasn1==0.4.7
 pyasn1-modules==0.2.7
 pycadf==2.10.0
 pycparser==2.19
-pycryptodome==3.9.0
+pycryptodome==3.9.1
 pyct==0.4.6
 Pygments==2.4.2
 pyinotify==0.9.6
