@@ -1,5 +1,5 @@
 bokeh
-celery
+celery==4.3.0
 colorcet
 cython
 dateparser
