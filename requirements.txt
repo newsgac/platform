@@ -151,7 +151,7 @@ rdflib==4.2.2
 redis==3.3.11
 regex==2019.11.1
 repoze.lru==0.7
-requests==2.20.1
+requests==2.22.0
 rfc3986==1.3.2
 Routes==2.4.1
 scikit-image==0.16.2
