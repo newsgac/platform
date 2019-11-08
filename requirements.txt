@@ -1,5 +1,5 @@
 2to3==1.0
-amqp==2.5.1
+amqp==2.5.2
 anchor-exp==0.0.0.6
 anytree==2.7.2
 argh==0.26.2
