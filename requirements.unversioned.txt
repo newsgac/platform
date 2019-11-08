@@ -2,7 +2,7 @@ anchor_exp==0.0.0.6
 bokeh==1.4.0
 colorcet==2.0.2
 celery==4.3.0
-python-dotenv
+python-dotenv==0.10.3
 numpy
 scipy
 dill
