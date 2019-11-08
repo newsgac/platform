@@ -16,7 +16,7 @@ passlib
 Pattern
 pymodm
 PyNLPl
-pytest
+pytest==5.2.2
 pytest-cov
 pytest-timeout
 python-dotenv
