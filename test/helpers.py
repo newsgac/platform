@@ -1,25 +1,29 @@
-import pprint
-import re
-from py_w3c.validators.html.validator import HTMLValidator
+from pprint import pformat
+
+import requests
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def is_really_error(error):
-    w3c_regex_whitelist = [
-        r'An "img" element must have an "alt" attribute, except under certain conditions.*',
-        r'Attribute ".*?" not allowed.*',
-        r'Element "li" not allowed as child of element ".*?" in this context.*',
+def is_valid_html(page):
+    url = 'https://validator.w3.org/nu/?out=json'
+    headers = {'Content-Type': 'text/html; charset=utf-8'}
+    files = {'file': ('index.html', page)}
+    r = requests.post(url, files=files, headers=headers)
+    messages = r.json()['messages']
+    errors = list(filter(lambda message: message['type'] == 'error', messages))
+    warnings = list(filter(lambda message: message.get('subType', None) == 'warning', messages))
+    others = list(filter(lambda message: message['type'] != 'error' and message.get('subType', None) != 'warning', messages))
+
+    levels = [
+        (errors, logger.error),
+        (warnings, logger.warning),
+        (others, logger.info)
     ]
 
-    for regex in w3c_regex_whitelist:
-        if re.match(regex, error['message']):
-            return False
-    return True
+    for collection, func in levels:
+        func(pformat(collection))
 
-
-def is_valid_html(result):
-    html_validator = HTMLValidator()
-    html_validator.validate_fragment(result)
-    errors = list(filter(is_really_error, html_validator.errors))
-    if len(errors) != 0:
-        pprint.pprint(errors)
-    return len(errors) == 0
+    return False if errors else True

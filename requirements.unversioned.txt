@@ -14,7 +14,6 @@ numpy
 pandas
 passlib
 Pattern
-py-w3c
 pymodm
 PyNLPl
 pytest
@@ -22,6 +21,7 @@ pytest-cov
 pytest-timeout
 python-dotenv
 redis
+requests
 scikit-learn
 scipy
 sentry-sdk[flask]
