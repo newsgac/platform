@@ -25,4 +25,4 @@ requests
 scikit-learn
 scipy
 sentry-sdk[flask]
-xgboost
+xgboost==0.90
