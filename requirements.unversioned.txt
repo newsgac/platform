@@ -15,7 +15,7 @@ pandas
 passlib
 Pattern
 pymodm
-PyNLPl
+PyNLPl==1.2.9
 pytest
 pytest-cov
 pytest-timeout
