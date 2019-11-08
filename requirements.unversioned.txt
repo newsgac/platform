@@ -5,7 +5,7 @@ cython
 dateparser
 dill
 Flask
-gunicorn
+gunicorn==19.9.0
 lightgbm
 git+git://github.com/newsgac/lime@master#egg=lime
 MarkupSafe
