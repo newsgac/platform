@@ -4,7 +4,7 @@ colorcet
 cython
 dateparser
 dill
-Flask
+Flask==1.1.1
 gunicorn
 lightgbm
 git+git://github.com/newsgac/lime@master#egg=lime
