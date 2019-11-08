@@ -17,7 +17,7 @@ Pattern
 pymodm
 PyNLPl
 pytest
-pytest-cov
+pytest-cov==2.8.1
 pytest-timeout
 python-dotenv
 redis
