@@ -12,7 +12,7 @@ MarkupSafe
 nltk
 numpy
 pandas
-passlib
+passlib==1.7.1
 Pattern
 pymodm
 PyNLPl
