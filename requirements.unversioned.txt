@@ -20,7 +20,7 @@ pytest
 pytest-cov
 pytest-timeout
 python-dotenv
-redis
+redis==3.3.11
 requests
 scikit-learn
 scipy
