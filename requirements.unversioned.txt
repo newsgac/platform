@@ -1,5 +1,5 @@
 anchor_exp==0.0.0.6
-bokeh
+bokeh==1.4.0
 colorcet
 celery
 python-dotenv
