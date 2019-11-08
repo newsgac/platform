@@ -1,7 +1,7 @@
 bokeh
 celery
 colorcet
-cython
+cython==0.29.14
 dateparser
 dill
 Flask
