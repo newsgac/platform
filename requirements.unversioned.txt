@@ -21,7 +21,7 @@ stop-words==2018.7.23
 pandas==0.25.3
 gunicorn==19.9.0
 redis==3.3.11
-pytest
+pytest==5.2.2
 pytest-timeout
 py-w3c
 spacy
