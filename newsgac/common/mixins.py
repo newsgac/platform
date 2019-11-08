@@ -82,3 +82,14 @@ class ParametersMixin(object):
         model = cls(**kwargs)
         model.set_default_parameters()
         return model
+
+    def save(self, **kwargs):
+        self._tag = self.__class__.tag
+        super().save(**kwargs)
+
+    @classmethod
+    def create(cls, **kwargs):
+        model = cls(**kwargs)
+        model.set_default_parameters()
+        model._tag = cls.tag
+        return model
