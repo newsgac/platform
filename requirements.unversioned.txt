@@ -19,7 +19,7 @@ PyNLPl
 pytest
 pytest-cov
 pytest-timeout
-python-dotenv
+python-dotenv==0.10.3
 redis
 requests
 scikit-learn
