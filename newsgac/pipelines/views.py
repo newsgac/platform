@@ -1,11 +1,8 @@
 
 from bson import ObjectId
 from bokeh.embed import components
-from bokeh.layouts import gridplot
 from flask import Blueprint, render_template, request, session, json, url_for, Response
-from lime.lime_tabular import LimeTabularExplainer
 from pymodm.errors import ValidationError
-from scipy.sparse import csr_matrix
 from sklearn.pipeline import FeatureUnion, Pipeline as SKPipeline
 
 from newsgac.common.back import back
