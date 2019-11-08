@@ -11,7 +11,7 @@ git+git://github.com/newsgac/lime@master#egg=lime
 MarkupSafe
 nltk
 numpy
-pandas
+pandas==0.25.3
 passlib
 Pattern
 pymodm
