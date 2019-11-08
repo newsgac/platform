@@ -63,7 +63,7 @@ jedi==0.15.1
 Jinja2==2.10.3
 joblib==0.14.0
 johnnydep==1.0
-jsonschema==2.6.0
+jsonschema==3.1.1
 kiwisolver==1.1.0
 kombu==4.6.5
 ldap3==2.6.1
