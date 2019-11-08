@@ -1,4 +1,4 @@
-anchor_exp
+anchor_exp==0.0.0.6
 bokeh
 colorcet
 celery
