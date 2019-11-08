@@ -10,7 +10,7 @@ Flask==1.1.1
 lime==0.1.1.34
 MarkupSafe==1.1.1
 nltk==3.4.5
-Pattern
+Pattern==3.6
 passlib
 pymodm
 PyNLPl
