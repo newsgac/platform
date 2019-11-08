@@ -161,7 +161,7 @@ sentry-sdk==0.13.1
 six==1.13.0
 sortedcontainers==2.1.0
 soupsieve==1.9.5
-spacy==2.2.1
+spacy==2.2.2
 srsly==0.2.0
 statsd==3.3.0
 stevedore==1.31.0
