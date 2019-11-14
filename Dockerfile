@@ -12,8 +12,6 @@ RUN chown flask:flask /home/flask
 COPY requirements.txt /newsgac/requirements.txt
 RUN pip install -r /newsgac/requirements.txt
 
-RUN python -m spacy download nl_core_news_sm
-
 COPY entrypoint.sh /newsgac
 RUN chmod a+x /newsgac/entrypoint.sh
 

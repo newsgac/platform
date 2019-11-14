@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import numpy as np
 from bson import ObjectId
-from anchor import anchor_text
 
 from lime.lime_tabular import LimeTabularExplainer
 from lime.lime_text import LimeTextExplainer
@@ -16,7 +15,7 @@ from newsgac.cached_views.models import CachedView
 from newsgac.pipelines import Pipeline
 from newsgac.tasks.models import Status
 
-from newsgac.ace.models import ACE, DUTCH_NLP
+from newsgac.ace.models import ACE
 from newsgac.tasks.celery_app import celery_app
 
 
@@ -120,20 +119,6 @@ def get_lime_feature_explanation(article, prediction, skp, predict_proba, traini
         num_samples=num_samples
     )
 
-
-def get_anchor_text_explanation(skp, raw_text, predict, used_class_names):
-    exp_anchor = anchor_text.AnchorText(DUTCH_NLP, class_names=used_class_names,
-                                        use_unk_distribution=False)
-
-    # need to send clean ocr to anchor
-    # TODO: applying a dirty fix right now, we need to look into encoding/decoding changes made in transformers.py
-    # clean_text = skp.steps[0][1].transform([raw_text])[0]
-    # TODO: Question: why aren't we removing quotes? It's contradicting with the feature descriptions
-    # clean_text = RemoveQuotes().transform([clean_text])[0]
-
-    clean_text = raw_text.encode('ascii', 'replace')
-
-    return exp_anchor.explain_instance(clean_text, predict, use_proba=True)
 
 def explain_article_lime_task_impl(view_cache_id, ace_id, pipeline_id, article_number):
     ace = ACE.objects.get({'_id': ObjectId(ace_id)})
