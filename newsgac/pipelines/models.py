@@ -31,27 +31,31 @@ class Result(EmbeddedMongoModel):
 
     @classmethod
     def from_prediction(cls, true_labels, predicted_labels):
-        scores = numpy.array([
-            1 if true_labels[i] == predicted_labels[i] else 0 for i in range(0, len(true_labels))
-        ])
-        # sorted_labels = sorted(list(set(list(true_labels)+list(predicted_labels))))
+        def limit_precision(number,precision):
+            return(float(int(number*(10.0**precision)))/(10.0**precision))
 
+        def estimate_10cv_scores(true_labels,predicted_labels):
+            scores = [ 1 if true_labels[i] == predicted_labels[i] else 0 for i in range(0, len(true_labels)) ]
+            nbrOfScores = len(scores)
+            sections = [scores[int(i*nbrOfScores/10):int((i+1)*nbrOfScores/10)] for i in range(0,10)]
+            section_scores = [numpy.array(x).mean() for x in sections]
+            return(numpy.array(section_scores))
+
+        scores = estimate_10cv_scores(true_labels,predicted_labels)
         return cls(
             confusion_matrix=confusion_matrix(true_labels, predicted_labels),
-            # confusion_matrix=confusion_matrix(true_labels, predicted_labels, labels=DataUtils.genre_codes),
-            precision_weighted=metrics.precision_score(true_labels, predicted_labels, average='weighted'),
-            precision_micro=metrics.precision_score(true_labels, predicted_labels, average='micro'),
-            precision_macro=metrics.precision_score(true_labels, predicted_labels, average='macro'),
-            recall_weighted=metrics.recall_score(true_labels, predicted_labels, average='weighted'),
-            recall_micro=metrics.recall_score(true_labels, predicted_labels, average='micro'),
-            recall_macro=metrics.recall_score(true_labels, predicted_labels, average='macro'),
-            fmeasure_weighted=metrics.f1_score(true_labels, predicted_labels, average='weighted'),
-            fmeasure_micro=metrics.f1_score(true_labels, predicted_labels, average='micro'),
-            fmeasure_macro=metrics.f1_score(true_labels, predicted_labels, average='macro'),
-            cohens_kappa=metrics.cohen_kappa_score(true_labels, predicted_labels),
-            accuracy=scores.mean(),
-            std=scores.std(),
-            # sorted_labels=sorted_labels
+            precision_weighted=limit_precision(metrics.precision_score(true_labels, predicted_labels, average='weighted'),4),
+            precision_micro=limit_precision(metrics.precision_score(true_labels, predicted_labels, average='micro'),4),
+            precision_macro=limit_precision(metrics.precision_score(true_labels, predicted_labels, average='macro'),4),
+            recall_weighted=limit_precision(metrics.recall_score(true_labels, predicted_labels, average='weighted'),4),
+            recall_micro=limit_precision(metrics.recall_score(true_labels, predicted_labels, average='micro'),4),
+            recall_macro=limit_precision(metrics.recall_score(true_labels, predicted_labels, average='macro'),4),
+            fmeasure_weighted=limit_precision(metrics.f1_score(true_labels, predicted_labels, average='weighted'),4),
+            fmeasure_micro=limit_precision(metrics.f1_score(true_labels, predicted_labels, average='micro'),4),
+            fmeasure_macro=limit_precision(metrics.f1_score(true_labels, predicted_labels, average='macro'),4),
+            cohens_kappa=limit_precision(metrics.cohen_kappa_score(true_labels, predicted_labels),4),
+            accuracy=limit_precision(scores.mean(),4),
+            std=limit_precision(scores.std(),4)
         )
 
 
