@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import gridfs
-from pymodm import DateTimeField, EmbeddedDocumentField
+from pymodm import DateTimeField, EmbeddedDocumentField, fields
 from pymodm.connection import _get_db
 
 from newsgac.common.fields import ObjectField

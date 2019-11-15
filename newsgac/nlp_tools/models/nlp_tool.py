@@ -1,7 +1,7 @@
-from pymodm import EmbeddedMongoModel
+from pymodm import EmbeddedMongoModel, fields
 
 from newsgac.common.mixins import ParametersMixin
 
 
 class NlpTool(ParametersMixin, EmbeddedMongoModel):
-    pass
+    _tag = fields.CharField(required=True)
