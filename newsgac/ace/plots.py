@@ -16,7 +16,7 @@ def metric_plot(pipelines, field, title='', color='#000000'):
         plot_height=max(300, 50 * len(pipelines)),
         title=title,
         plot_width=400,
-        x_range=[0, 1.05],
+        x_range=[0, 105],
         y_range=[pipeline.display_title for pipeline in pipelines],
         toolbar_location='right',
         tools="save,pan,box_zoom,reset,wheel_zoom"
