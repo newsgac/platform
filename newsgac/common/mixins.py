@@ -17,8 +17,8 @@ class CreatedUpdated(object):
 
     def save(self, **kwargs):
         if not self.created:
-            self.created = datetime.utcnow()
-        self.updated = datetime.utcnow()
+            self.created = datetime.now()
+        self.updated = datetime.now()
         super(CreatedUpdated, self).save(**kwargs)
 
 

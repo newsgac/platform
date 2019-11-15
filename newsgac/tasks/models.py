@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from traceback import format_exception, format_exc
 
 from enum import Enum
@@ -24,15 +25,15 @@ class TrackedTask(EmbeddedMongoModel):
 
     def set_started(self):
         self.status = Status.STARTED
-        self.start = datetime.utcnow()
+        self.start = datetime.now()
 
     def set_success(self):
         self.status = Status.SUCCESS
-        self.end = datetime.utcnow()
+        self.end = datetime.now()
 
     def set_failure(self, err):
         self.status = Status.FAILURE
-        self.end = datetime.utcnow()
+        self.end = datetime.now()
         self.error = str(err)
         import sys
         # self.trace = sys.exc_info()
