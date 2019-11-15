@@ -25,4 +25,6 @@ requests
 scikit-learn
 scipy
 sentry-sdk[flask]
+watchdog
+watchdog[watchmedo]
 xgboost
