@@ -14,12 +14,15 @@ def parse_bool(value):
 
 
 if not environ.get('FLASK_ENV', False):
-    logger.warn('Loading environment variables from ".env" file.')
+    logger.warning('Loading environment variables from ".env" file.')
     load_dotenv(verbose=True)
 
 # path where this file is located, used to find relative files
 root_path = path.dirname(path.abspath(__file__))
 secret_key = environ.get('FLASK_SECRET_KEY')
+if not secret_key:
+    logger.warning("No secret key found, using default. THIS IS BAD IN PRODUCTION.")
+    secret_key = 'default'
 flask_port = int(environ.get('FLASK_PORT', 5050))
 mongo_host = environ.get('MONGO_HOST', 'localhost')
 mongo_port = int(environ.get('MONGO_PORT', 27017))
@@ -30,7 +33,7 @@ redis_host = environ.get('REDIS_HOST', 'localhost')
 redis_port = int(environ.get('REDIS_PORT', 6379))
 
 # celery_eager == True setting will evaluate tasks immediately, without using workers. Useful for tests
-celery_eager = parse_bool(environ.get('CELERY_EAGER', False))
+celery_eager = parse_bool(environ.get('CELERY_EAGER', True))
 
 # number of parallel jobs (typically, this is used for internal classifier parallellization)
 n_parallel_jobs = int(environ.get('N_PARALLEL_JOBS', 1))

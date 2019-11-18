@@ -2,3 +2,5 @@
 *.pyc
 .pytest_cache
 .git
+data
+data.backup

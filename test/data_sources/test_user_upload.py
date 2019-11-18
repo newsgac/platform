@@ -21,7 +21,7 @@ def test_new_page(client):
     if not is_valid_html(sv.data.decode('utf-8')): raise AssertionError()
 
 
-#@pytest.mark.timeout(10)
+@pytest.mark.timeout(10)
 def test_upload(client, dataset_balanced_100):
     sv = client.post('/data_sources/new', data=dict(
         file=(dataset_balanced_100, 'dataset.txt'),

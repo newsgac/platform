@@ -1,0 +1,134 @@
+version: "3.2"
+
+
+services:
+    frog:
+        hostname: proycon/lamachine
+        image: proycon/lamachine:latest
+        command: bash -c "frog -S 12345 --skip p"
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+            resources:
+                limits:
+                    cpus: ${FROG_CPU_LIMIT}
+
+    redis:
+        hostname: redis
+        image: redis:latest
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+
+
+    database:
+        hostname: mongo
+        image: mongo:latest
+        volumes:
+            - ${DATA_DIRECTORY}:/data/db
+
+
+    worker: &worker-base
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/newsgac
+        depends_on:
+            - redis
+            - database
+        hostname: celeryworker
+        volumes:
+            - ./newsgac:/newsgac/newsgac
+        environment:
+            - FLASK_ENV
+            - MONGO_HOST
+            - MONGO_PORT
+            - MONGO_DB_NAME
+            - FROG_HOSTNAME
+            - FROG_PORT
+            - REDIS_HOST
+            - REDIS_PORT
+            - N_PARALLEL_JOBS
+            - N_CROSS_VAL_JOBS
+
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+            resources:
+                limits:
+                    cpus: ${CELERY_CPU_LIMIT}
+
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 10 -n worker@%h
+
+    frogworker:
+        <<: *worker-base
+        image: newsgac/newsgac
+        hostname: frogworker
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+
+        depends_on:
+            - redis
+            - database
+            - frog
+
+        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog
+
+
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: newsgac/newsgac
+        depends_on:
+            - worker
+            - redis
+            - database
+            - frog
+        command: ["python", "newsgac/app.py"]
+        volumes:
+            - ./newsgac:/newsgac/newsgac
+        ports:
+            - target: 5050
+              published: 5050
+              protocol: tcp
+              mode: host
+
+        environment:
+            - PYTHONPATH=/newsgac
+            - FLASK_SECRET_KEY
+            - FLASK_ENV
+            - FLASK_DEBUG
+            - FLASK_APP
+            - MONGO_HOST
+            - MONGO_PORT
+            - MONGO_USER
+            - MONGO_PASSWORD
+            - MONGO_DB_NAME
+            - FROG_HOSTNAME
+            - FROG_PORT
+            - REDIS_HOST
+            - REDIS_PORT
+            - CELERY_EAGER
+            - N_PARALLEL_JOBS
+            - N_CROSS_VAL_JOBS
+
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3

@@ -10,11 +10,16 @@ In the project, we developed an online platform for applying machine learning mo
 
 ## Setup Instructions for DOCKER
 
-In order to run the platform at your computer, you need to have the programs [anaconda](https://www.anaconda.com/distribution/) and [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
+In order to run the platform at your computer, you need to have [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
 
- 1. git clone [https://github.com/newsgac/platform.git]([https://github.com/newsgac/platform.git)
- 2. cd platform
- 3. docker-compose -f docker-compose_local.yml up --build
+ 1. `git clone [https://github.com/newsgac/platform.git]([https://github.com/newsgac/platform.git)`
+ 2. `cd platform`
+ 3. `docker build . -t "newsgac/newsgac"`
+ 4. optional: `docker build . -f jupyter/Dockerfile -t "newsgac/jupyterhub"`
+ 5. optional: `docker build ./nginx -t newsgac/nginx` (only needed in production)
+ 6. Setup `.env` file: `cp .env.example .env`, make changes as necessary
+ 7. load environment variables: `export $(egrep -v '^#' .env | xargs)`
+ 8. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
 
 When these commands have successfully completed, the platform will be available as a web server on the address: [http://localhost:5050](http://localhost:5050)
 
@@ -26,10 +31,10 @@ You might want to run flask outside of Docker (because it is e.g. easier to atta
   * Make sure the flask docker container is DOWN:
 
 ```
-    docker-compose -f docker-compose_local.yml stop web
+    docker service rm newsgacdev_web
 ```
 
-  * Set up a virtual environment (python 2.7) and install the requirements:
+  * Set up a virtual environment (python 3.7) and install the requirements:
 
 ```
     pip install -r requirements.txt
@@ -54,13 +59,22 @@ You might want to run flask outside of Docker (because it is e.g. easier to atta
 Typically tasks are executed by celery workers. If you want to debug a task you can do one of two things:
 
  1. Run a celery worker in debug mode
- 2. In `config.py`, set `celery_eager` to True. This will cause celery to run tasks in the main thread instead of offloading it to workers.
+ 2. Make sure `CELERY_EAGER=True` (or unset). This will cause celery to run tasks in the main thread instead of offloading it to workers.
 
 ## Running the tests (Docker)
 
- 1. `docker-compose -f docker-compose_test.yml build test`
- 2. `docker-compose -f docker-compose_test.yml run test`
- 3. `docker-compose -f docker-compose_test.yml down`
+ 1. `docker run --name=mongo -it --rm -d mongo`
+ 2. 
+```
+    docker run \
+        --name=newsgactest \
+        -it \
+        --network=container:mongo \
+        --mount type=bind,src="$(pwd)"/newsgac,destination=/newsgac/newsgac \
+        --entrypoint=sh \
+        newsgac/newsgac -c pytest --cov=newsgac --cov-report=xml
+```
+ 3. `docker stop newsgactest mongo`
 
 ## Running the tests (Local)
 
@@ -71,8 +85,8 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
     export $(cat .env.test | xargs)
 ```
 
-  * Make sure the database, Frog and redis are running (e.g. `docker-compose -f docker-compose_local.yml up database redis frog`
-  * Run tests using
+  * Make sure the database, Frog and redis are running (e.g. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
+  * Load env variables, then run tests using
 
 ```
     pytest .
@@ -82,10 +96,10 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
 
 E.g. to create a user:
 
-  * Start console using docker-compose (or from you local environment using `python`):
+  * Start console using docker (or from you local environment using `python`):
 
 ```
-    docker-compose -f docker-compose_local.yml run web python
+    docker exec -it newsgac_dev web python
 ```
 
   * Import database & user model
@@ -103,6 +117,12 @@ E.g. to create a user:
 ```
 
   * You can now login from the frontend as this user.
+  
+## Useful commands
+ - `docker stack ps newsgacdev`
+ - `docker service ps newsgacdev_worker`
+ - `docker service inspect newsgacdev_worker`
+ - `docker service logs newsgacdev_worker`
 
 ## References
 

@@ -8,7 +8,7 @@ from newsgac.common.mixins import CreatedUpdated, DeleteObjectsMixin
 @pytest.fixture(autouse=True)
 def setup_db(db):
     # drops whole db
-    for collection_name in db.collection_names():
+    for collection_name in db.list_collection_names():
         db[collection_name].drop()
 
 
@@ -29,12 +29,12 @@ def test_delete_objects():
     m.embed = EmbeddedModelWithObjectField(data="some embedded object")
     m.save()
     db = _get_db()
-    if not db['fs.files'].count() == 2: raise AssertionError()
-    if not db['fs.chunks'].count() == 2: raise AssertionError()
+    if not db['fs.files'].count_documents({}) == 2: raise AssertionError()
+    if not db['fs.chunks'].count_documents({}) == 2: raise AssertionError()
     if not ModelWithObjectField.objects.count() == 1: raise AssertionError()
     m.delete()
-    if not db['fs.files'].count() == 0: raise AssertionError()
-    if not db['fs.chunks'].count() == 0: raise AssertionError()
+    if not db['fs.files'].count_documents({}) == 0: raise AssertionError()
+    if not db['fs.chunks'].count_documents({}) == 0: raise AssertionError()
     if not ModelWithObjectField.objects.count() == 0: raise AssertionError()
 
 
@@ -44,12 +44,12 @@ def test_objects_are_cleaned_up_when_saved():
     m.embed = EmbeddedModelWithObjectField(data="some embedded object")
     m.save()
     db = _get_db()
-    if not db['fs.files'].count() == 2: raise AssertionError()
-    if not db['fs.chunks'].count() == 2: raise AssertionError()
+    if not db['fs.files'].count_documents({}) == 2: raise AssertionError()
+    if not db['fs.chunks'].count_documents({}) == 2: raise AssertionError()
     if not ModelWithObjectField.objects.count() == 1: raise AssertionError()
     m.save()
-    if not db['fs.files'].count() == 2: raise AssertionError()
-    if not db['fs.chunks'].count() == 2: raise AssertionError()
+    if not db['fs.files'].count_documents({}) == 2: raise AssertionError()
+    if not db['fs.chunks'].count_documents({}) == 2: raise AssertionError()
     if not ModelWithObjectField.objects.count() == 1: raise AssertionError()
 
 
@@ -71,6 +71,6 @@ def test_objects_are_not_cloned_up_when_model_gets_serialized():
     m.save()
     m.delete()
     db = _get_db()
-    if not 0 == db['fs.files'].count(): raise AssertionError()
-    if not 0 == db['fs.chunks'].count(): raise AssertionError()
+    if not 0 == db['fs.files'].count_documents({}): raise AssertionError()
+    if not 0 == db['fs.chunks'].count_documents({}): raise AssertionError()
     if not 0 == ModelWithObjectField.objects.count(): raise AssertionError()

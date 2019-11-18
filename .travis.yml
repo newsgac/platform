@@ -1,13 +1,21 @@
 install:
-  - docker-compose -f docker-compose_test.yml build test
+  - docker build . -t "newsgac/newsgac"
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+  - docker run --name=mongo -it --rm -d mongo
 script:
-  - docker-compose -f docker-compose_test.yml run --name newsgac_test test
+  - docker run \
+    --name=newsgactest \
+    -it \
+    --network=container:mongo \
+    --mount type=bind,src="$(pwd)"/newsgac,destination=/newsgac/newsgac \
+    --entrypoint=sh \
+    newsgac/newsgac -c pytest --cov=newsgac --cov-report=xml
 after_script:
-  - docker cp newsgac_test:/newsgac/coverage.xml ./coverage_docker.xml
-  - docker-compose -f docker-compose_test.yml down
+  - docker cp newsgactest:/newsgac/coverage.xml ./coverage_docker.xml
+  - docker stop mongo
+  - docker rm mongo newsgactest
   - cat coverage_docker.xml | sed "s|<source>.*</source>|<source>newsgac</source>|" > coverage.xml
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT --debug

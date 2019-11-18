@@ -1,0 +1,32 @@
+version: "3.2"
+
+
+services:
+    frog:
+        ports:
+            - target: 12345
+              published: 12345
+              protocol: tcp
+              mode: host
+
+    redis:
+        ports:
+            - target: 6379
+              published: 6379
+              protocol: tcp
+              mode: host
+            - target: 6380
+              published: 6380
+              protocol: tcp
+              mode: host
+
+    database:
+        ports:
+            - target: 27017
+              published: 27017
+              protocol: tcp
+              mode: host
+
+    worker:
+        entrypoint: "sh"
+        command: ["-c", "watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 8 -n worker1@%h" ]
