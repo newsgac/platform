@@ -84,7 +84,7 @@ def delete(data_source_id):
         return redirect((url_for('pipelines.overview')))
 
     data_source.delete()
-    return back.redirect()
+    return redirect((url_for('data_sources.overview')))
 
 
 @data_source_blueprint.route('/delete_all')
