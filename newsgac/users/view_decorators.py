@@ -23,7 +23,7 @@ def requires_no_login(f):
     def decorated_function(*args, **kwargs):
         if 'email' in list(session.keys()) and session['email'] is not None:
             flash('You are already logged in.', 'info')
-            return redirect(url_for("experiments.user_experiments"))
+            return redirect('/')
         return f(*args, **kwargs)
 
     return decorated_function
