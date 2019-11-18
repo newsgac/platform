@@ -25,7 +25,7 @@ class CachedView(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     def get_or_new(cls, hash):
         try:
             cache = cls.objects.get({'hash': hash})
-            cache.last_accessed = datetime.utcnow()
+            cache.last_accessed = datetime.now()
             cache.save()
             return cache
         except DoesNotExist:

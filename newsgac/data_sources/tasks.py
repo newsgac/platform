@@ -19,7 +19,7 @@ def process_data_source(self, data_source_id):
         labels = sorted(list(set([article.label for article in articles])))
         assert len(labels) > 0
 
-        inverse_labels = {v: k for k, v in enumerate(list(set(labels)))}
+        inverse_labels = {v: k for k, v in enumerate(labels)}
         for article in articles:
             article.label = inverse_labels[article.label]
 

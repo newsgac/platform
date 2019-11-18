@@ -22,7 +22,7 @@ class Cache(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     def get_or_new(cls, hash):
         try:
             cache = cls.objects.raw({'hash': hash})[0]
-            cache.last_accessed = datetime.utcnow()
+            cache.last_accessed = datetime.now()
             cache.save()
             return cache
         except DoesNotExist:
