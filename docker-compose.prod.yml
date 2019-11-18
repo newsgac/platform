@@ -2,9 +2,6 @@ version: "3.2"
 
 services:
     jupyterhub:
-        build:
-            context: .
-            dockerfile: jupyter/Dockerfile
         image: newsgac/jupyterhub
         volumes:
             - ${JUPYTER_NOTEBOOK_DIRECTORY}:/notebooks
@@ -13,8 +10,12 @@ services:
             - database
             - worker
             - frog
-        env_file:
-            - .env.prod
+        environment:
+            - JUPYTER_NOTEBOOK_DIRECTORY
+            - FLASK_SECRET_KEY
+            - REDIS_HOST
+            - REDIS_PORT
+            - CELERY_EAGER
         deploy:
             restart_policy:
                 condition: on-failure
