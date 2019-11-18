@@ -35,9 +35,6 @@ services:
 
 
     worker: &worker-base
-        build:
-            context: .
-            dockerfile: Dockerfile
         image: newsgac/newsgac
         depends_on:
             - redis
@@ -89,9 +86,6 @@ services:
 
 
     web:
-        build:
-            context: .
-            dockerfile: Dockerfile
         image: newsgac/newsgac
         depends_on:
             - worker
