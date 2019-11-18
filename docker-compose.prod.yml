@@ -22,6 +22,10 @@ services:
 #                max_attempts: 3
 #            replicas: 1
 
+    worker:
+        command: "celery -A newsgac.tasks.celery_app worker -l warning --concurrency 10 -n worker@%h"
+
+
     nginx:
         build:
             context: nginx

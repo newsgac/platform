@@ -44,6 +44,7 @@ services:
             - ./newsgac:/newsgac/newsgac
         environment:
             - FLASK_ENV
+            - FLASK_SECRET_KEY
             - MONGO_HOST
             - MONGO_PORT
             - MONGO_DB_NAME
@@ -64,7 +65,6 @@ services:
                 limits:
                     cpus: ${CELERY_CPU_LIMIT}
 
-        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 10 -n worker@%h
 
     frogworker:
         <<: *worker-base
@@ -82,7 +82,7 @@ services:
             - database
             - frog
 
-        command: celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog
+        command: ["sh", "-c", "celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h -Q frog"]
 
 
     web:

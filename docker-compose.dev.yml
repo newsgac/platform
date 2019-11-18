@@ -28,5 +28,4 @@ services:
               mode: host
 
     worker:
-        entrypoint: "sh"
-        command: ["-c", "watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 8 -n worker1@%h" ]
+        command: "watchmedo auto-restart --patterns=\"*.py\" --recursive -- celery -A newsgac.tasks.celery_app worker -l info --concurrency 8 -n worker1@%h"
