@@ -95,11 +95,7 @@ services:
         command: ["python", "newsgac/app.py"]
         volumes:
             - ./newsgac:/newsgac/newsgac
-        ports:
-            - target: 5050
-              published: 5050
-              protocol: tcp
-              mode: host
+
 
         environment:
             - PYTHONPATH=/newsgac

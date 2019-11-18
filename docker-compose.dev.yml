@@ -2,6 +2,13 @@ version: "3.2"
 
 
 services:
+    web:
+        ports:
+        - target: 5050
+          published: 5050
+          protocol: tcp
+          mode: host
+
     frog:
         ports:
             - target: 12345

@@ -16,6 +16,8 @@ services:
             - REDIS_HOST
             - REDIS_PORT
             - CELERY_EAGER
+            - JUPYTER_USER
+            - JUPYTER_PASSWORD
         deploy:
             restart_policy:
                 condition: on-failure
