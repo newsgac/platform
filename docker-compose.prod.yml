@@ -1,26 +1,26 @@
 version: "3.2"
 
 services:
-#    jupyterhub:
-#        build:
-#            context: .
-#            dockerfile: jupyter/Dockerfile
-#        image: newsgac/jupyterhub
-#        volumes:
-#            - /export/scratch2/home/aysenur/hub_notebooks:/notebooks
-#        depends_on:
-#            - redis
-#            - database
-#            - worker
-#            - frog
-#        env_file:
-#            - .env.prod
-#        deploy:
-#            restart_policy:
-#                condition: on-failure
-#                delay: 10s
-#                max_attempts: 3
-#            replicas: 1
+    jupyterhub:
+        build:
+            context: .
+            dockerfile: jupyter/Dockerfile
+        image: newsgac/jupyterhub
+        volumes:
+            - ${JUPYTER_NOTEBOOK_DIRECTORY}:/notebooks
+        depends_on:
+            - redis
+            - database
+            - worker
+            - frog
+        env_file:
+            - .env.prod
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+            replicas: 1
 
     worker:
         command: "celery -A newsgac.tasks.celery_app worker -l warning --concurrency 10 -n worker@%h"
@@ -33,7 +33,7 @@ services:
         image: newsgac/nginx
         depends_on:
             - web
-#            - jupyterhub
+            - jupyterhub
         deploy:
             replicas: 1
             restart_policy:
