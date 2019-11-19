@@ -13,7 +13,8 @@ src/test/*
 
 .ipynb_checkpoints
 
-data
+data/**/*
+!data/.gitkeep
 hub_notebooks
 dist
 build
