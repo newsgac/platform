@@ -17,7 +17,7 @@ def normalise_confusion_matrix(cm):
     return np.divide(temp, sum, out=np.zeros_like(temp), where=sum!=0)
 
 
-def confusion_matrix_plot(pipeline, title="Evaluation", normalisation_flag=True, ds_param = 1):
+def confusion_matrix_plot(pipeline, title="Evaluation", normalisation_flag=True, ds_param = 0.66):
     result = pipeline.result
     confusion_matrix = result.confusion_matrix.get()
     cm_normalised = normalise_confusion_matrix(confusion_matrix)
