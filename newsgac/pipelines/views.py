@@ -228,7 +228,7 @@ def visualise_results(pipeline_id):
     results_eval = pipeline.result
     results_model = pipeline.result
 
-    p = confusion_matrix_plot(pipeline=pipeline, ds_param=0.7)
+    p = confusion_matrix_plot(pipeline=pipeline, ds_param=0.66)
     script, div = components(p)
 
     p_features = feature_weights(pipeline=pipeline)
