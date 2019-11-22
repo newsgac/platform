@@ -12,16 +12,22 @@ In the project, we developed an online platform for applying machine learning mo
 
 In order to run the platform at your computer, you need to have [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
 
- 1. `git clone [https://github.com/newsgac/platform.git]([https://github.com/newsgac/platform.git)`
+ 1. `git clone `[https://github.com/newsgac/platform.git]([https://github.com/newsgac/platform.git)
  2. `cd platform`
  3. `docker build . -t "newsgac/newsgac"`
- 4. optional: `docker build . -f jupyter/Dockerfile -t "newsgac/jupyterhub"`
- 5. optional: `docker build ./nginx -t newsgac/nginx` (only needed in production)
- 6. Setup `.env` file: `cp .env.example .env`, make changes as necessary
- 7. load environment variables: `export $(egrep -v '^#' .env | xargs)`
- 8. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
+ 4. load environment variables: `export $(egrep -v '^#' .env.default | xargs)`
+ 5. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
 
-When these commands have successfully completed, the platform will be available as a web server on the address: [http://localhost:5050](http://localhost:5050)
+When these commands have successfully completed, the platform will be available as a web server on the address: [http://YOUR-IP-ADDRESS:5050](http://YOUR-IP-ADDRESS:5050)
+
+Steps 1, 2 and 3 need to be executed only once for installing the syste.
+Both step 4 and step 5 are required each time when you start the system.
+
+Optional steps:
+
+ * For adaption to local environment: edit file .env.default or make your own version
+ * For Jupyter notebook support: `docker build . -f jupyter/Dockerfile -t "newsgac/jupyterhub"`
+ * During production: `docker build ./nginx -t newsgac/nginx` (only needed in production)
 
 ## Run flask web app locally (through IDE)
 
