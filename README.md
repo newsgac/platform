@@ -8,26 +8,33 @@
 
 In the project, we developed an online platform for applying machine learning models to text data, with the opportunity to closely analyze the performance of the models. This repository contains the code of this platform.
 
-## Setup Instructions for DOCKER
+## Setup Instructions
 
 In order to run the platform at your computer, you need to have [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
 
- 1. `git clone `[https://github.com/newsgac/platform.git]([https://github.com/newsgac/platform.git)
+ 1. `git clone https://github.com/newsgac/platform.git`
  2. `cd platform`
  3. `docker build . -t "newsgac/newsgac"`
- 4. load environment variables: `export $(egrep -v '^#' .env.default | xargs)`
+ 4. `export $(egrep -v '^#' .env.default | xargs)`
  5. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
 
 When these commands have successfully completed, the platform will be available as a web server on the address: [http://YOUR-IP-ADDRESS:5050](http://YOUR-IP-ADDRESS:5050)
 
-Steps 1, 2 and 3 need to be executed only once for installing the syste.
+Steps 1, 2 and 3 need to be executed only once for installing the system.
 Both step 4 and step 5 are required each time when you start the system.
 
 Optional steps:
 
- * For adaption to local environment: edit file .env.default or make your own version
+ * For adaption to local environment: edit file .env.default or create your own version
  * For Jupyter notebook support: `docker build . -f jupyter/Dockerfile -t "newsgac/jupyterhub"`
- * During production: `docker build ./nginx -t newsgac/nginx` (only needed in production)
+ * During production: `docker build ./nginx -t newsgac/nginx`
+
+Stopping the service
+
+ 1. `docker service rm newsgacdev_database newsgacdev_frog newsgacdev_frogworker newsgacdev_redis newsgacdev_web newsgacdev_worker`
+
+Note that it takes a few seconds to completely top the services.
+
 
 ## Run flask web app locally (through IDE)
 
