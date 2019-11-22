@@ -105,7 +105,7 @@ def comparison_overview(ace_id):
     from bokeh.layouts import gridplot
     script, div = components(gridplot(metrics_plots(ace), ncols=3))
 
-    cm_plots = [confusion_matrix_plot(pipeline, pipeline.display_title) for pipeline in ace.pipelines]
+    cm_plots = [confusion_matrix_plot(pipeline, pipeline.display_title, ds_param=0.66) for pipeline in ace.pipelines]
     cm_script, cm_div = components(gridplot(cm_plots, ncols=3))
 
     # comparator = PipelineComparator(ace)
