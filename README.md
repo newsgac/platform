@@ -29,11 +29,11 @@ Optional steps:
  * For Jupyter notebook support: `docker build . -f jupyter/Dockerfile -t "newsgac/jupyterhub"`
  * During production: `docker build ./nginx -t newsgac/nginx`
 
-Stopping the service
+Stopping the system:
 
  1. `docker service rm newsgacdev_database newsgacdev_frog newsgacdev_frogworker newsgacdev_redis newsgacdev_web newsgacdev_worker`
 
-Note that it takes a few seconds to completely top the services.
+Note that it takes a few seconds to completely stop all parts of the system.
 
 
 ## Run flask web app locally (through IDE)
