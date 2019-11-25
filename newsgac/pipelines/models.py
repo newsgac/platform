@@ -11,6 +11,7 @@ from newsgac.learners.models.learner import Learner
 from newsgac.nlp_tools import TFIDF
 from newsgac.nlp_tools.models.nlp_tool import NlpTool
 from newsgac.pipelines.get_sk_pipeline import get_sk_pipeline
+from newsgac.stop_words.models import StopWords
 
 
 class Result(EmbeddedMongoModel):
@@ -70,7 +71,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
     updated = fields.DateTimeField()
 
     data_source = fields.ReferenceField(DataSource, required=True, blank=False)
-    sw_removal = fields.BooleanField(required=True, default=False)
+    stop_words = fields.ReferenceField(StopWords, required=False, blank=True)
     lowercase = fields.BooleanField(required=True, default=False)
     lemmatization = fields.BooleanField(required=True, default=False)
     quote_removal = fields.BooleanField(required=True, default=True)
@@ -87,7 +88,7 @@ class Pipeline(CreatedUpdated, DeleteObjectsMixin, MongoModel):
         return cls(
             display_title="",
             data_source=None,
-            sw_removal=cls.sw_removal.default,
+            stop_words=cls.stop_words.default,
             lowercase=cls.lowercase.default,
             lemmatization=cls.lemmatization.default,
             nlp_tool=cls.nlp_tool.default,

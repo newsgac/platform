@@ -12,6 +12,7 @@ from newsgac.learners import GridSearch
 from newsgac.pipelines.models import Pipeline
 from newsgac.pipelines.tasks import run_pipeline_task, run_grid_search_task
 from newsgac.data_sources.models import DataSource
+from newsgac.stop_words.models import StopWords
 from newsgac.users.view_decorators import requires_login
 from newsgac.users.models import User
 from newsgac.learners.factory import learners, create_learner
@@ -48,6 +49,16 @@ def get_data_sources_dict():
         for data_source in list(DataSource.objects.all())
         # for data_source in list(DataSource.objects.raw({'training_purpose': True}))
     }
+
+
+def get_stop_words_dict_list():
+    return [{
+        'display_title': stop_words.display_title,
+        'description': stop_words.description,
+        'filename': stop_words.filename,
+        'id': str(stop_words._id)
+    } for stop_words in StopWords.objects.all()]
+
 
 
 @pipeline_blueprint.route('/')
@@ -107,6 +118,7 @@ def new(from_pipeline_id=None):
         pipeline=_dumps(pipeline),
         data_sources=json.dumps(get_data_sources_dict()),
         nlp_tools=json.dumps(nlp_tools_dict),
+        stop_words=json.dumps(get_stop_words_dict_list()),
         save_url=url_for('pipelines.new_save'),
         pipelines_url=url_for('pipelines.overview'),
         learners=json.dumps(learners_dict)

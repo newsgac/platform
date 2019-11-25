@@ -12,18 +12,30 @@
                     <p align="right" class="center-align-pad">
                         <strong>Stop-words removal</strong>
                     </p>
+
                 </div>
                 <div class="col-md-1">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" checked name="sw_removal" id="sw_removal"
-                                   v-model="model.sw_removal">
-                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
-                        </label>
-                    </div>
+
                 </div>
-		<div class="col-md-8">
-                    <span class="help-block"><i>Remove common Dutch words from text (see word list)</i></span>
+		        <div class="col-md-8">
+                    <select name="data_sources"
+                            class="selectpicker show-tick"
+                            data-width="85%"
+                            data-actions-box="true"
+                            v-model="model.stop_words">
+                            <option
+                                    :value="null"
+                                    label="None...">
+                                None
+                            </option>
+                            <option
+                                    v-for="sw in stop_words"
+                                    :value="sw.id"
+                                    :label="sw.display_title">
+                                [[ sw.display_title ]]
+                            </option>
+                        </select>
+                    <span class="help-block"><i>Remove common words</i></span>
                 </div>
             </div>
             <div class="row mar_ned"></div>

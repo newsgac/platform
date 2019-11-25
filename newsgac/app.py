@@ -8,6 +8,7 @@ from flask import Flask, render_template
 from newsgac import config
 from newsgac.common.filters import load_filters
 from newsgac.common.json_encoder import _JSONEncoder
+from newsgac.stop_words.views import stop_words_blueprint
 
 from newsgac.users.views import user_blueprint
 from newsgac.data_sources.views import data_source_blueprint
@@ -35,6 +36,7 @@ app.register_blueprint(data_source_blueprint, url_prefix="/data_sources")
 app.register_blueprint(pipeline_blueprint, url_prefix="/pipelines")
 app.register_blueprint(task_blueprint, url_prefix="/tasks")
 app.register_blueprint(ace_blueprint, url_prefix="/ace")
+app.register_blueprint(stop_words_blueprint, url_prefix="/stop_words")
 
 app.json_encoder = _JSONEncoder
 
