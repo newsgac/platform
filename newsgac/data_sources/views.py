@@ -8,6 +8,7 @@ from newsgac.common.back import back
 from newsgac.pipelines.models import Pipeline
 from newsgac.users.view_decorators import requires_login
 from newsgac.data_sources.models import DataSource
+from newsgac.stop_words.models import StopWords
 from newsgac.data_sources.tasks import process_data_source
 from newsgac.users.models import User
 from newsgac.data_sources.plots import data_source_stats
@@ -22,7 +23,8 @@ data_source_blueprint = Blueprint('data_sources', __name__)
 def overview():
     # todo: get users data sources only
     data_sources = list(DataSource.objects.values())
-    return render_template("data_sources/data_sources.html", data_sources=data_sources)
+    stop_words = list(StopWords.objects.values())
+    return render_template("data_sources/data_sources.html", data_sources=data_sources, stop_words=stop_words)
 
 
 @data_source_blueprint.route('/new', methods=['GET', 'POST'])

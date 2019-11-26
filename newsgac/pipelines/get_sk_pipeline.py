@@ -61,6 +61,10 @@ def frog_union(pipeline, name, feature_extractor):
         ))
     ])
 
+def get_stopwords(pipeline):
+    f = pipeline.stop_words.file
+    return [word for word in f.read().decode('utf-8').split("\n") if word != '']
+
 def get_sk_pipeline(pipeline):
     """
     Transform our `newsgac.pipelines.models.Pipeline` into a Scikit Learn `sklearn.pipeline.Pipeline`
@@ -69,7 +73,7 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('StopWordRemoval', StopWordRemoval(pipeline.stop_words.file.read().decode('utf-8').split('\n'))) if pipeline.stop_words else None,
+                ('StopWordRemoval', StopWordRemoval(get_stopwords(pipeline))) if pipeline.stop_words else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', tfidf_union(pipeline, pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())),
                 ('RobustScaler', RobustScaler(with_centering=False)) if pipeline.nlp_tool.parameters.scaling else None,
@@ -82,7 +86,7 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('StopWordRemoval', StopWordRemoval(pipeline.stop_words.file.read().decode('utf-8').split('\n'))) if pipeline.stop_words else None,
+                ('StopWordRemoval', StopWordRemoval(get_stopwords(pipeline))) if pipeline.stop_words else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', frog_union(pipeline, pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())),
                 ('RobustScaler', RobustScaler(with_centering=False)) if pipeline.nlp_tool.parameters.scaling else None,
@@ -100,7 +104,7 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('StopWordRemoval', StopWordRemoval(pipeline.stop_words.file.read().decode('utf-8').split('\n'))) if pipeline.stop_words else None,
+                ('StopWordRemoval', StopWordRemoval(get_stopwords(pipeline))) if pipeline.stop_words else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', FeatureUnion([
                     ('frog', frog_union(pipeline, 'frog', frog.get_feature_extractor())),
