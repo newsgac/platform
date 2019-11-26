@@ -69,7 +69,7 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('StopWordRemoval', StopWordRemoval()) if pipeline.stop_words else None,
+                ('StopWordRemoval', StopWordRemoval(pipeline.stop_words.file.read().decode('utf-8').split('\n'))) if pipeline.stop_words else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', tfidf_union(pipeline, pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())),
                 ('RobustScaler', RobustScaler(with_centering=False)) if pipeline.nlp_tool.parameters.scaling else None,
@@ -82,7 +82,7 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('StopWordRemoval', StopWordRemoval()) if pipeline.stop_words else None,
+                ('StopWordRemoval', StopWordRemoval(pipeline.stop_words.file.read().decode('utf-8').split('\n'))) if pipeline.stop_words else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', frog_union(pipeline, pipeline.nlp_tool.name, pipeline.nlp_tool.get_feature_extractor())),
                 ('RobustScaler', RobustScaler(with_centering=False)) if pipeline.nlp_tool.parameters.scaling else None,
@@ -100,7 +100,7 @@ def get_sk_pipeline(pipeline):
         return features_pipeline(
             steps=[
                 ('CleanOCR', CleanOCR()),
-                ('StopWordRemoval', StopWordRemoval()) if pipeline.stop_words else None,
+                ('StopWordRemoval', StopWordRemoval(pipeline.stop_words.file.read().decode('utf-8').split('\n'))) if pipeline.stop_words else None,
                 ('Lemmatization', ApplyLemmatization()) if pipeline.lemmatization else None,
                 ('FeatureExtraction', FeatureUnion([
                     ('frog', frog_union(pipeline, 'frog', frog.get_feature_extractor())),

@@ -5,14 +5,13 @@ import os
 import numpy
 from collections import OrderedDict
 
-from sklearn.base import TransformerMixin
+from sklearn.base import TransformerMixin, BaseEstimator
 from joblib import delayed, Parallel
 
 from nltk import word_tokenize, sent_tokenize
 from nltk.stem.snowball import SnowballStemmer
 
 from newsgac import config
-
 unwanted_chars = {
     '|',
     '_',
@@ -198,41 +197,25 @@ class ExtractSentimentFeatures(TransformerMixin):
         ]
 
 
+class StopWordRemoval(BaseEstimator, TransformerMixin):
+    def __init__(self, stop_words):
+        self.stop_words = stop_words
 
-## STOP WORD REMOVAL
-language_filename = os.path.join(config.root_path, 'dutch_stopwords_mod.txt')
-stop_words = []
-try:
-    with open(language_filename, 'rb') as language_file:
-        stop_words = [
-            line.decode('utf-8').strip() for line in language_file.readlines()
-        ]
-except:
-    raise IOError(
-        '{0}" file is unreadable, check your installation.'.format(
-            language_filename
-        )
-    )
+    @staticmethod
+    def remove_stop_words(text, word_list):
+        pattern = re.compile(r'\b(' + r'|'.join(word_list) + r')\b\s*', re.IGNORECASE)
+        reg_text = pattern.sub('', text)
 
-def remove_stop_words(text):
-    pattern = re.compile(r'\b(' + r'|'.join(stop_words) + r')\b\s*', re.IGNORECASE)
-    reg_text = pattern.sub('', text)
+        return reg_text
 
-    return reg_text
-
-
-
-class StopWordRemoval(TransformerMixin):
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
         return Parallel(n_jobs=config.n_parallel_jobs)(
-            delayed(remove_stop_words)(a) for a in X
+            delayed(self.remove_stop_words)(a, self.stop_words) for a in X
         )
 
-    def get_params(self, deep=False):
-        return {}
 
 
 class Lowercase(TransformerMixin):
