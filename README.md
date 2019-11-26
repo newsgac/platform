@@ -10,13 +10,14 @@ In the project, we developed an online platform for applying machine learning mo
 
 ## Setup Instructions
 
-In order to run the platform at your computer, you need to have [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment:
+In order to run the platform at your computer, you need to have [docker](https://www.docker.com/products/docker-desktop) available on your system. Then execute the following commands in a command line environment (instructions for Linux):
 
  1. `git clone https://github.com/newsgac/platform.git`
  2. `cd platform`
- 3. `docker build . -t "newsgac/newsgac"`
- 4. `export $(egrep -v '^#' .env.default | xargs)`
- 5. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
+ 3. `mkdir data`
+ 4. `docker build . -t "newsgac/newsgac"`
+ 5. `export $(egrep -v '^#' .env.default | xargs)`
+ 6. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
 
 When these commands have successfully completed, the platform will be available as a web server on the address: [http://YOUR-IP-ADDRESS:5050](http://YOUR-IP-ADDRESS:5050)
 
@@ -31,7 +32,7 @@ Optional steps:
 
 Stopping the system:
 
- 1. `docker service rm newsgacdev_database newsgacdev_frog newsgacdev_frogworker newsgacdev_redis newsgacdev_web newsgacdev_worker`
+ * `docker service rm newsgacdev_database newsgacdev_frog newsgacdev_frogworker newsgacdev_redis newsgacdev_web newsgacdev_worker`
 
 Note that it takes a few seconds to completely stop all parts of the system.
 
