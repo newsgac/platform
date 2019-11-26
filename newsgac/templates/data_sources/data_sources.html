@@ -2,16 +2,13 @@
 {% from "task.html" import task %}
 {% block content %}
 
-    {% if data_sources|length == 0 %}
         <div class="page-header">
             <h1>Data sources <small>added by you</small></h1>
             <a class="btn btn-success" href="{{ url_for('data_sources.new') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+    {% if data_sources|length == 0 %}
         </div>
         <p><i>There are no data sources to view.</i></p>
     {% else %}
-        <div class="page-header">
-            <h1>Data sources <small>added by you</small></h1>
-            <a class="btn btn-success" href="{{ url_for('data_sources.new') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
             {% if processed_data_sources|length > 0 %}
                 <a class="btn btn-info disabled" href="{{ url_for('data_sources.sources_overview') }}"><span class="glyphicon glyphicon-eye-open "></span> Overview</a>
             {% endif %}
@@ -70,7 +67,68 @@
                 </div>
             </div>
         <!--</div>-->
+    {% endif %}
+
+
+        <div class="page-header">
+            <h1>Stop word lists <small>added by you</small></h1>
+            <a class="btn btn-success" href="{{ url_for('stop_words.new') }}"><span class="glyphicon glyphicon-plus "></span> New </a>
+    {% if stop_words|length == 0 %}
+        </div>
+        <p><i>There are no stop word lists to view.</i></p>
+    {% else %}
+            <a class="btn btn-danger" data-toggle="confirmation" data-popout="true"
+               data-title="This action cannot be undone. Are you sure?"
+               href="{{ url_for('stop_words.delete_all') }}"
+               data-btn-ok-label="Yes, delete" data-btn-cancel-label="No, cancel" >
+                <span class="glyphicon glyphicon-trash"></span> Delete All</a>
+        </div>
+
+        <!--<div class="container">-->
+            <div class="row">
+                <div class="col-xs-12">
+                    <table id="stop_words_table" class="table table-bordered table-hover dt-responsive" width="100%">
+                    <!--<caption class="text-center">DataTables</caption>-->
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for sw in stop_words %}
+                        <tr>
+                            <td>{{ sw.display_title }}</td>
+                            <td>{{ sw.description }}</td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   data-toggle="confirmation"
+                                   data-popout="true"
+                                   data-title="This action cannot be undone. Are you sure?"
+                                   href="{{ url_for('stop_words.delete', stop_words_id = sw._id) }}"
+                                   data-btn-ok-label="Yes, delete"
+                                   data-btn-cancel-label="No, cancel"
+                                   data-original-title=""
+                                   title="">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    Delete
+                                </a>
+                                <a class="btn btn-default"
+                                   href="{{ url_for('stop_words.download', stop_words_id = sw._id) }}"
+                                        <span class="glyphicon glyphicon-download"></span>
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    </table>
+                </div>
+            </div>
+        <!--</div>-->
 
     {% endif %}
 {% endblock %}
-

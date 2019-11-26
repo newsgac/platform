@@ -19,12 +19,6 @@
             {% if session['email'] %}
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="{{ url_for('stop_words.overview') }}">
-                            <span class="glyphicon glyphicon-stop"></span>
-                            Stop words
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ url_for('data_sources.overview') }}">
                             <span class="glyphicon glyphicon-hdd"></span>
                             Data
