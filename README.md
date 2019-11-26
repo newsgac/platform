@@ -21,8 +21,8 @@ In order to run the platform at your computer, you need to have [docker](https:/
 
 When these commands have successfully completed, the platform will be available as a web server on the address: [http://YOUR-IP-ADDRESS:5050](http://YOUR-IP-ADDRESS:5050)
 
-Steps 1, 2 and 3 need to be executed only once for installing the system.
-Both step 4 and step 5 are required each time when you start the system.
+Steps 1, 2, 3 and 4 need to be executed only once for installing the system.
+Both step 5 and step 6 are required each time when you start the system.
 
 Optional steps:
 
