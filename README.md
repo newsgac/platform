@@ -14,15 +14,14 @@ In order to run the platform at your computer, you need to have [docker](https:/
 
  1. `git clone https://github.com/newsgac/platform.git`
  2. `cd platform`
- 3. `mkdir data`
- 4. `docker build . -t "newsgac/newsgac"`
- 5. `export $(egrep -v '^#' .env.default | xargs)`
- 6. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
+ 3. `docker build . -t "newsgac/newsgac"`
+ 4. `export $(egrep -v '^#' .env.default | xargs)`
+ 5. `docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml newsgacdev`
 
 When these commands have successfully completed, the platform will be available as a web server on the address: [http://YOUR-IP-ADDRESS:5050](http://YOUR-IP-ADDRESS:5050)
 
-Steps 1, 2, 3 and 4 need to be executed only once for installing the system.
-Both step 5 and step 6 are required each time when you start the system.
+Steps 1, 2 and 3 need to be executed only once for installing the system.
+Both step 4 and step 5 are required each time when you start the system.
 
 Optional steps:
 
