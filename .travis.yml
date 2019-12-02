@@ -11,9 +11,8 @@ script:
       --name=newsgactest \
       -it \
       --network=container:mongo \
-      --mount type=bind,src="$(pwd)"/newsgac,destination=/newsgac/newsgac \
       --entrypoint=sh \
-      newsgac/newsgac -c pytest --cov=newsgac --cov-report=xml
+      newsgac/newsgac -c "pytest --cov=newsgac --cov-report=xml"
 after_script:
   - docker cp newsgactest:/newsgac/coverage.xml ./coverage_docker.xml
   - docker stop mongo
