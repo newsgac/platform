@@ -1,0 +1,153 @@
+services:
+  database:
+    hostname: mongo
+    image: mongo:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 27017
+      target: 27017
+    volumes:
+    - /Users/JanPieterK/Documents/newsgac/platform/data:/data/db:rw
+  frog:
+    command: bash -c "frog -S 12345 --skip p"
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '1'
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    hostname: proycon/lamachine
+    image: proycon/lamachine:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 12345
+      target: 12345
+  frogworker:
+    command:
+    - sh
+    - -c
+    - celery -A newsgac.tasks.celery_app worker -l warning --concurrency 1 -n frogworker@%h
+      -Q frog
+    depends_on:
+    - database
+    - frog
+    - redis
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    environment:
+      FLASK_ENV: development
+      FLASK_SECRET_KEY: newsgacdev123
+      FROG_HOSTNAME: frog
+      FROG_PORT: '12345'
+      MONGO_DB_NAME: null
+      MONGO_HOST: database
+      MONGO_PORT: '27017'
+      N_CROSS_VAL_JOBS: '1'
+      N_PARALLEL_JOBS: '1'
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+    hostname: frogworker
+    image: newsgac/newsgac
+    volumes:
+    - /Users/JanPieterK/Documents/newsgac/platform/newsgac:/newsgac/newsgac:rw
+  redis:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    hostname: redis
+    image: redis:latest
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 6379
+      target: 6379
+    - mode: host
+      protocol: tcp
+      published: 6380
+      target: 6380
+  web:
+    command:
+    - python
+    - newsgac/app.py
+    depends_on:
+    - database
+    - frog
+    - redis
+    - worker
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    environment:
+      CELERY_EAGER: "False"
+      FLASK_APP: newsgac.app
+      FLASK_DEBUG: '1'
+      FLASK_ENV: development
+      FLASK_SECRET_KEY: newsgacdev123
+      FROG_HOSTNAME: frog
+      FROG_PORT: '12345'
+      MONGO_DB_NAME: null
+      MONGO_HOST: database
+      MONGO_PASSWORD: null
+      MONGO_PORT: '27017'
+      MONGO_USER: null
+      N_CROSS_VAL_JOBS: '1'
+      N_PARALLEL_JOBS: '1'
+      PYTHONPATH: /newsgac
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+    image: newsgac/newsgac
+    ports:
+    - mode: host
+      protocol: tcp
+      published: 5050
+      target: 5050
+    volumes:
+    - /Users/JanPieterK/Documents/newsgac/platform/newsgac:/newsgac/newsgac:rw
+  worker:
+    command: watchmedo auto-restart --patterns="*.py" --recursive -- celery -A newsgac.tasks.celery_app
+      worker -l info --concurrency 8 -n worker1@%h
+    depends_on:
+    - database
+    - redis
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '1'
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    environment:
+      FLASK_ENV: development
+      FLASK_SECRET_KEY: newsgacdev123
+      FROG_HOSTNAME: frog
+      FROG_PORT: '12345'
+      MONGO_DB_NAME: null
+      MONGO_HOST: database
+      MONGO_PORT: '27017'
+      N_CROSS_VAL_JOBS: '1'
+      N_PARALLEL_JOBS: '1'
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+    hostname: celeryworker
+    image: newsgac/newsgac
+    volumes:
+    - /Users/JanPieterK/Documents/newsgac/platform/newsgac:/newsgac/newsgac:rw
+version: '3.2'
+

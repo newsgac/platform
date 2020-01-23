@@ -1,0 +1,72 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: worker
+  name: worker
+  namespace: tci-newsgac
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: worker
+    spec:
+      containers:
+      - args:
+        - watchmedo
+        - auto-restart
+        - --patterns=*.py
+        - --recursive
+        - --
+        - celery
+        - -A
+        - newsgac.tasks.celery_app
+        - worker
+        - -l
+        - info
+        - --concurrency
+        - "8"
+        - -n
+        - worker1@%h
+        env:
+        - name: FLASK_ENV
+          value: development
+        - name: FLASK_SECRET_KEY
+          value: newsgacdev123
+        - name: FROG_HOSTNAME
+          value: frog
+        - name: FROG_PORT
+          value: "12345"
+        - name: MONGO_HOST
+          value: database
+        - name: MONGO_PORT
+          value: "27017"
+        - name: N_CROSS_VAL_JOBS
+          value: "1"
+        - name: N_PARALLEL_JOBS
+          value: "1"
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        image: registry.diginfra.net/newsgac
+        resources:
+          limits:
+            cpu: 200m
+            memory: 750Mi
+          requests:
+            cpu: 200m
+            memory: 750Mi
+        name: worker
+        volumeMounts:
+        - mountPath: /newsgac/newsgac
+          name: newsgac-claim0
+      hostname: celeryworker
+      restartPolicy: Always
+      volumes:
+      - name: newsgac-claim0
+        persistentVolumeClaim:
+          claimName: newsgac-claim0

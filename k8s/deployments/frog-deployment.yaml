@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: frog
+  name: frog
+  namespace: tci-newsgac
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: frog
+    spec:
+      containers:
+        - args:
+            - bash
+            - -c
+            - frog -S 12345 --skip p
+          image: proycon/lamachine:latest
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+            requests:
+              cpu: 1000m
+              memory: 2000Mi
+          name: frog
+          ports:
+            - containerPort: 12345
+      hostname: frog
+      restartPolicy: Always
+
+
+
