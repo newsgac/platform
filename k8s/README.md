@@ -39,4 +39,4 @@ kubectl apply -f deployments/
 
 Wait 5 minutes for containers to be created
 
-Go to https://newsgac.diginfa.net
+Go to https://newsgac.yourdomain
