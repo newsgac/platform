@@ -28,6 +28,7 @@ Optional steps:
  * For adaption to local environment: edit file .env.default or create your own version
  * For Jupyter notebook support: `docker build . -f jupyter/Dockerfile -t "newsgac/jupyterhub"`
  * During production: `docker build ./nginx -t newsgac/nginx`
+ * installation instructions for usage of a [k8s/README.md](kubernetes cluster) (CLARIAH)
 
 Stopping the system:
 
