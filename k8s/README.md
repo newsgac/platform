@@ -8,14 +8,14 @@ Some manual correction
 
 Some manual correction
 
-Create `newsgac.diginfra.net` domain in DNS:
+Create `newsgac.yourdomain` domain in DNS:
 ```bash
-$ nslookup newsgac.diginfra.net
+$ nslookup newsgac.yourdomain
 Server:		8.8.8.8
 Address:	8.8.8.8#53
 
 Non-authoritative answer:
-Name:	newsgac.diginfra.net
+Name:	newsgac.yourdomain
 Address: 194.171.4.29
 ```
 
