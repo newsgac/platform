@@ -6,7 +6,7 @@ metadata:
   namespace: newsgac
 spec:
   rules:
-    - host: newsgac.diginfra.net
+    - host: newsgac.clariah.nl
       http:
         paths:
           - backend:
