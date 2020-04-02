@@ -16,7 +16,7 @@ Address:	8.8.8.8#53
 
 Non-authoritative answer:
 Name:	newsgac.diginfra.net
-Address: 194.171.4.29
+Address: 195.169.88.174
 ```
 
 Create `web-ingress.yml` for external ingress
