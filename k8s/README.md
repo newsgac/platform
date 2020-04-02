@@ -8,14 +8,14 @@ Some manual correction
 
 Some manual correction
 
-Create `your.newsgac.domain` domain in DNS:
+Create `newsgac.yourdomain` domain in DNS:
 ```bash
-$ nslookup newsgac.diginfra.net
+$ nslookup newsgac.yourdomain
 Server:		8.8.8.8
 Address:	8.8.8.8#53
 
 Non-authoritative answer:
-Name:	your.newsgac.domain
+Name:	newsgac.yourdomain
 Address: xxx.xxx.xxx.xxx
 ```
 
@@ -41,4 +41,4 @@ kubectl apply -f deployments/
 
 Wait 5 minutes for containers to be created
 
-Go to https://newsgac.diginfa.net
+Go to https://newsgac.yourdomain
