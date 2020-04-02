@@ -19,6 +19,8 @@ Name:	newsgac.diginfra.net
 Address: 195.169.88.174
 ```
 
+Configure outside proxy to handle SSL for this domain
+
 Create `web-ingress.yml` for external ingress
 
 ```bash
