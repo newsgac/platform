@@ -8,15 +8,15 @@ Some manual correction
 
 Some manual correction
 
-Create `newsgac.diginfra.net` domain in DNS:
+Create `your.newsgac.domain` domain in DNS:
 ```bash
 $ nslookup newsgac.diginfra.net
 Server:		8.8.8.8
 Address:	8.8.8.8#53
 
 Non-authoritative answer:
-Name:	newsgac.diginfra.net
-Address: 195.169.88.174
+Name:	your.newsgac.domain
+Address: xxx.xxx.xxx.xxx
 ```
 
 Configure outside proxy to handle SSL for this domain
