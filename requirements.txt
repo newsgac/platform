@@ -12,7 +12,7 @@ certifi==2020.4.5.1
 chardet==3.0.4
 cheroot==8.3.0
 CherryPy==18.6.0
-Click==7.0
+Click==7.1.1
 colorcet==2.0.2
 coverage==4.5.4
 cycler==0.10.0
