@@ -74,7 +74,7 @@ regex==2020.5.14
 requests==2.23.0
 scikit-learn==0.23.0
 scipy==1.4.1
-sentry-sdk==0.13.2
+sentry-sdk==0.14.4
 six==1.13.0
 sortedcontainers==2.1.0
 soupsieve==1.9.5
