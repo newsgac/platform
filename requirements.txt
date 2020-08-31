@@ -48,7 +48,7 @@ param==1.9.2
 passlib==1.7.2
 pathtools==0.1.2
 Pattern==3.6
-pdfminer.six==20191110
+pdfminer.six==20200726
 Pillow==6.2.2
 pluggy==0.13.0
 portend==2.6
