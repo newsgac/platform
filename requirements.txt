@@ -54,7 +54,7 @@ pluggy==0.13.1
 portend==2.7.1
 progressbar==2.5
 py==1.10.0
-pycryptodome==3.9.3
+pycryptodome==3.10.1
 pyct==0.4.6
 pymodm==0.4.2
 pymongo==3.9.0
