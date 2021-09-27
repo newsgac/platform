@@ -85,7 +85,7 @@ urllib3==1.26.7
 vine==5.0.0
 watchdog==2.1.5
 wcwidth==0.2.5
-Werkzeug==0.16.0
+Werkzeug==2.0.1
 xgboost==0.90
 zc.lockfile==2.0
 zipp==0.6.0
