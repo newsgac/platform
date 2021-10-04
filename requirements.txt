@@ -84,7 +84,7 @@ tzlocal==3.0
 urllib3==1.26.7
 vine==5.0.0
 watchdog==2.1.6
-wcwidth==0.1.7
+wcwidth==0.2.5
 Werkzeug==0.16.0
 xgboost==0.90
 zc.lockfile==2.0
