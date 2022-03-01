@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.10-bullseye
 
 RUN mkdir /newsgac
 RUN mkdir /home/flask
