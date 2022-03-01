@@ -1,4 +1,4 @@
-FROM python:3.10-bullseye
+FROM python:3.9-bullseye
 
 RUN mkdir /newsgac
 RUN mkdir /home/flask
@@ -9,7 +9,7 @@ RUN groupadd -g 999 flask && \
 RUN chown flask:flask /newsgac
 RUN chown flask:flask /home/flask
 
-COPY requirements.txt /newsgac/requirements.txt
+COPY requirements.newsgac.txt /newsgac/requirements.txt
 RUN pip install -r /newsgac/requirements.txt
 
 COPY entrypoint.sh /newsgac
