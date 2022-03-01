@@ -1,4 +1,4 @@
-FROM jupyterhub/jupyterhub
+FROM jupyterhub/jupyterhub:2.1
 
 RUN apt-get update && apt install -y build-essential libmariadb-dev-compat
 
