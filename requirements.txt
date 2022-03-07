@@ -1,7 +1,7 @@
 amqp==5.1.0
 argh==0.26.2
 atomicwrites==1.4.0
-attrs==19.3.0
+attrs==21.4.0
 backports.csv==1.0.7
 beautifulsoup4==4.8.1
 billiard==3.6.1.0
