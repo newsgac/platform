@@ -86,6 +86,6 @@ vine==5.0.0
 watchdog==2.1.7
 wcwidth==0.2.5
 Werkzeug==2.1.0
-xgboost==0.90
+xgboost==1.5.2
 zc.lockfile==2.0
 zipp==0.6.0
