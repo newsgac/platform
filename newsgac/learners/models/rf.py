@@ -75,6 +75,8 @@ class LearnerRF(Learner):
 
     @staticmethod
     def transform_max_features(max_features):
+        if max_features == None:
+            return None
         if max_features == 'none':
             return None
         try:
