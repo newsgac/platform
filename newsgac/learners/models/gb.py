@@ -98,7 +98,6 @@ class LearnerGB(Learner):
             min_impurity_decrease=0.,
             warm_start=False,
             init=None,
-            presort='auto',
             validation_fraction=0.1,
             n_iter_no_change=None,
             tol=1e-4,
