@@ -96,7 +96,6 @@ class LearnerGB(Learner):
             min_weight_fraction_leaf=0.,
             max_leaf_nodes=None,
             min_impurity_decrease=0.,
-            min_impurity_split=None,
             warm_start=False,
             init=None,
             presort='auto',

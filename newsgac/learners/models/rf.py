@@ -106,7 +106,6 @@ class LearnerRF(Learner):
 
             min_weight_fraction_leaf=0.,
             min_impurity_decrease=0.,
-            min_impurity_split=None,
             oob_score=False,
             verbose=0,
             warm_start=False,
