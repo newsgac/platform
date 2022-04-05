@@ -1,21 +1,40 @@
-FROM jupyterhub/jupyterhub
+FROM jupyterhub/jupyterhub:2.1
 
-RUN apt-get update && apt install -y build-essential libmariadb-dev-compat
+ARG NODEJS_VERSION=16
+ARG PYTHON_VERSION=3.9.10
+
+RUN apt-get update && apt install -y \
+        build-essential \
+        curl \
+        git \
+        libffi-dev \
+        libmariadb-dev-compat \
+        libsqlite3-dev
+
+# set up repo for nodejs 16
+# (necessary for jupyterlab hub-extension)
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash -
+
+RUN apt-get update && apt install -y \
+        nodejs
+
+# install pyenv for managing python versions
+RUN curl https://pyenv.run | bash
+
+# install python
+RUN /root/.pyenv/bin/pyenv install ${PYTHON_VERSION}
+RUN /root/.pyenv/bin/pyenv global ${PYTHON_VERSION}
+ENV PATH="/root/.pyenv/bin:/root/.pyenv/versions/${PYTHON_VERSION}/bin:$PATH"
 
 RUN mkdir /newsgac
+COPY requirements.jupyter.txt /newsgac/requirements.txt
+RUN pip install -r /newsgac/requirements.txt
 
-COPY requirements.txt /newsgac/requirements.txt
-
-RUN pip install jupyter jupyterlab && \
-    conda create -n py37 python=3.7 && \
-    /opt/conda/envs/py37/bin/pip install jupyter ipykernel setuptools wheel ipywidgets && \
-    /opt/conda/envs/py37/bin/pip install -r /newsgac/requirements.txt && \
-    /opt/conda/envs/py37/bin/python -m ipykernel install
+RUN python -m ipykernel install
 
 RUN jupyter labextension install @jupyterlab/hub-extension
 RUN jupyter nbextension enable --py widgetsnbextension
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
-
 
 WORKDIR /newsgac
 
@@ -24,10 +43,9 @@ COPY newsgac /newsgac/newsgac
 
 COPY setup.py /newsgac/setup.py
 
-RUN /opt/conda/envs/py37/bin/python setup.py install
+RUN python setup.py install
 
-#RUN /opt/conda/envs/py37/bin/python -m spacy download nl_core_news_sm
-RUN ["bash", "-c", "/opt/conda/envs/py37/bin/python <<< \"import nltk; nltk.download('punkt')\""]
+RUN ["bash", "-c", "python <<< \"import nltk; nltk.download('punkt')\""]
 
 COPY jupyter/entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh

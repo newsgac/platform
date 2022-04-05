@@ -75,6 +75,8 @@ class LearnerRF(Learner):
 
     @staticmethod
     def transform_max_features(max_features):
+        if max_features == None:
+            return None
         if max_features == 'none':
             return None
         try:
@@ -106,7 +108,6 @@ class LearnerRF(Learner):
 
             min_weight_fraction_leaf=0.,
             min_impurity_decrease=0.,
-            min_impurity_split=None,
             oob_score=False,
             verbose=0,
             warm_start=False,
