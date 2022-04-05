@@ -77,6 +77,16 @@ Typically tasks are executed by celery workers. If you want to debug a task you 
  1. Run a celery worker in debug mode
  2. Make sure `CELERY_EAGER=True` (or unset). This will cause celery to run tasks in the main thread instead of offloading it to workers.
 
+### Access logs
+- Web console
+    - Find the web container with `docker ps`
+    - Read the logs with `docker logs newsgacdev_web.[many_numbers]` (use tab completion), search for PIN
+- Crash logs
+    - Find the worker container with `docker ps`
+    - Read the logs with `docker logs newsgacdev_worker.[many_numbers]` (use tab completion)
+- Brief model crash logs
+    - Mouse-over the Status.FAILURE field in the Pipelines page
+
 ## Running the tests (Docker)
 
  1. `docker run --name=mongo -it --rm -d mongo`
