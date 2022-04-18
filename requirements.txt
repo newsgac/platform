@@ -7,7 +7,7 @@ beautifulsoup4==4.11.1
 billiard==3.6.4.0
 blinker==1.4
 bokeh==2.4.2
-celery==4.3.0
+celery==5.2.6
 certifi==2019.9.11
 chardet==3.0.4
 cheroot==8.2.1
