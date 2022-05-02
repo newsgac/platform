@@ -45,7 +45,7 @@ numpy==1.22.3
 packaging==21.3
 pandas==1.4.2
 param==1.12.1
-passlib==1.7.1
+passlib==1.7.4
 pathtools==0.1.2
 Pattern==3.6
 pdfminer.six==20191110
