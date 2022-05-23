@@ -10,7 +10,7 @@ bokeh==2.4.3
 celery==5.2.6
 certifi==2022.5.18.1
 chardet==4.0.0
-cheroot==8.2.1
+cheroot==8.6.0
 CherryPy==18.4.0
 Click==7.0
 colorcet==2.0.2
