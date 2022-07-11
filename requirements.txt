@@ -3,7 +3,7 @@ argh==0.26.2
 atomicwrites==1.4.1
 attrs==21.4.0
 backports.csv==1.0.7
-beautifulsoup4==4.8.1
+beautifulsoup4==4.11.1
 billiard==3.6.1.0
 blinker==1.4
 bokeh==1.4.0
