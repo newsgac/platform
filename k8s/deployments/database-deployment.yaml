@@ -1,21 +1,25 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     io.kompose.service: database
   name: database
-  namespace: tci-newsgac
+  namespace: newsgac
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: database
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         io.kompose.service: database
+        name: database
     spec:
       containers:
-      - image: mongo:latest
+      - image: mongo:4.4
         resources:
           limits:
             cpu: 200m
@@ -28,10 +32,10 @@ spec:
         - containerPort: 27017
         volumeMounts:
         - mountPath: /data/db
-          name: database-claim0
+          name: database-claim1
       hostname: mongo
       restartPolicy: Always
       volumes:
-      - name: database-claim0
+      - name: database-claim1
         persistentVolumeClaim:
-          claimName: database-claim0
+          claimName: database-claim1
