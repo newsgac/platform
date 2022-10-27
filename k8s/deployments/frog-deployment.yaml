@@ -23,14 +23,14 @@ spec:
             - bash
             - -c
             - frog -S 12345 --skip p
-          image: proycon/lamachine:latest
+          image: registry.diginfra.net/proycon/lamachine:newsgac
           resources:
             limits:
               cpu: 1000m
-              memory: 2000Mi
+              memory: 3000Mi
             requests:
               cpu: 1000m
-              memory: 2000Mi
+              memory: 3000Mi
           name: frog
           ports:
             - containerPort: 12345

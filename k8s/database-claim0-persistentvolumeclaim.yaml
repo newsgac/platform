@@ -4,12 +4,12 @@ metadata:
   labels:
     io.kompose.service: database-claim0
   annotations:
-    volume.beta.kubernetes.io/storage-class: "nfs-client"
-  name: database-claim0
+    volume.beta.kubernetes.io/storage-class: "longhorn"
+  name: database-claim1
   namespace: newsgac
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
+      storage: 1Gi

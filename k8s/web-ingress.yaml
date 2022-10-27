@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   name: newsgac
   namespace: newsgac
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 30m
 spec:
   rules:
     - host: newsgac.clariah.nl
