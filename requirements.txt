@@ -44,7 +44,7 @@ nltk==3.8
 numpy==1.24.0
 packaging==22.0
 pandas==1.5.2
-param==1.9.2
+param==1.12.3
 passlib==1.7.1
 pathtools==0.1.2
 Pattern==3.6
