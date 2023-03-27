@@ -40,7 +40,7 @@ MarkupSafe==2.1.2
 matplotlib==3.7.1
 more-itertools==9.1.0
 mysqlclient==2.1.1
-nltk==3.4.5
+nltk==3.8.1
 numpy==1.17.4
 packaging==19.2
 pandas==0.25.3
