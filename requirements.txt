@@ -88,4 +88,4 @@ wcwidth==0.2.6
 Werkzeug==2.3.7
 xgboost==2.0.0
 zc.lockfile==3.0.post1
-zipp==0.6.0
+zipp==3.17.0
