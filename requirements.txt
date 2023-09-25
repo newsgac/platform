@@ -8,7 +8,7 @@ billiard==4.1.0
 blinker==1.6.2
 bokeh==3.2.2
 celery==5.3.4
-certifi==2019.9.11
+certifi==2023.7.22
 chardet==3.0.4
 cheroot==8.2.1
 CherryPy==18.4.0
