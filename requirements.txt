@@ -87,5 +87,5 @@ watchdog==4.0.0
 wcwidth==0.2.13
 Werkzeug==3.0.1
 xgboost==2.0.3
-zc.lockfile==2.0
+zc.lockfile==3.0.post1
 zipp==0.6.0
