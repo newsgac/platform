@@ -28,7 +28,7 @@ idna==3.6
 importlib-metadata==7.0.1
 isodate==0.6.1
 itsdangerous==2.1.2
-jaraco.functools==2.0
+jaraco.functools==4.0.0
 Jinja2==2.10.3
 joblib==0.14.0
 kiwisolver==1.1.0
