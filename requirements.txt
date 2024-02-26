@@ -25,7 +25,7 @@ future==1.0.0
 gunicorn==21.2.0
 httplib2==0.22.0
 idna==3.6
-importlib-metadata==0.23
+importlib-metadata==7.0.1
 isodate==0.6.0
 itsdangerous==1.1.0
 jaraco.functools==2.0
