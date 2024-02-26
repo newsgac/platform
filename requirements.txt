@@ -14,7 +14,7 @@ cheroot==10.0.0
 CherryPy==18.9.0
 Click==8.1.7
 colorcet==3.0.1
-coverage==4.5.4
+coverage==7.4.3
 cycler==0.10.0
 Cython==0.29.14
 dateparser==0.7.2
