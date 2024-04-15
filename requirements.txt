@@ -24,7 +24,7 @@ Flask==3.0.3
 future==1.0.0
 gunicorn==21.2.0
 httplib2==0.22.0
-idna==2.8
+idna==3.7
 importlib-metadata==0.23
 isodate==0.6.0
 itsdangerous==1.1.0
