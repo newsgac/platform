@@ -41,7 +41,7 @@ matplotlib==3.8.4
 more-itertools==10.2.0
 mysqlclient==2.2.4
 nltk==3.8.1
-numpy==1.17.4
+numpy==1.26.4
 packaging==19.2
 pandas==0.25.3
 param==1.9.2
