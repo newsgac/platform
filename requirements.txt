@@ -18,7 +18,7 @@ coverage==7.5.2
 cycler==0.12.1
 Cython==3.0.10
 dateparser==1.2.0
-dill==0.3.1.1
+dill==0.3.8
 feedparser==5.2.1
 Flask==1.1.1
 future==0.18.2
