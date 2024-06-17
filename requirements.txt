@@ -39,7 +39,7 @@ lxml==5.2.2
 MarkupSafe==2.1.5
 matplotlib==3.9.0
 more-itertools==10.3.0
-mysqlclient==1.4.5
+mysqlclient==2.2.4
 nltk==3.4.5
 numpy==1.17.4
 packaging==19.2
