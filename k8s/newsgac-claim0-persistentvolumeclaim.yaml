@@ -3,11 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     io.kompose.service: newsgac-claim0
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "longhorn-nfs"
   name: newsgac-claim0
   namespace: newsgac
 spec:
+  storageClassName: longhorn
   accessModes:
   - ReadWriteMany
   resources:

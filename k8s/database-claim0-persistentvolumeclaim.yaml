@@ -3,11 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     io.kompose.service: database-claim0
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "longhorn"
   name: database-claim1
   namespace: newsgac
 spec:
+  storageClassName: nutanix-volume
   accessModes:
   - ReadWriteOnce
   resources:

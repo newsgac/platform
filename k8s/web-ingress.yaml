@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: newsgac
@@ -11,7 +11,12 @@ spec:
     - host: newsgac.clariah.nl
       http:
         paths:
-          - backend:
-              serviceName: web
-              servicePort: 5050
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 5050
+
 # TLS is handled by outside proxy
