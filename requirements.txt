@@ -4,7 +4,7 @@ atomicwrites==1.4.1
 attrs==24.2.0
 backports.csv==1.0.7
 beautifulsoup4==4.12.3
-billiard==3.6.1.0
+billiard==4.2.1
 blinker==1.4
 bokeh==1.4.0
 celery==4.3.0
