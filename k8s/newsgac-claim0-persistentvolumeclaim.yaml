@@ -4,8 +4,9 @@ metadata:
   labels:
     io.kompose.service: newsgac-claim0
   name: newsgac-claim0
-  namespace: tci-newsgac
+  namespace: newsgac
 spec:
+  storageClassName: longhorn
   accessModes:
   - ReadWriteMany
   resources:

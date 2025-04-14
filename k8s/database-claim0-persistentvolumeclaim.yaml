@@ -3,11 +3,12 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     io.kompose.service: database-claim0
-  name: database-claim0
-  namespace: tci-newsgac
+  name: database-claim1
+  namespace: newsgac
 spec:
+  storageClassName: longhorn
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
+      storage: 1Gi

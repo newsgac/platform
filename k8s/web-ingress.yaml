@@ -1,43 +1,22 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: newsgac
+  namespace: newsgac
   annotations:
-    certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
-    ingress.kubernetes.io/redirect-permanent: "true"
-    ingress.kubernetes.io/ssl-redirect: "true"
-    kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: "traefik"
-  namespace: tci-newsgac
+    nginx.ingress.kubernetes.io/proxy-body-size: 30m
 spec:
   rules:
-    - host: newsgac.diginfra.net
+    - host: newsgac.clariah.nl
       http:
         paths:
-          - backend:
-              serviceName: web
-              servicePort: 5050
-  tls:
-    - hosts:
-        - newsgac.diginfra.net
-      secretName: newsgac
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 5050
 
-# The Secret with the Let's Encrypt certificate is automatically created
-# when deploying the above Ingress yaml. You don't need to create a yaml file
-# with the secret yourself.
-#
-# Creating the certificate takes a few minutes.
-#
-# Obviously this only works if the domain name referenced is in the "real"
-# DNS system and resolves to 194.171.4.29
-#
-# You can check the secret's existence with kubectl:
-#
-# $ kubectl -n tci-momfer get secret momfer
-# NAME      TYPE                DATA      AGE
-# momfer    kubernetes.io/tls   3         24d
-#
-# and "get secret momfer -o yaml" returns the yaml version.
-#
-# https://docs.knaw-huc.kumina.net/Getting_Started/Making_Applications_Available
+# TLS is handled by outside proxy
