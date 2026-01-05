@@ -11,7 +11,7 @@ celery==5.6.2
 certifi==2026.1.4
 chardet==5.2.0
 cheroot==11.1.2
-CherryPy==18.4.0
+CherryPy==18.10.0
 Click==7.0
 colorcet==2.0.2
 coverage==4.5.4
