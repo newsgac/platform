@@ -43,7 +43,7 @@ mysqlclient==2.2.8
 nltk==3.9.2
 numpy==2.4.2
 packaging==26.0
-pandas==0.25.3
+pandas==3.0.1
 param==1.9.2
 passlib==1.7.1
 pathtools==0.1.2
