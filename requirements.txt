@@ -42,7 +42,7 @@ more-itertools==10.8.0
 mysqlclient==2.2.8
 nltk==3.9.3
 numpy==2.4.2
-packaging==19.2
+packaging==26.0
 pandas==0.25.3
 param==1.9.2
 passlib==1.7.1
