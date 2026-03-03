@@ -1,6 +1,6 @@
 bokeh
 celery
-colorcet
+colorcet==3.1.0
 cython
 dateparser
 dill
