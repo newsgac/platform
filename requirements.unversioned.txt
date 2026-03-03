@@ -22,7 +22,7 @@ pytest-timeout
 python-dotenv
 redis
 requests
-scikit-learn
+scikit-learn==1.8.0
 scipy
 sentry-sdk[flask]
 watchdog
