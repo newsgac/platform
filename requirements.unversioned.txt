@@ -27,4 +27,4 @@ scipy
 sentry-sdk[flask]
 watchdog
 watchdog[watchmedo]
-xgboost
+xgboost==3.2.0
