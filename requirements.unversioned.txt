@@ -24,7 +24,7 @@ redis
 requests
 scikit-learn
 scipy
-sentry-sdk[flask]
+sentry-sdk[flask]==2.54.0
 watchdog
 watchdog[watchmedo]
 xgboost
