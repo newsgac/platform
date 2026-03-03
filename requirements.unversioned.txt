@@ -13,7 +13,7 @@ nltk
 numpy
 pandas
 passlib
-Pattern
+Pattern==0.0.1a0
 pymodm
 PyNLPl
 pytest
