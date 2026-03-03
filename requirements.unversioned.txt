@@ -18,7 +18,7 @@ pymodm
 PyNLPl
 pytest
 pytest-cov
-pytest-timeout
+pytest-timeout==2.4.0
 python-dotenv
 redis
 requests
