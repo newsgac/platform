@@ -21,7 +21,7 @@ pytest-cov
 pytest-timeout
 python-dotenv
 redis
-requests
+requests==2.32.5
 scikit-learn
 scipy
 sentry-sdk[flask]
