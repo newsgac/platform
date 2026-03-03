@@ -26,5 +26,5 @@ scikit-learn
 scipy
 sentry-sdk[flask]
 watchdog==6.0.0
-watchdog[watchmedo]
+watchdog[watchmedo]==6.0.0
 xgboost
