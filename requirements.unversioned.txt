@@ -3,7 +3,7 @@ celery
 colorcet
 cython
 dateparser
-dill
+dill==0.4.1
 Flask
 gunicorn
 lightgbm
