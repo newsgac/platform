@@ -78,7 +78,7 @@ sentry-sdk==0.13.2
 six==1.13.0
 sortedcontainers==2.1.0
 soupsieve==1.9.5
-tempora==1.14.1
+tempora==5.8.1
 tornado==6.0.3
 tzlocal==2.0.0
 urllib3==1.25.7
