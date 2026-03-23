@@ -67,7 +67,7 @@ python-dateutil==2.9.0.post0
 python-docx==1.2.0
 python-dotenv==1.2.2
 pytz==2026.1.post1
-PyYAML==5.1.2
+PyYAML==6.0.3
 rdflib==4.2.1
 redis==3.3.11
 regex==2019.11.1
