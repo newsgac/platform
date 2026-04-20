@@ -9,7 +9,7 @@ blinker==1.9.0
 bokeh==3.9.0
 celery==5.6.3
 certifi==2026.2.25
-chardet==3.0.4
+chardet==7.4.3
 cheroot==8.2.1
 CherryPy==18.4.0
 Click==7.0
