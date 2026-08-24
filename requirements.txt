@@ -13,7 +13,7 @@ chardet==7.6.0
 cheroot==11.1.2
 CherryPy==18.10.0
 Click==8.4.2
-colorcet==2.0.2
+colorcet==3.2.1
 coverage==4.5.4
 cycler==0.10.0
 Cython==0.29.14
